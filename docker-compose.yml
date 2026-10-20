@@ -1,0 +1,35 @@
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: vite-gourmand-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vite_gourmand
+      POSTGRES_USER: vite_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définis POSTGRES_PASSWORD dans le fichier .env}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vite_admin -d vite_gourmand"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:8
+    container_name: vite-gourmand-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?Définis MONGO_PASSWORD dans le fichier .env}
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  mongo_data:
