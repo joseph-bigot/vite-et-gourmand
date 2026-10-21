@@ -1,1 +1,44 @@
-/* You can add global styles to this file, and also import other style files */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bordeaux: #542D32;
+  --color-creme: #F6F1E7;
+  --color-vert-foret: #34483A;
+  --color-ocre: #C69B65;
+  --color-brun-encre: #292725;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--color-creme);
+  color: var(--color-brun-encre);
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Lora', serif;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
