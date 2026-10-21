@@ -1,4 +1,10 @@
-import { Module } from '@nestjs/common';
 
-@Module({})
+import { Module } from '@nestjs/common';
+import { MenusController } from './menus/menus.controller.js';
+import { MenusService } from './menus/menus.service.js';
+
+@Module({
+  controllers: [MenusController],
+  providers: [MenusService],
+})
 export class MenusModule {}

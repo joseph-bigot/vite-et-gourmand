@@ -1,0 +1,20 @@
+
+<section class="menus-page">
+  <h1>Nos menus</h1>
+  <p>Découvrez les menus proposés par Vite & Gourmand.</p>
+
+  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+  <div class="menus-grid" *ngIf="menus.length > 0">
+    <article class="menu-card" *ngFor="let menu of menus">
+      <p class="menu-theme">{{ menu.theme }}</p>
+      <h2>{{ menu.titre }}</h2>
+      <p>{{ menu.description }}</p>
+      <p>Régime : {{ menu.regime_alimentaire }}</p>
+      <p>Minimum : {{ menu.nombre_minimum_personnes }} personnes</p>
+      <p class="menu-prix">{{ menu.prix_par_personne }} € / personne</p>
+    </article>
+  </div>
+
+  <p *ngIf="!erreur && menus.length === 0">Chargement des menus...</p>
+</section>
