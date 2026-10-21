@@ -3,9 +3,63 @@
   <h1>Nos menus</h1>
   <p>Découvrez les menus proposés par Vite & Gourmand.</p>
 
-  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+  <div class="menus-filtres">
+    <label for="prixMin">Prix minimum (€)</label>
+    <input
+      id="prixMin"
+      type="number"
+      min="0"
+      placeholder="Ex. : 25"
+      [value]="prixMin"
+      (input)="changerPrixMin($event)"
+    />
 
-  <div class="menus-grid" *ngIf="menus.length > 0">
+    <label for="prixMax">Prix maximum (€)</label>
+    <input
+      id="prixMax"
+      type="number"
+      min="0"
+      placeholder="Ex. : 45"
+      [value]="prixMax"
+      (input)="changerPrixMax($event)"
+    />
+
+    <label for="theme">Thème</label>
+    <select id="theme" [value]="theme" (change)="changerTheme($event)">
+      <option value="">Tous les thèmes</option>
+      <option value="Classique">Classique</option>
+      <option value="Festif">Festif</option>
+      <option value="Végétarien">Végétarien</option>
+    </select>
+
+    <label for="regime">Régime alimentaire</label>
+    <select id="regime" [value]="regime" (change)="changerRegime($event)">
+      <option value="">Tous les régimes</option>
+      <option value="Classique">Classique</option>
+      <option value="Végétarien">Végétarien</option>
+      <option value="Végétalien">Végétalien</option>
+      <option value="Sans gluten">Sans gluten</option>
+    </select>
+
+    <label for="nombrePersonnes">Nombre de personnes</label>
+    <input
+      id="nombrePersonnes"
+      type="number"
+      min="1"
+      placeholder="Ex. : 10"
+      [value]="nombrePersonnes"
+      (input)="changerNombrePersonnes($event)"
+    />
+
+    <button type="button" (click)="reinitialiserFiltres()">
+      Réinitialiser les filtres
+    </button>
+  </div>
+
+  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+  <p *ngIf="chargement">Chargement des menus...</p>
+
+  <div class="menus-grid" *ngIf="!chargement && menus.length > 0">
     <article class="menu-card" *ngFor="let menu of menus">
       <p class="menu-theme">{{ menu.theme }}</p>
       <h2>{{ menu.titre }}</h2>
@@ -16,5 +70,7 @@
     </article>
   </div>
 
-  <p *ngIf="!erreur && menus.length === 0">Chargement des menus...</p>
+  <p *ngIf="!chargement && !erreur && menus.length === 0">
+    Aucun menu ne correspond à vos critères.
+  </p>
 </section>
