@@ -1,3 +1,4 @@
+
 import {
   Body,
   Controller,
@@ -8,11 +9,13 @@ import {
 import { UtilisateursService } from './utilisateurs.service.js';
 import { InscriptionDto } from './dto/inscription.dto.js';
 import { ConnexionDto } from './dto/connexion.dto.js';
+import { AuthService } from '../auth/auth.service.js';
 
 @Controller('utilisateurs')
 export class UtilisateursController {
   constructor(
     private readonly utilisateursService: UtilisateursService,
+    private readonly authService: AuthService,
   ) {}
 
   @Post('inscription')
@@ -23,7 +26,18 @@ export class UtilisateursController {
 
   @Post('connexion')
   @HttpCode(HttpStatus.OK)
-  connecter(@Body() donnees: ConnexionDto) {
-    return this.utilisateursService.connecter(donnees);
+  async connecter(@Body() donnees: ConnexionDto) {
+    const utilisateur = await this.utilisateursService.connecter(donnees);
+
+    const accessToken = this.authService.genererJeton({
+      id_utilisateur: utilisateur.id_utilisateur,
+      email: utilisateur.email,
+      role: utilisateur.role,
+    });
+
+    return {
+      utilisateur,
+      access_token: accessToken,
+    };
   }
 }

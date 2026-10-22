@@ -1,3 +1,4 @@
+
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,6 +6,11 @@ import { RouterLink, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { finalize, timeout } from 'rxjs';
 import { Session, UtilisateurConnecte } from '../../../core/services/session';
+
+interface ReponseConnexion {
+  utilisateur: UtilisateurConnecte;
+  access_token: string;
+}
 
 @Component({
   selector: 'app-connexion',
@@ -34,7 +40,7 @@ export class Connexion {
     this.chargement = true;
 
     this.http
-      .post<UtilisateurConnecte>(
+      .post<ReponseConnexion>(
         'http://localhost:3000/utilisateurs/connexion',
         {
           email: this.email,
@@ -49,9 +55,10 @@ export class Connexion {
         }),
       )
       .subscribe({
-        next: (utilisateur) => {
-          this.session.enregistrerUtilisateur(utilisateur);
-          this.message = `Bienvenue ${utilisateur.prenom}.`;
+        next: (reponse) => {
+          localStorage.setItem('vite-gourmand-token', reponse.access_token);
+          this.session.enregistrerUtilisateur(reponse.utilisateur);
+          this.message = `Bienvenue ${reponse.utilisateur.prenom}.`;
           this.motDePasse = '';
           this.cdr.detectChanges();
         },
