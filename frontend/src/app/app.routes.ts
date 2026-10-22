@@ -1,4 +1,3 @@
-
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { Accueil } from './features/accueil/accueil';
@@ -7,6 +6,8 @@ import { DetailMenu } from './features/detail-menu/detail-menu';
 import { Commande } from './features/commandes/commande/commande';
 import { Connexion } from './features/auth/connexion/connexion';
 import { Inscription } from './features/auth/inscription/inscription';
+import { EspaceClient } from './features/espace-client/espace-client';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -36,6 +37,11 @@ export const routes: Routes = [
       {
         path: 'inscription',
         component: Inscription,
+      },
+      {
+        path: 'espace-client',
+        component: EspaceClient,
+        canActivate: [authGuard],
       },
     ],
   },

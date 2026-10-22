@@ -1,0 +1,9 @@
+<section class="auth-page">
+  <h1>Mon espace client</h1>
+
+  <p *ngIf="session.utilisateur() as utilisateur">
+    Bienvenue {{ utilisateur.prenom }} {{ utilisateur.nom }}.
+  </p>
+
+  <p>Depuis votre espace, vous pourrez bientôt retrouver vos commandes et gérer votre compte.</p>
+</section>
