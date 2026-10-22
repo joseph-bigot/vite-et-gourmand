@@ -1,7 +1,7 @@
 
 <section class="menus-page">
-  <h1>Nos menus</h1>
-  <p>Découvrez les menus proposés par Vite & Gourmand.</p>
+  <h1>Tous nos menus</h1>
+  <p>Découvrez les menus proposés par Vite &amp; Gourmand.</p>
 
   <div class="menus-filtres">
     <label for="prixMin">Prix minimum (€)</label>
@@ -25,7 +25,11 @@
     />
 
     <label for="theme">Thème</label>
-    <select id="theme" [value]="theme" (change)="changerTheme($event)">
+    <select
+      id="theme"
+      [value]="theme"
+      (change)="changerTheme($event)"
+    >
       <option value="">Tous les thèmes</option>
       <option value="Classique">Classique</option>
       <option value="Festif">Festif</option>
@@ -33,7 +37,11 @@
     </select>
 
     <label for="regime">Régime alimentaire</label>
-    <select id="regime" [value]="regime" (change)="changerRegime($event)">
+    <select
+      id="regime"
+      [value]="regime"
+      (change)="changerRegime($event)"
+    >
       <option value="">Tous les régimes</option>
       <option value="Classique">Classique</option>
       <option value="Végétarien">Végétarien</option>
@@ -61,12 +69,35 @@
 
   <div class="menus-grid" *ngIf="!chargement && menus.length > 0">
     <article class="menu-card" *ngFor="let menu of menus">
-      <p class="menu-theme">{{ menu.theme }}</p>
-      <h2>{{ menu.titre }}</h2>
-      <p>{{ menu.description }}</p>
-      <p>Régime : {{ menu.regime_alimentaire }}</p>
-      <p>Minimum : {{ menu.nombre_minimum_personnes }} personnes</p>
-      <p class="menu-prix">{{ menu.prix_par_personne }} € / personne</p>
+      <img
+        class="menu-image"
+        [src]="
+          menu.theme === 'Festif'
+            ? '/images/menu-festif.png'
+            : menu.theme === 'Végétarien'
+              ? '/images/menu-vegetarien.png'
+              : '/images/menu-classique.png'
+        "
+        [alt]="'Illustration du ' + menu.titre"
+      />
+
+      <div class="menu-card-content">
+        <h2>{{ menu.titre }}</h2>
+        <p>{{ menu.description }}</p>
+        <p>
+          Minimum {{ menu.nombre_minimum_personnes }} personnes
+        </p>
+        <p class="menu-prix">
+          À partir de {{ menu.prix_par_personne }} € / personne
+        </p>
+      </div>
+
+      <a
+  class="menu-details"
+  [routerLink]="['/menus', menu.id_menu]"
+>
+  Voir le menu
+</a>
     </article>
   </div>
 

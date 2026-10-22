@@ -1,5 +1,5 @@
 
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Param, NotFoundException } from '@nestjs/common';
 import { MenusService } from './menus.service.js';
 
 @Controller('menus')
@@ -22,5 +22,16 @@ export class MenusController {
       nombrePersonnes:
         nombrePersonnes !== undefined ? Number(nombrePersonnes) : undefined,
     });
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const menu = await this.menusService.findOne(id);
+
+    if (!menu) {
+      throw new NotFoundException('Menu introuvable');
+    }
+
+    return menu;
   }
 }

@@ -2,6 +2,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 
 interface Menu {
   id_menu: string;
@@ -17,7 +18,7 @@ interface Menu {
 @Component({
   selector: 'app-menus',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './menus.html',
   styleUrl: './menus.scss',
 })

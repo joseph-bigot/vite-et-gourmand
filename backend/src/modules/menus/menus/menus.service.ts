@@ -68,4 +68,69 @@ export class MenusService {
       parametres,
     );
   }
+
+  async findOne(id: string) {
+    const menus = await this.dataSource.query(
+      `
+        SELECT
+          m.id_menu,
+          m.titre,
+          m.description,
+          m.prix_par_personne,
+          m.nombre_minimum_personnes,
+          m.stock,
+          m.conditions_commande,
+          m.conditions_conservation,
+          t.nom AS theme,
+          r.nom AS regime_alimentaire
+        FROM menu m
+        INNER JOIN theme t ON t.id_theme = m.id_theme
+        INNER JOIN regime_alimentaire r ON r.id_regime = m.id_regime
+        WHERE m.id_menu = $1
+          AND m.disponible = TRUE
+      `,
+      [id],
+    );
+
+    const menu = menus[0];
+
+    if (!menu) {
+      return null;
+    }
+
+    const plats = await this.dataSource.query(
+      `
+        SELECT
+          p.id_plat,
+          p.nom,
+          p.description,
+          p.categorie,
+          cm.quantite,
+          cm.ordre_affichage,
+          COALESCE(
+            ARRAY_AGG(a.nom) FILTER (WHERE a.nom IS NOT NULL),
+            ARRAY[]::VARCHAR[]
+          ) AS allergenes
+        FROM composer_menu cm
+        INNER JOIN plat p ON p.id_plat = cm.id_plat
+        LEFT JOIN plat_allergene pa ON pa.id_plat = p.id_plat
+        LEFT JOIN allergene a ON a.id_allergene = pa.id_allergene
+        WHERE cm.id_menu = $1
+        GROUP BY
+          p.id_plat,
+          p.nom,
+          p.description,
+          p.categorie,
+          cm.quantite,
+          cm.ordre_affichage
+        ORDER BY cm.ordre_affichage, p.categorie
+      `,
+      [id],
+    );
+
+    return {
+      ...menu,
+      plats,
+    };
+  }
 }

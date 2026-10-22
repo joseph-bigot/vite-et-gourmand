@@ -1,0 +1,91 @@
+
+<section class="commande-page">
+  <a class="retour-menus" routerLink="/menus">← Retour aux menus</a>
+
+  <h1>Commander un menu</h1>
+
+  <p *ngIf="chargement">Chargement du menu...</p>
+
+  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+  <ng-container *ngIf="!chargement && menu">
+    <section class="commande-resume">
+      <h2>{{ menu.titre }}</h2>
+      <p>Prix par personne : {{ menu.prix_par_personne }} €</p>
+      <p>Nombre minimum : {{ menu.nombre_minimum_personnes }} personnes</p>
+      <p>Disponibilité : {{ menu.stock }} menu(s) en stock</p>
+    </section>
+
+    <form #formCommande="ngForm">
+      <h2>Nombre de personnes</h2>
+
+      <label for="nombrePersonnes">Nombre de convives</label>
+      <input
+        id="nombrePersonnes"
+        name="nombrePersonnes"
+        type="number"
+        [min]="menu.nombre_minimum_personnes"
+        [value]="nombre"
+        #nombreInput
+        (input)="nombre = nombreInput.valueAsNumber"
+        required
+      />
+
+      <p
+        *ngIf="nombre > 0 && nombre < menu.nombre_minimum_personnes"
+        class="erreur"
+      >
+        Le minimum requis est de
+        {{ menu.nombre_minimum_personnes }} personnes.
+      </p>
+
+      <section class="commande-prix">
+        <h2>Récapitulatif du prix</h2>
+
+        <p>
+          Prix du menu :
+          {{ menu.prix_par_personne }} € ×
+          {{
+            nombre >= menu.nombre_minimum_personnes
+              ? nombre
+              : menu.nombre_minimum_personnes
+          }}
+          personnes
+        </p>
+
+        <p *ngIf="reductionApplicable">
+          Réduction de 10 % :
+          -{{ montantReduction | number: '1.2-2' }} €
+        </p>
+
+        <p>
+          <strong>
+            Total du menu :
+            {{ totalMenu | number: '1.2-2' }} €
+          </strong>
+        </p>
+
+        <p class="note-livraison">
+          Les frais de livraison seront calculés selon l’adresse de prestation.
+        </p>
+      </section>
+
+      <p class="information">
+        La commande définitive nécessitera les coordonnées du client,
+        l’adresse et la date de prestation, ainsi que l’heure de livraison.
+      </p>
+
+      <button
+        type="button"
+        [disabled]="
+          nombre < menu.nombre_minimum_personnes ||
+          !nombre ||
+          nombre % 1 !== 0
+        "
+        (click)="continuerCommande()"
+      >
+        Continuer la commande
+      </button>
+    </form>
+  </ng-container>
+</section>
