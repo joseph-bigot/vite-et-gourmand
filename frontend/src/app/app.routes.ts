@@ -5,6 +5,8 @@ import { Accueil } from './features/accueil/accueil';
 import { Menus } from './features/menus/menus';
 import { DetailMenu } from './features/detail-menu/detail-menu';
 import { Commande } from './features/commandes/commande/commande';
+import { Connexion } from './features/auth/connexion/connexion';
+import { Inscription } from './features/auth/inscription/inscription';
 
 export const routes: Routes = [
   {
@@ -26,6 +28,14 @@ export const routes: Routes = [
       {
         path: 'commande/:id',
         component: Commande,
+      },
+      {
+        path: 'connexion',
+        component: Connexion,
+      },
+      {
+        path: 'inscription',
+        component: Inscription,
       },
     ],
   },
