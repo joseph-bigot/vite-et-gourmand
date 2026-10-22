@@ -1,5 +1,7 @@
+
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Session } from '../../core/services/session';
 
 @Component({
@@ -11,4 +13,10 @@ import { Session } from '../../core/services/session';
 })
 export class EspaceClient {
   readonly session = inject(Session);
+  private readonly router = inject(Router);
+
+  deconnecter(): void {
+    this.session.deconnecter();
+    this.router.navigate(['/']);
+  }
 }
