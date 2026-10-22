@@ -1,4 +1,13 @@
-import { Module } from '@nestjs/common';
 
-@Module({})
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Commande } from './entities/commande.entity.js';
+import { CommandesService } from './commandes.service.js';
+import { CommandesController } from './commandes.controller.js';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Commande])],
+  controllers: [CommandesController],
+  providers: [CommandesService],
+})
 export class CommandesModule {}

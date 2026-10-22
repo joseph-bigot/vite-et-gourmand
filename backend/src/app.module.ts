@@ -1,8 +1,10 @@
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import databaseConfig from './config/database.config.js';
 
+import { AuthModule } from './modules/auth/auth.module.js';
 import { UtilisateursModule } from './modules/utilisateurs/utilisateurs.module.js';
 import { MenusModule } from './modules/menus/menus.module.js';
 import { CommandesModule } from './modules/commandes/commandes.module.js';
@@ -31,6 +33,7 @@ import { StatistiquesModule } from './modules/statistiques/statistiques.module.j
         synchronize: false,
       }),
     }),
+    AuthModule,
     UtilisateursModule,
     MenusModule,
     CommandesModule,
