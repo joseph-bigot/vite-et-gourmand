@@ -26,6 +26,9 @@ export class Commande implements OnInit {
   chargement = true;
   nombre = 0;
 
+  distanceKm = 0;
+  livraisonHorsBordeaux = false;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly http: HttpClient,
@@ -78,6 +81,18 @@ export class Commande implements OnInit {
     return this.prixBrut - this.montantReduction;
   }
 
+  get fraisLivraison(): number {
+    if (!this.livraisonHorsBordeaux) {
+      return 5;
+    }
+
+    return 5 + Math.max(0, this.distanceKm) * 0.59;
+  }
+
+  get totalCommande(): number {
+    return this.totalMenu + this.fraisLivraison;
+  }
+
   continuerCommande(): void {
     if (
       !this.menu ||
@@ -87,7 +102,7 @@ export class Commande implements OnInit {
     }
 
     alert(
-      'Étape suivante : les coordonnées et les informations de livraison.',
+      'La validation définitive de la commande sera disponible après la mise en place du traitement des commandes.',
     );
   }
 }
