@@ -55,6 +55,22 @@ export class Commande {
   })
   frais_livraison!: string;
 
+  @Column({
+    name: 'distance_km',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    default: 0,
+  })
+  distance_km!: string;
+
+  @Column({
+    name: 'livraison_hors_bordeaux',
+    type: 'boolean',
+    default: false,
+  })
+  livraison_hors_bordeaux!: boolean;
+
   @Column({ name: 'prix_total', type: 'numeric', precision: 10, scale: 2 })
   prix_total!: string;
 

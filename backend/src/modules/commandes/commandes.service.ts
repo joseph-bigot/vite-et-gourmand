@@ -166,6 +166,8 @@ export class CommandesService {
         adresse_livraison: adresse_livraison.trim(),
         lieu_prestation: lieu_prestation.trim(),
         nombre_personnes,
+        distance_km: distance_km.toFixed(2),
+        livraison_hors_bordeaux,
         prix_menu: prixMenu.toFixed(2),
         montant_reduction: reductionArrondie.toFixed(2),
         frais_livraison: livraisonArrondie.toFixed(2),
@@ -285,8 +287,11 @@ export class CommandesService {
         id_commande: string;
         id_menu: string;
         frais_livraison: string;
+        distance_km: string;
+        livraison_hors_bordeaux: boolean;
       }> = await manager.query(
-        `SELECT c.id_commande, c.id_menu, c.frais_livraison
+        `SELECT c.id_commande, c.id_menu, c.frais_livraison,
+                c.distance_km, c.livraison_hors_bordeaux
          FROM commande c
          JOIN historique_statut h
            ON h.id_commande = c.id_commande
@@ -343,10 +348,15 @@ export class CommandesService {
           : 0;
       const prixMenu = Math.round(prixBrut * 100) / 100;
       const reductionArrondie = Math.round(reduction * 100) / 100;
-      const fraisLivraison = Number(commande.frais_livraison);
+      const fraisLivraison = commande.livraison_hors_bordeaux
+        ? 5 + Number(commande.distance_km) * 0.59
+        : 5;
+      const fraisLivraisonArrondis =
+        Math.round(fraisLivraison * 100) / 100;
       const prixTotal =
-        Math.round((prixMenu - reductionArrondie + fraisLivraison) * 100) /
-        100;
+        Math.round(
+          (prixMenu - reductionArrondie + fraisLivraisonArrondis) * 100,
+        ) / 100;
 
       await manager.query(
         `UPDATE commande
@@ -357,9 +367,10 @@ export class CommandesService {
              nombre_personnes = $5,
              prix_menu = $6,
              montant_reduction = $7,
-             prix_total = $8
-         WHERE id_commande = $9
-           AND id_utilisateur = $10`,
+             frais_livraison = $8,
+             prix_total = $9
+         WHERE id_commande = $10
+           AND id_utilisateur = $11`,
         [
           donnees.date_prestation,
           donnees.heure_prestation,
@@ -368,6 +379,7 @@ export class CommandesService {
           donnees.nombre_personnes,
           prixMenu.toFixed(2),
           reductionArrondie.toFixed(2),
+          fraisLivraisonArrondis.toFixed(2),
           prixTotal.toFixed(2),
           idCommande,
           idUtilisateur,
@@ -379,7 +391,7 @@ export class CommandesService {
         detail_prix: {
           prix_menu: prixMenu,
           montant_reduction: reductionArrondie,
-          frais_livraison: fraisLivraison,
+          frais_livraison: fraisLivraisonArrondis,
           prix_total: prixTotal,
         },
       };
