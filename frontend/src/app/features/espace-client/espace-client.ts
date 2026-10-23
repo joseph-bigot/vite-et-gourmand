@@ -1,3 +1,4 @@
+
 import {
   Component,
   inject,
@@ -6,10 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {
-  Commandes,
-  CommandeClient,
-} from '../../core/services/commandes';
+import { Commandes, CommandeClient } from '../../core/services/commandes';
 import { Session } from '../../core/services/session';
 
 @Component({
@@ -28,14 +26,11 @@ export class EspaceClient implements OnInit {
   commandes: CommandeClient[] = [];
   chargement = true;
   erreur = '';
+  commandeDetailsOuverte: number | null = null;
 
   ngOnInit(): void {
-    console.log('Chargement des commandes démarré');
-
     this.commandesService.trouverMesCommandes().subscribe({
       next: (commandes) => {
-        console.log('Type reçu :', typeof commandes);
-console.log('Données reçues :', commandes);
         this.commandes = commandes;
         this.chargement = false;
         this.cdr.detectChanges();
@@ -47,6 +42,11 @@ console.log('Données reçues :', commandes);
         this.cdr.detectChanges();
       },
     });
+  }
+
+  afficherDetails(idCommande: number): void {
+    this.commandeDetailsOuverte =
+      this.commandeDetailsOuverte === idCommande ? null : idCommande;
   }
 
   deconnecter(): void {

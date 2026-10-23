@@ -116,3 +116,37 @@
   background: #e1ebf9;
   color: #24538a;
 }
+
+
+.bouton-details {
+  margin: 0 0 16px;
+  padding: 9px 16px;
+  color: #542b2e;
+  background: #ffffff;
+  border: 1px solid #542b2e;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.bouton-details:hover {
+  color: #ffffff;
+  background: #542b2e;
+}
+
+.commande-details {
+  margin: 12px 0 20px;
+  padding: 20px;
+  background: #faf6f3;
+  border: 1px solid #e5d9d4;
+  border-radius: 8px;
+}
+
+.commande-details h4 {
+  margin: 0 0 16px;
+  color: #542b2e;
+}
+
+.commande-details p {
+  margin: 10px 0;
+}
