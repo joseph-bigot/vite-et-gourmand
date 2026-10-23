@@ -31,6 +31,8 @@ export class CommandesService {
         'commande.date_prestation AS date_prestation',
         'commande.heure_prestation AS heure_prestation',
         'commande.nombre_personnes AS nombre_personnes',
+        'commande.adresse_livraison AS adresse_livraison',
+        'commande.lieu_prestation AS lieu_prestation',
         'commande.prix_total AS prix_total',
         'historique.statut AS statut',
         'menu.titre AS titre_menu',

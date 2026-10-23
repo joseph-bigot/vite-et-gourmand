@@ -11,6 +11,8 @@ export interface CommandeClient {
   prix_total: number;
   statut: string;
   titre_menu: string;
+  adresse_livraison: string;
+  lieu_prestation: string;
 }
 
 @Injectable({

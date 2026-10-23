@@ -47,6 +47,8 @@
         {{ commande.date_prestation | date: 'dd/MM/yyyy' }}
         à {{ commande.heure_prestation }}
       </p>
+      <p><strong>Adresse de livraison :</strong> {{ commande.adresse_livraison }}</p>
+<p><strong>Lieu de prestation :</strong> {{ commande.lieu_prestation }}</p>
     </div>
 
     <div *ngIf="commandeDetailsOuverte !== commande.id_commande">
