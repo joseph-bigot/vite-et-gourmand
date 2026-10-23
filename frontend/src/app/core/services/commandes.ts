@@ -38,4 +38,20 @@ export class Commandes {
       { motif, moyen_contact },
     );
   }
+
+  modifierCommande(
+    idCommande: number,
+    donnees: {
+      date_prestation: string;
+      heure_prestation: string;
+      adresse_livraison: string;
+      lieu_prestation: string;
+      nombre_personnes: number;
+    },
+  ): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/${idCommande}`,
+      donnees,
+    );
+  }
 }

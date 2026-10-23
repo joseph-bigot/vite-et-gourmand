@@ -255,4 +255,135 @@ export class CommandesService {
       return { message: 'Commande annulée avec succès.' };
     });
   }
+
+  async modifierCommande(
+    idUtilisateur: string,
+    idCommande: string,
+    donnees: {
+      date_prestation: string;
+      heure_prestation: string;
+      adresse_livraison: string;
+      lieu_prestation: string;
+      nombre_personnes: number;
+    },
+  ) {
+    if (
+      !donnees.date_prestation ||
+      !donnees.heure_prestation ||
+      !donnees.adresse_livraison?.trim() ||
+      !donnees.lieu_prestation?.trim() ||
+      !Number.isInteger(donnees.nombre_personnes) ||
+      donnees.nombre_personnes <= 0
+    ) {
+      throw new BadRequestException(
+        'Les informations de la commande sont invalides.',
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const commandes: Array<{
+        id_commande: string;
+        id_menu: string;
+        frais_livraison: string;
+      }> = await manager.query(
+        `SELECT c.id_commande, c.id_menu, c.frais_livraison
+         FROM commande c
+         JOIN historique_statut h
+           ON h.id_commande = c.id_commande
+         WHERE c.id_commande = $1
+           AND c.id_utilisateur = $2
+           AND h.date_changement = (
+             SELECT MAX(h2.date_changement)
+             FROM historique_statut h2
+             WHERE h2.id_commande = c.id_commande
+           )
+           AND h.statut = 'en_attente'
+         FOR UPDATE OF c`,
+        [idCommande, idUtilisateur],
+      );
+
+      const commande = commandes[0];
+
+      if (!commande) {
+        throw new BadRequestException(
+          'Commande introuvable ou non modifiable.',
+        );
+      }
+
+      const menus: Array<{
+        prix_par_personne: string;
+        nombre_minimum_personnes: number;
+        disponible: boolean;
+      }> = await manager.query(
+        `SELECT prix_par_personne, nombre_minimum_personnes, disponible
+         FROM menu
+         WHERE id_menu = $1`,
+        [commande.id_menu],
+      );
+
+      const menu = menus[0];
+
+      if (!menu || !menu.disponible) {
+        throw new BadRequestException(
+          'Le menu de cette commande est indisponible.',
+        );
+      }
+
+      if (donnees.nombre_personnes < menu.nombre_minimum_personnes) {
+        throw new BadRequestException(
+          `Ce menu exige au minimum ${menu.nombre_minimum_personnes} personnes.`,
+        );
+      }
+
+      const prixBrut =
+        Number(menu.prix_par_personne) * donnees.nombre_personnes;
+      const reduction =
+        donnees.nombre_personnes >= menu.nombre_minimum_personnes + 5
+          ? Math.round(prixBrut * 10) / 100
+          : 0;
+      const prixMenu = Math.round(prixBrut * 100) / 100;
+      const reductionArrondie = Math.round(reduction * 100) / 100;
+      const fraisLivraison = Number(commande.frais_livraison);
+      const prixTotal =
+        Math.round((prixMenu - reductionArrondie + fraisLivraison) * 100) /
+        100;
+
+      await manager.query(
+        `UPDATE commande
+         SET date_prestation = $1,
+             heure_prestation = $2,
+             adresse_livraison = $3,
+             lieu_prestation = $4,
+             nombre_personnes = $5,
+             prix_menu = $6,
+             montant_reduction = $7,
+             prix_total = $8
+         WHERE id_commande = $9
+           AND id_utilisateur = $10`,
+        [
+          donnees.date_prestation,
+          donnees.heure_prestation,
+          donnees.adresse_livraison.trim(),
+          donnees.lieu_prestation.trim(),
+          donnees.nombre_personnes,
+          prixMenu.toFixed(2),
+          reductionArrondie.toFixed(2),
+          prixTotal.toFixed(2),
+          idCommande,
+          idUtilisateur,
+        ],
+      );
+
+      return {
+        message: 'Commande modifiée avec succès.',
+        detail_prix: {
+          prix_menu: prixMenu,
+          montant_reduction: reductionArrondie,
+          frais_livraison: fraisLivraison,
+          prix_total: prixTotal,
+        },
+      };
+    });
+  }
+
 }

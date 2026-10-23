@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 
 import {
   Component,
@@ -13,7 +14,7 @@ import { Session } from '../../core/services/session';
 @Component({
   selector: 'app-espace-client',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './espace-client.html',
   styleUrl: './espace-client.scss',
 })
@@ -27,6 +28,14 @@ export class EspaceClient implements OnInit {
   chargement = true;
   erreur = '';
   commandeDetailsOuverte: number | null = null;
+  commanderEnModification: number | null = null;
+  modification = {
+    date_prestation: '',
+    heure_prestation: '',
+    adresse_livraison: '',
+    lieu_prestation: '',
+    nombre_personnes: 1,
+  };
 
   ngOnInit(): void {
     this.commandesService.trouverMesCommandes().subscribe({
@@ -47,6 +56,38 @@ export class EspaceClient implements OnInit {
   afficherDetails(idCommande: number): void {
     this.commandeDetailsOuverte =
       this.commandeDetailsOuverte === idCommande ? null : idCommande;
+  }
+
+  commencerModification(commande: CommandeClient): void {
+    this.commanderEnModification = commande.id_commande;
+    this.modification = {
+      date_prestation: commande.date_prestation.slice(0, 10),
+      heure_prestation: commande.heure_prestation.slice(0, 5),
+      adresse_livraison: commande.adresse_livraison,
+      lieu_prestation: commande.lieu_prestation,
+      nombre_personnes: commande.nombre_personnes,
+    };
+  }
+
+  enregistrerModification(idCommande: number): void {
+    this.commandesService.modifierCommande(
+      idCommande,
+      this.modification,
+    ).subscribe({
+      next: () => {
+        window.alert('Commande modifiée avec succès.');
+        window.location.reload();
+      },
+      error: (error) => {
+        window.alert(
+          error.error?.message ?? 'Impossible de modifier la commande.',
+        );
+      },
+    });
+  }
+
+  annulerModification(): void {
+    this.commanderEnModification = null;
   }
 
   annulerCommande(idCommande: number): void {

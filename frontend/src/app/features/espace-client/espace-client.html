@@ -60,6 +60,78 @@
       Annuler la commande
     </button>
 
+    <button
+      *ngIf="commande.statut === 'en_attente' && commanderEnModification !== commande.id_commande"
+      type="button"
+      class="bouton-details"
+      (click)="commencerModification(commande)"
+    >
+      Modifier la commande
+    </button>
+
+    <form
+      *ngIf="commanderEnModification === commande.id_commande"
+      class="commande-details"
+      (ngSubmit)="enregistrerModification(commande.id_commande)"
+    >
+      <h4>Modifier la commande</h4>
+
+      <label>
+        Date de prestation
+        <input
+          type="date"
+          name="date_prestation"
+          [(ngModel)]="modification.date_prestation"
+          required
+        />
+      </label>
+
+      <label>
+        Heure de prestation
+        <input
+          type="time"
+          name="heure_prestation"
+          [(ngModel)]="modification.heure_prestation"
+          required
+        />
+      </label>
+
+      <label>
+        Adresse de livraison
+        <input
+          type="text"
+          name="adresse_livraison"
+          [(ngModel)]="modification.adresse_livraison"
+          required
+        />
+      </label>
+
+      <label>
+        Lieu de prestation
+        <input
+          type="text"
+          name="lieu_prestation"
+          [(ngModel)]="modification.lieu_prestation"
+          required
+        />
+      </label>
+
+      <label>
+        Nombre de personnes
+        <input
+          type="number"
+          name="nombre_personnes"
+          [(ngModel)]="modification.nombre_personnes"
+          [min]="1"
+          step="1"
+          required
+        />
+      </label>
+
+      <button type="submit">Enregistrer les modifications</button>
+      <button type="button" (click)="annulerModification()">Annuler</button>
+    </form>
+
     <div *ngIf="commandeDetailsOuverte !== commande.id_commande">
       <p><strong>Menu :</strong> {{ commande.titre_menu }}</p>
 

@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -73,4 +74,25 @@ export class CommandesController {
       donnees.moyen_contact,
     );
   }
+
+  @Put(':id')
+  modifierCommande(
+    @Req() requete: RequeteAuthentifiee,
+    @Param('id') idCommande: string,
+    @Body()
+    donnees: {
+      date_prestation: string;
+      heure_prestation: string;
+      adresse_livraison: string;
+      lieu_prestation: string;
+      nombre_personnes: number;
+    },
+  ) {
+    return this.commandesService.modifierCommande(
+      requete.user.id_utilisateur,
+      idCommande,
+      donnees,
+    );
+  }
+
 }
