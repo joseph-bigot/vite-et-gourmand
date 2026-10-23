@@ -51,6 +51,15 @@
 <p><strong>Lieu de prestation :</strong> {{ commande.lieu_prestation }}</p>
     </div>
 
+    <button
+      *ngIf="commande.statut === 'en_attente'"
+      type="button"
+      class="bouton-annulation"
+      (click)="annulerCommande(commande.id_commande)"
+    >
+      Annuler la commande
+    </button>
+
     <div *ngIf="commandeDetailsOuverte !== commande.id_commande">
       <p><strong>Menu :</strong> {{ commande.titre_menu }}</p>
 

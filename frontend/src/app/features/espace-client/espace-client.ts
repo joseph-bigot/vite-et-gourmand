@@ -49,6 +49,34 @@ export class EspaceClient implements OnInit {
       this.commandeDetailsOuverte === idCommande ? null : idCommande;
   }
 
+  annulerCommande(idCommande: number): void {
+    const motif = window.prompt('Motif de l’annulation :');
+    if (!motif?.trim()) return;
+
+    const moyenContact = window.prompt(
+      'Moyen de contact (email ou téléphone) :',
+    );
+    if (!moyenContact?.trim()) return;
+
+    if (!window.confirm('Confirmer l’annulation de cette commande ?')) {
+      return;
+    }
+
+    this.commandesService
+      .annulerCommande(idCommande, motif, moyenContact)
+      .subscribe({
+        next: () => {
+          window.alert('Commande annulée.');
+          window.location.reload();
+        },
+        error: (error) => {
+          window.alert(
+            error.error?.message ?? 'Impossible d’annuler la commande.',
+          );
+        },
+      });
+  }
+
   deconnecter(): void {
     this.session.deconnecter();
     this.router.navigate(['/']);

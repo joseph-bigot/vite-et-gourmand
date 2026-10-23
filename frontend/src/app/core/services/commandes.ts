@@ -27,4 +27,15 @@ export class Commandes {
       `${this.apiUrl}/mes-commandes`,
     );
   }
+
+  annulerCommande(
+    idCommande: number,
+    motif: string,
+    moyen_contact: string,
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/${idCommande}/annuler`,
+      { motif, moyen_contact },
+    );
+  }
 }

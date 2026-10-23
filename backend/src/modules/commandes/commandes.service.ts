@@ -195,4 +195,64 @@ export class CommandesService {
       };
     });
   }
+  async annulerCommande(
+    idUtilisateur: string,
+    idCommande: string,
+    motif: string,
+    moyenContact: string,
+  ) {
+    return this.dataSource.transaction(async (manager) => {
+      const commandes: Array<{ id_commande: string }> =
+        await manager.query(
+          `SELECT c.id_commande
+           FROM commande c
+           JOIN historique_statut h
+             ON h.id_commande = c.id_commande
+           WHERE c.id_commande = $1
+             AND c.id_utilisateur = $2
+             AND h.date_changement = (
+               SELECT MAX(h2.date_changement)
+               FROM historique_statut h2
+               WHERE h2.id_commande = c.id_commande
+             )
+             AND h.statut = 'en_attente'
+           FOR UPDATE OF c`,
+          [idCommande, idUtilisateur],
+        );
+
+      if (commandes.length === 0) {
+        throw new BadRequestException(
+          'Commande introuvable ou non annulable.',
+        );
+      }
+
+      if (!motif?.trim() || !moyenContact?.trim()) {
+        throw new BadRequestException(
+          'Le motif et le moyen de contact sont obligatoires.',
+        );
+      }
+
+      await manager.query(
+        `UPDATE commande
+         SET motif_annulation = $1,
+             moyen_contact_annulation = $2
+         WHERE id_commande = $3
+           AND id_utilisateur = $4`,
+        [
+          motif.trim(),
+          moyenContact.trim(),
+          idCommande,
+          idUtilisateur,
+        ],
+      );
+
+      await manager.query(
+        `INSERT INTO historique_statut (id_commande, statut)
+         VALUES ($1, 'annulee')`,
+        [idCommande],
+      );
+
+      return { message: 'Commande annulée avec succès.' };
+    });
+  }
 }

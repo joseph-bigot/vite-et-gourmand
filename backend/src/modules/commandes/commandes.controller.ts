@@ -1,8 +1,8 @@
-
 import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -30,6 +30,11 @@ interface DonneesCreationCommande {
   livraison_hors_bordeaux: boolean;
 }
 
+interface DonneesAnnulationCommande {
+  motif: string;
+  moyen_contact: string;
+}
+
 @Controller('commandes')
 @UseGuards(JwtAuthGuard)
 export class CommandesController {
@@ -52,6 +57,20 @@ export class CommandesController {
     return this.commandesService.creerCommande(
       requete.user.id_utilisateur,
       donnees,
+    );
+  }
+
+  @Post(':id/annuler')
+  annulerCommande(
+    @Req() requete: RequeteAuthentifiee,
+    @Param('id') idCommande: string,
+    @Body() donnees: DonneesAnnulationCommande,
+  ) {
+    return this.commandesService.annulerCommande(
+      requete.user.id_utilisateur,
+      idCommande,
+      donnees.motif,
+      donnees.moyen_contact,
     );
   }
 }
