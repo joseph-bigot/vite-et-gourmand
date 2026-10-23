@@ -5,6 +5,7 @@ export interface UtilisateurConnecte {
   nom: string;
   prenom: string;
   email: string;
+  telephone: string | null;
   role: string;
 }
 

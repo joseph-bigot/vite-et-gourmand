@@ -1,7 +1,9 @@
 
 import {
+  Body,
   Controller,
   Get,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +19,17 @@ interface RequeteAuthentifiee extends Request {
   };
 }
 
+interface DonneesCreationCommande {
+  id_menu: string;
+  date_prestation: string;
+  heure_prestation: string;
+  adresse_livraison: string;
+  lieu_prestation: string;
+  nombre_personnes: number;
+  distance_km: number;
+  livraison_hors_bordeaux: boolean;
+}
+
 @Controller('commandes')
 @UseGuards(JwtAuthGuard)
 export class CommandesController {
@@ -28,6 +41,17 @@ export class CommandesController {
   trouverMesCommandes(@Req() requete: RequeteAuthentifiee) {
     return this.commandesService.trouverParUtilisateur(
       requete.user.id_utilisateur,
+    );
+  }
+
+  @Post()
+  creerCommande(
+    @Req() requete: RequeteAuthentifiee,
+    @Body() donnees: DonneesCreationCommande,
+  ) {
+    return this.commandesService.creerCommande(
+      requete.user.id_utilisateur,
+      donnees,
     );
   }
 }

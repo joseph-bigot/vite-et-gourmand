@@ -6,6 +6,7 @@
 
   <p *ngIf="chargement">Chargement du menu...</p>
   <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+  <p *ngIf="messageSucces" class="succes">{{ messageSucces }}</p>
 
   <ng-container *ngIf="!chargement && menu">
     <section class="commande-resume">
@@ -15,22 +16,34 @@
       <p>Disponibilité : {{ menu.stock }} menu(s) en stock</p>
     </section>
 
-    <form #formCommande="ngForm">
+    <form #formCommande="ngForm" (ngSubmit)="continuerCommande()">
       <section>
         <h2>Coordonnées du client</h2>
 
         <label for="nom">Nom</label>
-        <input id="nom" name="nom" type="text" ngModel required />
+        <input
+          id="nom"
+          name="nom"
+          type="text"
+          [(ngModel)]="nom"
+          required
+        />
 
         <label for="prenom">Prénom</label>
-        <input id="prenom" name="prenom" type="text" ngModel required />
+        <input
+          id="prenom"
+          name="prenom"
+          type="text"
+          [(ngModel)]="prenom"
+          required
+        />
 
         <label for="email">Adresse e-mail</label>
         <input
           id="email"
           name="email"
           type="email"
-          ngModel
+          [(ngModel)]="email"
           required
           email
         />
@@ -40,7 +53,7 @@
           id="telephone"
           name="telephone"
           type="tel"
-          ngModel
+          [(ngModel)]="telephone"
           required
         />
       </section>
@@ -49,26 +62,38 @@
         <h2>Informations sur la prestation</h2>
 
         <label for="adresse">Adresse de livraison</label>
-        <input id="adresse" name="adresse" type="text" ngModel required />
+        <input
+          id="adresse"
+          name="adresse"
+          type="text"
+          [(ngModel)]="adresse"
+          required
+        />
 
         <label for="codePostal">Code postal</label>
         <input
           id="codePostal"
           name="codePostal"
           type="text"
-          ngModel
+          [(ngModel)]="codePostal"
           required
         />
 
         <label for="ville">Ville</label>
-        <input id="ville" name="ville" type="text" ngModel required />
+        <input
+          id="ville"
+          name="ville"
+          type="text"
+          [(ngModel)]="ville"
+          required
+        />
 
         <label for="datePrestation">Date de la prestation</label>
         <input
           id="datePrestation"
           name="datePrestation"
           type="date"
-          ngModel
+          [(ngModel)]="datePrestation"
           required
         />
 
@@ -77,7 +102,7 @@
           id="heurePrestation"
           name="heurePrestation"
           type="time"
-          ngModel
+          [(ngModel)]="heurePrestation"
           required
         />
 
@@ -86,7 +111,7 @@
           id="lieuPrestation"
           name="lieuPrestation"
           type="text"
-          ngModel
+          [(ngModel)]="lieuPrestation"
           required
         />
       </section>
@@ -100,14 +125,14 @@
           name="nombrePersonnes"
           type="number"
           [min]="menu.nombre_minimum_personnes"
-          [value]="nombre"
-          #nombreInput
-          (input)="nombre = nombreInput.valueAsNumber"
+          [(ngModel)]="nombre"
+          #nombreControle="ngModel"
           required
+          step="1"
         />
 
         <p
-          *ngIf="nombre > 0 && nombre < menu.nombre_minimum_personnes"
+          *ngIf="nombreControle.touched && nombre < menu.nombre_minimum_personnes"
           class="erreur"
         >
           Le minimum requis est de
@@ -119,14 +144,8 @@
         <h2>Récapitulatif du prix</h2>
 
         <p>
-          Prix du menu :
-          {{ menu.prix_par_personne }} € ×
-          {{
-            nombre >= menu.nombre_minimum_personnes
-              ? nombre
-              : menu.nombre_minimum_personnes
-          }}
-          personnes
+          Prix des menus :
+          {{ menu.prix_par_personne }} € × {{ nombre }} personnes
         </p>
 
         <p *ngIf="reductionApplicable">
@@ -161,6 +180,7 @@
             min="0"
             step="0.1"
             [(ngModel)]="distanceKm"
+            required
           />
         </div>
 
@@ -178,22 +198,22 @@
 
         <p class="note-livraison">
           La livraison est estimée à 5 € à Bordeaux. Hors de Bordeaux,
-          le tarif est de 5 € plus 0,59 € par kilomètre. La distance est
-          saisie manuellement et devra être vérifiée avant validation.
+          le tarif est de 5 € plus 0,59 € par kilomètre. La distance saisie
+          doit être vérifiée avant validation.
         </p>
       </section>
 
       <button
-        type="button"
+        type="submit"
         [disabled]="
           formCommande.invalid ||
           nombre < menu.nombre_minimum_personnes ||
           !nombre ||
-          nombre % 1 !== 0
+          nombre % 1 !== 0 ||
+          envoiEnCours
         "
-        (click)="continuerCommande()"
       >
-        Continuer la commande
+        {{ envoiEnCours ? 'Envoi en cours...' : 'Commander' }}
       </button>
     </form>
   </ng-container>
