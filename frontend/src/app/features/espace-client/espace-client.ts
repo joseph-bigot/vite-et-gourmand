@@ -34,7 +34,8 @@ export class EspaceClient implements OnInit {
 
     this.commandesService.trouverMesCommandes().subscribe({
       next: (commandes) => {
-        console.log('Commandes reçues :', commandes);
+        console.log('Type reçu :', typeof commandes);
+console.log('Données reçues :', commandes);
         this.commandes = commandes;
         this.chargement = false;
         this.cdr.detectChanges();

@@ -1,3 +1,4 @@
+
 <section class="auth-page">
   <h1>Mon espace client</h1>
 
@@ -41,13 +42,31 @@
 
     <p>
       <strong>Prix total :</strong>
-      {{ commande.prix_total | currency: 'EUR' : 'symbol' : '1.2-2' : 'fr-FR' }}
+      {{ commande.prix_total }} €
     </p>
 
-    <p>
-      <strong>Statut :</strong>
-      {{ commande.statut || 'En attente de statut' }}
-    </p>
+    
+<p class="statut-commande">
+  <strong>Statut :</strong>
+  <span
+    class="statut-badge"
+    [ngClass]="'statut-' + commande.statut"
+  >
+    {{
+      commande.statut === 'en_attente' ? 'En attente de confirmation' :
+      commande.statut === 'acceptee' ? 'Commande acceptée' :
+      commande.statut === 'refusee' ? 'Commande refusée' :
+      commande.statut === 'en_preparation' ? 'En préparation' :
+      commande.statut === 'en_livraison' ? 'En livraison' :
+      commande.statut === 'livree' ? 'Livrée' :
+      commande.statut === 'attente_retour_materiel' ? 'En attente du retour du matériel' :
+      commande.statut === 'terminee' ? 'Terminée' :
+      commande.statut === 'annulee' ? 'Annulée' :
+      'Statut indisponible'
+    }}
+  </span>
+</p>
+
   </article>
 
   <button type="button" (click)="deconnecter()">
