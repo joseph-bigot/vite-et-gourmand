@@ -59,8 +59,10 @@ export class Connexion {
           localStorage.setItem('vite-gourmand-token', reponse.access_token);
           this.session.enregistrerUtilisateur(reponse.utilisateur);
           this.message = `Bienvenue ${reponse.utilisateur.prenom}.`;
-          this.motDePasse = '';
-          this.cdr.detectChanges();
+this.motDePasse = '';
+this.cdr.detectChanges();
+
+this.router.navigate(['/espace-client']);
         },
         error: (error) => {
           if (error.status === 0) {

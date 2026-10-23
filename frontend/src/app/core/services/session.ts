@@ -27,10 +27,11 @@ export class Session {
     this.utilisateur.set(utilisateur);
   }
 
-  deconnecter(): void {
-    localStorage.removeItem(this.cleSession);
-    this.utilisateur.set(null);
-  }
+deconnecter(): void {
+  localStorage.removeItem(this.cleSession);
+  localStorage.removeItem('vite-gourmand-token');
+  this.utilisateur.set(null);
+}
 
   private chargerUtilisateur(): UtilisateurConnecte | null {
     try {
