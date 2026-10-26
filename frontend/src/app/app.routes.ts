@@ -8,6 +8,8 @@ import { Connexion } from './features/auth/connexion/connexion';
 import { Inscription } from './features/auth/inscription/inscription';
 import { EspaceClient } from './features/espace-client/espace-client';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { EspaceEmploye } from './features/espace-employe/espace-employe';
 
 export const routes: Routes = [
   {
@@ -42,6 +44,11 @@ export const routes: Routes = [
         path: 'espace-client',
         component: EspaceClient,
         canActivate: [authGuard],
+      },
+      {
+        path: 'espace-employe',
+        component: EspaceEmploye,
+        canActivate: [roleGuard],
       },
     ],
   },

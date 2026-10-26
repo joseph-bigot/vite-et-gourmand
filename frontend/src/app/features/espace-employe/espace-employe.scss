@@ -1,0 +1,101 @@
+.espace-employe {
+  width: min(1100px, 92%);
+  margin: 3rem auto;
+}
+
+h1 {
+  margin-bottom: 0.75rem;
+}
+
+.liste-commandes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.commande {
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+
+.commande h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.commande p {
+  margin: 0.65rem 0;
+  line-height: 1.5;
+}
+
+.erreur {
+  color: #b42318;
+  margin-top: 1rem;
+}
+
+.gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.gestion h3 {
+  margin: 0 0 0.5rem;
+}
+
+.gestion label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.gestion select,
+.gestion textarea {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.gestion button {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  background: #285943;
+  color: white;
+}
+
+.gestion button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.gestion .bouton-annulation {
+  background: #a52a2a;
+}
+
+.message {
+  color: #216e39;
+  margin-top: 1rem;
+}
+
+@media (max-width: 600px) {
+  .espace-employe {
+    margin: 1.5rem auto;
+  }
+
+  .commande {
+    padding: 1rem;
+  }
+}

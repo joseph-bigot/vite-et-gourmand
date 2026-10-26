@@ -1,0 +1,73 @@
+<section class="espace-employe">
+  <h1>Espace employé</h1>
+  <p>Consultez et gérez les commandes des clients.</p>
+
+  <p *ngIf="chargement">Chargement des commandes...</p>
+  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+  <p *ngIf="message" class="message">{{ message }}</p>
+
+  <div *ngIf="!chargement && !erreur && commandes.length === 0" class="commandes">
+    <p>Aucune commande à afficher.</p>
+  </div>
+
+  <div *ngIf="!chargement && commandes.length > 0" class="liste-commandes">
+    <article class="commande" *ngFor="let commande of commandes">
+      <h2>Commande n°{{ commande.id_commande }}</h2>
+      <p><strong>Client :</strong> {{ commande.prenom_client }} {{ commande.nom_client }}</p>
+      <p><strong>Email :</strong> {{ commande.email_client }}</p>
+      <p><strong>Téléphone :</strong> {{ commande.telephone_client || 'Non renseigné' }}</p>
+      <p><strong>Menu :</strong> {{ commande.titre_menu }}</p>
+      <p><strong>Date de prestation :</strong> {{ commande.date_prestation | date:'dd/MM/yyyy' }} à {{ commande.heure_prestation }}</p>
+      <p><strong>Nombre de personnes :</strong> {{ commande.nombre_personnes }}</p>
+      <p><strong>Lieu :</strong> {{ commande.lieu_prestation }}</p>
+      <p><strong>Adresse :</strong> {{ commande.adresse_livraison }}</p>
+      <p><strong>Prix total :</strong> {{ commande.prix_total | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</p>
+      <p><strong>Statut actuel :</strong> {{ commande.statut }}</p>
+
+      <div class="gestion">
+        <h3>Modifier le statut</h3>
+        <label [for]="'statut-' + commande.id_commande">Nouveau statut</label>
+        <select
+          [id]="'statut-' + commande.id_commande"
+          [(ngModel)]="statutSelectionne[commande.id_commande]"
+          [disabled]="commandeEnCours === commande.id_commande">
+          <option value="">Choisir un statut</option>
+          <option *ngFor="let statut of statutsPossibles" [value]="statut.valeur">
+            {{ statut.libelle }}
+          </option>
+        </select>
+
+        <label [for]="'motif-' + commande.id_commande">Motif (obligatoire pour un refus ou une annulation)</label>
+        <textarea
+          [id]="'motif-' + commande.id_commande"
+          [(ngModel)]="motifAnnulation[commande.id_commande]"
+          rows="2"
+          placeholder="Indiquer le motif"></textarea>
+
+        <label [for]="'contact-' + commande.id_commande">Moyen de contact (obligatoire pour un refus ou une annulation)</label>
+        <select
+          [id]="'contact-' + commande.id_commande"
+          [(ngModel)]="moyenContact[commande.id_commande]">
+          <option value="">Choisir un moyen de contact</option>
+          <option value="telephone">Téléphone</option>
+          <option value="email">E-mail</option>
+        </select>
+
+        <button
+          type="button"
+          (click)="changerStatut(commande)"
+          [disabled]="commandeEnCours === commande.id_commande">
+          Enregistrer le statut
+        </button>
+
+        <button
+          type="button"
+          class="bouton-annulation"
+          (click)="annulerCommande(commande)"
+          [disabled]="commandeEnCours === commande.id_commande">
+          Annuler la commande
+        </button>
+      </div>
+    </article>
+  </div>
+</section>
