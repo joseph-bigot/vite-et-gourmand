@@ -49,6 +49,27 @@
       </p>
       <p><strong>Adresse de livraison :</strong> {{ commande.adresse_livraison }}</p>
 <p><strong>Lieu de prestation :</strong> {{ commande.lieu_prestation }}</p>
+
+      <h4>Historique des statuts</h4>
+
+      <p *ngIf="chargementHistorique === commande.id_commande">
+        Chargement de l’historique...
+      </p>
+
+      <p *ngIf="erreurHistorique === commande.id_commande">
+        Impossible de charger l’historique des statuts.
+      </p>
+
+      <p *ngIf="historiques[commande.id_commande]?.length === 0">
+        Aucun historique disponible.
+      </p>
+
+      <ul *ngIf="historiques[commande.id_commande]?.length">
+        <li *ngFor="let evenement of historiques[commande.id_commande]">
+          <strong>{{ evenement.statut }}</strong> —
+          {{ evenement.date_changement | date: 'dd/MM/yyyy à HH:mm:ss' }}
+        </li>
+      </ul>
     </div>
 
     <button

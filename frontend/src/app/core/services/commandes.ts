@@ -2,6 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+
+export interface HistoriqueStatutCommande {
+  statut: string;
+  date_changement: string;
+}
+
 export interface CommandeClient {
   id_commande: number;
   date_commande: string;
@@ -54,4 +60,11 @@ export class Commandes {
       donnees,
     );
   }
+
+  trouverHistoriqueCommande(idCommande: number): Observable<HistoriqueStatutCommande[]> {
+    return this.http.get<HistoriqueStatutCommande[]>(
+      `${this.apiUrl}/${idCommande}/historique`
+    );
+  }
+
 }

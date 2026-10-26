@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Commandes, CommandeClient } from '../../core/services/commandes';
+import { Commandes, CommandeClient, HistoriqueStatutCommande } from '../../core/services/commandes';
 import { Session } from '../../core/services/session';
 
 @Component({
@@ -28,6 +28,9 @@ export class EspaceClient implements OnInit {
   chargement = true;
   erreur = '';
   commandeDetailsOuverte: number | null = null;
+  historiques: Record<number, HistoriqueStatutCommande[]> = {};
+  chargementHistorique: number | null = null;
+  erreurHistorique: number | null = null;
   commanderEnModification: number | null = null;
   modification = {
     date_prestation: '',
@@ -54,8 +57,31 @@ export class EspaceClient implements OnInit {
   }
 
   afficherDetails(idCommande: number): void {
-    this.commandeDetailsOuverte =
-      this.commandeDetailsOuverte === idCommande ? null : idCommande;
+    if (this.commandeDetailsOuverte === idCommande) {
+      this.commandeDetailsOuverte = null;
+      return;
+    }
+
+    this.commandeDetailsOuverte = idCommande;
+
+    if (this.historiques[idCommande]) return;
+
+    this.chargementHistorique = idCommande;
+    this.erreurHistorique = null;
+
+    this.commandesService.trouverHistoriqueCommande(idCommande).subscribe({
+      next: (historique) => {
+        this.historiques[idCommande] = historique;
+        this.chargementHistorique = null;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erreur de chargement de l’historique :', error);
+        this.erreurHistorique = idCommande;
+        this.chargementHistorique = null;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   commencerModification(commande: CommandeClient): void {

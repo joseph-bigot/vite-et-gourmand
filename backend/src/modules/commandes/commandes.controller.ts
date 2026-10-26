@@ -50,6 +50,17 @@ export class CommandesController {
     );
   }
 
+  @Get(':id/historique')
+  trouverHistoriqueCommande(
+    @Req() requete: RequeteAuthentifiee,
+    @Param('id') idCommande: string,
+  ) {
+    return this.commandesService.trouverHistoriqueCommande(
+      requete.user.id_utilisateur,
+      idCommande,
+    );
+  }
+
   @Post()
   creerCommande(
     @Req() requete: RequeteAuthentifiee,

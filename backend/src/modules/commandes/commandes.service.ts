@@ -414,4 +414,20 @@ export class CommandesService {
     });
   }
 
+
+  async trouverHistoriqueCommande(
+    idUtilisateur: string,
+    idCommande: string,
+  ) {
+    return this.dataSource.query(
+      `SELECT h.statut, h.date_changement
+       FROM historique_statut h
+       JOIN commande c ON c.id_commande = h.id_commande
+       WHERE c.id_commande = $1
+         AND c.id_utilisateur = $2
+       ORDER BY h.date_changement ASC`,
+      [idCommande, idUtilisateur],
+    );
+  }
+
 }
