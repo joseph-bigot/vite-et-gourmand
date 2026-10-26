@@ -508,6 +508,67 @@ export class CommandesService {
   }
 
 
+
+  async annulerCommandeParEmploye(
+    idCommande: string,
+    motif: string,
+    moyenContact: string,
+  ) {
+    if (!motif?.trim() || !moyenContact?.trim()) {
+      throw new BadRequestException(
+        'Le motif et le moyen de contact sont obligatoires.',
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const commandes: Array<{ id_commande: string }> =
+        await manager.query(
+          'SELECT id_commande FROM commande WHERE id_commande = $1 FOR UPDATE',
+          [idCommande],
+        );
+
+      if (commandes.length === 0) {
+        throw new NotFoundException('Commande introuvable.');
+      }
+
+      const dernierStatut: Array<{ statut: string }> =
+        await manager.query(
+          `SELECT statut
+           FROM historique_statut
+           WHERE id_commande = $1
+           ORDER BY date_changement DESC, id_historique DESC
+           LIMIT 1`,
+          [idCommande],
+        );
+
+      const statutActuel = dernierStatut[0]?.statut;
+
+      if (
+        !statutActuel ||
+        ['annulee', 'refusee', 'terminee'].includes(statutActuel)
+      ) {
+        throw new BadRequestException(
+          'Cette commande ne peut plus être annulée.',
+        );
+      }
+
+      await manager.query(
+        `UPDATE commande
+         SET motif_annulation = $1,
+             moyen_contact_annulation = $2
+         WHERE id_commande = $3`,
+        [motif.trim(), moyenContact.trim(), idCommande],
+      );
+
+      await manager.query(
+        'INSERT INTO historique_statut (id_commande, statut) VALUES ($1, $2)',
+        [idCommande, 'annulee'],
+      );
+
+      return { message: 'Commande annulée avec succès.' };
+    });
+  }
+
   async trouverToutesLesCommandes() {
     return this.dataSource.query(
       `SELECT

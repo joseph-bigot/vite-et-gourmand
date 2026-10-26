@@ -72,6 +72,20 @@ export class CommandesController {
     );
   }
 
+  @Post(':id/annuler-employe')
+  @UseGuards(RolesGuard)
+  @Roles('employe', 'admin')
+  annulerCommandeParEmploye(
+    @Param('id') idCommande: string,
+    @Body() donnees: DonneesAnnulationCommande,
+  ) {
+    return this.commandesService.annulerCommandeParEmploye(
+      idCommande,
+      donnees.motif,
+      donnees.moyen_contact,
+    );
+  }
+
   @Get('mes-commandes')
   trouverMesCommandes(@Req() requete: RequeteAuthentifiee) {
     return this.commandesService.trouverParUtilisateur(
