@@ -435,6 +435,8 @@ export class CommandesService {
   async changerStatutCommande(
     idCommande: string,
     nouveauStatut: string,
+    motif?: string,
+    moyenContact?: string,
   ) {
     const transitionsAutorisees: Record<string, string[]> = {
       en_attente: ['acceptee', 'refusee'],
@@ -444,6 +446,15 @@ export class CommandesService {
       livree: ['attente_retour_materiel'],
       attente_retour_materiel: ['terminee'],
     };
+
+    if (
+      nouveauStatut === 'refusee' &&
+      (!motif?.trim() || !moyenContact?.trim())
+    ) {
+      throw new BadRequestException(
+        'Le motif et le moyen de contact sont obligatoires pour refuser une commande.',
+      );
+    }
 
     return this.dataSource.transaction(async (manager) => {
       const commandes: Array<{ id_commande: string }> =
@@ -468,9 +479,22 @@ export class CommandesService {
 
       const statutActuel = dernierStatut[0]?.statut;
 
-      if (!statutActuel || !transitionsAutorisees[statutActuel]?.includes(nouveauStatut)) {
+      if (
+        !statutActuel ||
+        !transitionsAutorisees[statutActuel]?.includes(nouveauStatut)
+      ) {
         throw new BadRequestException(
           'Cette transition de statut est invalide.',
+        );
+      }
+
+      if (nouveauStatut === 'refusee') {
+        await manager.query(
+          `UPDATE commande
+           SET motif_annulation = $1,
+               moyen_contact_annulation = $2
+           WHERE id_commande = $3`,
+          [motif!.trim(), moyenContact!.trim(), idCommande],
         );
       }
 

@@ -57,11 +57,18 @@ export class CommandesController {
   @Roles('employe', 'admin')
   changerStatutCommande(
     @Param('id') idCommande: string,
-    @Body() donnees: { statut: string },
+    @Body()
+    donnees: {
+      statut: string;
+      motif?: string;
+      moyen_contact?: string;
+    },
   ) {
     return this.commandesService.changerStatutCommande(
       idCommande,
       donnees.statut,
+      donnees.motif,
+      donnees.moyen_contact,
     );
   }
 
