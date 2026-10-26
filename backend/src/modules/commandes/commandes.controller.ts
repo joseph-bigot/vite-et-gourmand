@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/roles.decorator.js';
 import { CommandesService } from './commandes.service.js';
 
 interface RequeteAuthentifiee extends Request {
@@ -42,6 +44,13 @@ export class CommandesController {
   constructor(
     private readonly commandesService: CommandesService,
   ) {}
+
+  @Get('toutes')
+  @UseGuards(RolesGuard)
+  @Roles('employe', 'admin')
+  trouverToutesLesCommandes() {
+    return this.commandesService.trouverToutesLesCommandes();
+  }
 
   @Get('mes-commandes')
   trouverMesCommandes(@Req() requete: RequeteAuthentifiee) {

@@ -430,4 +430,36 @@ export class CommandesService {
     );
   }
 
+
+  async trouverToutesLesCommandes() {
+    return this.dataSource.query(
+      `SELECT
+         c.id_commande,
+         c.date_commande,
+         c.date_prestation,
+         c.heure_prestation,
+         c.nombre_personnes,
+         c.adresse_livraison,
+         c.lieu_prestation,
+         c.prix_total,
+         u.nom AS nom_client,
+         u.prenom AS prenom_client,
+         u.email AS email_client,
+         u.telephone AS telephone_client,
+         m.titre AS titre_menu,
+         h.statut
+       FROM commande c
+       JOIN utilisateur u ON u.id_utilisateur = c.id_utilisateur
+       JOIN menu m ON m.id_menu = c.id_menu
+       JOIN historique_statut h
+         ON h.id_commande = c.id_commande
+        AND h.date_changement = (
+          SELECT MAX(h2.date_changement)
+          FROM historique_statut h2
+          WHERE h2.id_commande = c.id_commande
+        )
+       ORDER BY c.date_commande DESC`,
+    );
+  }
+
 }
