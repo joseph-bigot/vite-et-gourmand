@@ -52,6 +52,19 @@ export class CommandesController {
     return this.commandesService.trouverToutesLesCommandes();
   }
 
+  @Put(':id/statut')
+  @UseGuards(RolesGuard)
+  @Roles('employe', 'admin')
+  changerStatutCommande(
+    @Param('id') idCommande: string,
+    @Body() donnees: { statut: string },
+  ) {
+    return this.commandesService.changerStatutCommande(
+      idCommande,
+      donnees.statut,
+    );
+  }
+
   @Get('mes-commandes')
   trouverMesCommandes(@Req() requete: RequeteAuthentifiee) {
     return this.commandesService.trouverParUtilisateur(

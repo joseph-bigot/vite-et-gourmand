@@ -431,6 +431,65 @@ export class CommandesService {
   }
 
 
+
+  async changerStatutCommande(
+    idCommande: string,
+    nouveauStatut: string,
+  ) {
+    const statutsAutorises = [
+      'acceptee',
+      'refusee',
+      'en_preparation',
+      'en_livraison',
+      'livree',
+      'attente_retour_materiel',
+      'terminee',
+    ];
+
+    if (!statutsAutorises.includes(nouveauStatut)) {
+      throw new BadRequestException('Statut de commande invalide.');
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const commandes: Array<{ id_commande: string }> =
+        await manager.query(
+          'SELECT id_commande FROM commande WHERE id_commande = $1 FOR UPDATE',
+          [idCommande],
+        );
+
+      if (commandes.length === 0) {
+        throw new NotFoundException('Commande introuvable.');
+      }
+
+      const dernierStatut: Array<{ statut: string }> =
+        await manager.query(
+          `SELECT statut
+           FROM historique_statut
+           WHERE id_commande = $1
+           ORDER BY date_changement DESC, id_historique DESC
+           LIMIT 1`,
+          [idCommande],
+        );
+
+      if (
+        dernierStatut.length === 0 ||
+        ['annulee', 'refusee', 'terminee'].includes(dernierStatut[0].statut)
+      ) {
+        throw new BadRequestException(
+          'Cette commande ne peut plus changer de statut.',
+        );
+      }
+
+      await manager.query(
+        'INSERT INTO historique_statut (id_commande, statut) VALUES ($1, $2)',
+        [idCommande, nouveauStatut],
+      );
+
+      return { message: 'Statut de la commande mis à jour.' };
+    });
+  }
+
+
   async trouverToutesLesCommandes() {
     return this.dataSource.query(
       `SELECT
