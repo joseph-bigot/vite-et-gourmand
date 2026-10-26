@@ -436,19 +436,14 @@ export class CommandesService {
     idCommande: string,
     nouveauStatut: string,
   ) {
-    const statutsAutorises = [
-      'acceptee',
-      'refusee',
-      'en_preparation',
-      'en_livraison',
-      'livree',
-      'attente_retour_materiel',
-      'terminee',
-    ];
-
-    if (!statutsAutorises.includes(nouveauStatut)) {
-      throw new BadRequestException('Statut de commande invalide.');
-    }
+    const transitionsAutorisees: Record<string, string[]> = {
+      en_attente: ['acceptee', 'refusee'],
+      acceptee: ['en_preparation'],
+      en_preparation: ['en_livraison'],
+      en_livraison: ['livree'],
+      livree: ['attente_retour_materiel'],
+      attente_retour_materiel: ['terminee'],
+    };
 
     return this.dataSource.transaction(async (manager) => {
       const commandes: Array<{ id_commande: string }> =
@@ -471,12 +466,11 @@ export class CommandesService {
           [idCommande],
         );
 
-      if (
-        dernierStatut.length === 0 ||
-        ['annulee', 'refusee', 'terminee'].includes(dernierStatut[0].statut)
-      ) {
+      const statutActuel = dernierStatut[0]?.statut;
+
+      if (!statutActuel || !transitionsAutorisees[statutActuel]?.includes(nouveauStatut)) {
         throw new BadRequestException(
-          'Cette commande ne peut plus changer de statut.',
+          'Cette transition de statut est invalide.',
         );
       }
 
