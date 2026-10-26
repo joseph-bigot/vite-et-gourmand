@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Commande } from './entities/commande.entity.js';
+import { EmailService } from '../email/email.service.js';
 
 interface DonneesCommande {
   id_menu: string;
@@ -25,6 +26,7 @@ export class CommandesService {
     @InjectRepository(Commande)
     private readonly commandesRepository: Repository<Commande>,
     private readonly dataSource: DataSource,
+    private readonly emailService: EmailService,
   ) {}
 
   async trouverParUtilisateur(idUtilisateur: string) {
@@ -63,6 +65,7 @@ export class CommandesService {
   async creerCommande(
     idUtilisateur: string,
     donnees: DonneesCommande,
+    emailClient: string,
   ) {
     const {
       id_menu,
@@ -106,7 +109,7 @@ export class CommandesService {
       );
     }
 
-    return this.dataSource.transaction(async (manager) => {
+    const resultat = await this.dataSource.transaction(async (manager) => {
       const menus: Array<{
         id_menu: string;
         prix_par_personne: string;
@@ -196,7 +199,20 @@ export class CommandesService {
         },
       };
     });
+
+    try {
+      await this.emailService.envoyerEmail(
+        emailClient,
+        'Confirmation de votre commande - Vite & Gourmand',
+        `Votre commande n°${resultat.commande.id_commande} a bien été enregistrée.\n\nDate de prestation : ${date_prestation}\nHeure : ${heure_prestation}\nLieu : ${lieu_prestation}\nNombre de personnes : ${nombre_personnes}\nMontant total : ${resultat.detail_prix.prix_total.toFixed(2)} €\n\nVotre commande est en attente de confirmation.`,
+      );
+    } catch (erreur) {
+      console.error('Échec de l’envoi de l’e-mail de confirmation.', erreur);
+    }
+
+    return resultat;
   }
+
   async annulerCommande(
     idUtilisateur: string,
     idCommande: string,

@@ -58,6 +58,7 @@ export class CommandesController {
     return this.commandesService.creerCommande(
       requete.user.id_utilisateur,
       donnees,
+      requete.user.email,
     );
   }
 
