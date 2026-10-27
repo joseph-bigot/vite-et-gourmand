@@ -62,7 +62,13 @@ export class Connexion {
 this.motDePasse = '';
 this.cdr.detectChanges();
 
-this.router.navigate(['/espace-client']);
+const destination =
+  reponse.utilisateur.role === 'employe' ||
+  reponse.utilisateur.role === 'admin'
+    ? '/espace-employe'
+    : '/espace-client';
+
+this.router.navigate([destination]);
         },
         error: (error) => {
           if (error.status === 0) {

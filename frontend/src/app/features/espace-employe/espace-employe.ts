@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Commandes, CommandeEmploye } from '../../core/services/commandes';
@@ -12,6 +12,7 @@ import { Commandes, CommandeEmploye } from '../../core/services/commandes';
 })
 export class EspaceEmploye implements OnInit {
   private readonly commandesService = inject(Commandes);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   commandes: CommandeEmploye[] = [];
   chargement = true;
@@ -32,6 +33,10 @@ export class EspaceEmploye implements OnInit {
     { valeur: 'terminee', libelle: 'Terminée' },
   ];
 
+  suivreCommande(index: number, commande: CommandeEmploye): number {
+    return commande.id_commande;
+  }
+
   ngOnInit(): void {
     this.chargerCommandes();
   }
@@ -42,12 +47,17 @@ export class EspaceEmploye implements OnInit {
 
     this.commandesService.trouverToutesLesCommandes().subscribe({
       next: (commandes) => {
+        console.log('[EspaceEmploye] Commandes reçues :', commandes.length);
         this.commandes = commandes;
         this.chargement = false;
+        this.cdr.detectChanges();
+        console.log('[EspaceEmploye] chargement =', this.chargement);
       },
-      error: () => {
+      error: (erreur) => {
+        console.error('[EspaceEmploye] Erreur API :', erreur);
         this.erreur = 'Impossible de charger les commandes. Vérifiez votre connexion et vos droits.';
         this.chargement = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -78,6 +88,7 @@ export class EspaceEmploye implements OnInit {
         next: (reponse) => {
           this.message = reponse.message || 'Statut mis à jour.';
           this.commandeEnCours = null;
+          this.cdr.detectChanges();
           this.chargerCommandes();
         },
         error: (erreur) => {

@@ -7,3 +7,8 @@ dist/
 !.env.example
 coverage/
 *.tsbuildinfo
+
+# Sauvegardes locales de la base de données
+/sauvegarde-commande-schema.sql
+/sauvegarde-complete-vite-gourmand.sql
+/sauvegarde-utilisateurs-commandes.sql
