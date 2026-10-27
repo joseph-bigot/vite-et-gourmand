@@ -10,8 +10,47 @@
     <p>Aucune commande à afficher.</p>
   </div>
 
-  <div *ngIf="!chargement && commandes.length > 0" class="liste-commandes">
-    <article class="commande" *ngFor="let commande of commandes; trackBy: suivreCommande">
+  <section class="outils-commandes" *ngIf="!chargement && commandes.length > 0" aria-label="Recherche et filtres">
+    <div>
+      <label for="recherche-commandes">Rechercher une commande</label>
+      <input
+        id="recherche-commandes"
+        type="search"
+        [(ngModel)]="recherche"
+        placeholder="Numéro, nom ou prénom du client">
+    </div>
+
+    <div>
+      <label for="filtre-statut">Filtrer par statut</label>
+      <select id="filtre-statut" [(ngModel)]="filtreStatut">
+        <option value="tous">Tous les statuts</option>
+        <option value="en_attente">En attente ({{ nombreCommandesParStatut['en_attente'] || 0 }})</option>
+        <option *ngFor="let statut of statutsPossibles" [value]="statut.valeur">
+          {{ statut.libelle }} ({{ nombreCommandesParStatut[statut.valeur] || 0 }})
+        </option>
+        <option value="annulee">Annulée ({{ nombreCommandesParStatut['annulee'] || 0 }})</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="tri-date">Trier par date de prestation</label>
+      <select id="tri-date" [(ngModel)]="ordreDate">
+        <option value="croissant">Plus proche d’abord</option>
+        <option value="decroissant">Plus éloignée d’abord</option>
+      </select>
+    </div>
+
+    <p class="compteur-commandes">
+      {{ commandesFiltrees.length }} commande(s) affichée(s) sur {{ commandes.length }}
+    </p>
+  </section>
+
+  <p *ngIf="!chargement && commandes.length > 0 && commandesFiltrees.length === 0" class="aucun-resultat">
+    Aucune commande ne correspond à votre recherche.
+  </p>
+
+  <div *ngIf="!chargement && commandesFiltrees.length > 0" class="liste-commandes">
+    <article class="commande" *ngFor="let commande of commandesFiltrees; trackBy: suivreCommande">
       <h2>Commande n°{{ commande.id_commande }}</h2>
       <p><strong>Client :</strong> {{ commande.prenom_client }} {{ commande.nom_client }}</p>
       <p><strong>Email :</strong> {{ commande.email_client }}</p>

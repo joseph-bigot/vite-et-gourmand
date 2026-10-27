@@ -15,6 +15,52 @@ export class EspaceEmploye implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   commandes: CommandeEmploye[] = [];
+  recherche = '';
+  filtreStatut = 'tous';
+  ordreDate: 'croissant' | 'decroissant' = 'croissant';
+
+  readonly libellesStatuts: Record<string, string> = {
+    en_attente: 'En attente',
+    acceptee: 'Acceptée',
+    refusee: 'Refusée',
+    en_preparation: 'En préparation',
+    en_livraison: 'En livraison',
+    livree: 'Livrée',
+    attente_retour_materiel: 'En attente du retour du matériel',
+    terminee: 'Terminée',
+    annulee: 'Annulée',
+  };
+
+  get commandesFiltrees(): CommandeEmploye[] {
+    const recherche = this.recherche.trim().toLocaleLowerCase('fr');
+
+    return this.commandes
+      .filter((commande) => {
+        const nomComplet = `${commande.prenom_client} ${commande.nom_client}`.toLocaleLowerCase('fr');
+        const nomInverse = `${commande.nom_client} ${commande.prenom_client}`.toLocaleLowerCase('fr');
+        const correspondRecherche =
+          !recherche ||
+          String(commande.id_commande).includes(recherche) ||
+          nomComplet.includes(recherche) ||
+          nomInverse.includes(recherche);
+
+        return correspondRecherche &&
+          (this.filtreStatut === 'tous' || commande.statut === this.filtreStatut);
+      })
+      .sort((a, b) => {
+        const dateA = `${a.date_prestation}T${a.heure_prestation || '00:00'}`;
+        const dateB = `${b.date_prestation}T${b.heure_prestation || '00:00'}`;
+        const comparaison = dateA.localeCompare(dateB);
+        return this.ordreDate === 'croissant' ? comparaison : -comparaison;
+      });
+  }
+
+  get nombreCommandesParStatut(): Record<string, number> {
+    return this.commandes.reduce((compteurs, commande) => {
+      compteurs[commande.statut] = (compteurs[commande.statut] || 0) + 1;
+      return compteurs;
+    }, {} as Record<string, number>);
+  }
   chargement = true;
   erreur = '';
   message = '';
