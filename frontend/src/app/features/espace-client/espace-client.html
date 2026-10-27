@@ -66,7 +66,19 @@
 
       <ul *ngIf="historiques[commande.id_commande]?.length">
         <li *ngFor="let evenement of historiques[commande.id_commande]">
-          <strong>{{ evenement.statut }}</strong> —
+          <strong>{{
+            ({
+              en_attente: 'En attente de confirmation',
+              acceptee: 'Commande acceptée',
+              refusee: 'Commande refusée',
+              en_preparation: 'En préparation',
+              en_livraison: 'En livraison',
+              livree: 'Livrée',
+              attente_retour_materiel: 'En attente du retour du matériel',
+              terminee: 'Terminée',
+              annulee: 'Annulée'
+            }[evenement.statut] || evenement.statut)
+          }}</strong> —
           {{ evenement.date_changement | date: 'dd/MM/yyyy à HH:mm:ss' }}
         </li>
       </ul>
