@@ -35,11 +35,12 @@ export class CommandesService {
       .leftJoin(
         'historique_statut',
         'historique',
-        `historique.id_commande = commande.id_commande
-         AND historique.date_changement = (
-           SELECT MAX(h2.date_changement)
+        `historique.id_historique = (
+           SELECT h2.id_historique
            FROM historique_statut h2
            WHERE h2.id_commande = commande.id_commande
+           ORDER BY h2.date_changement DESC, h2.id_historique DESC
+           LIMIT 1
          )`,
       )
       .leftJoin('menu', 'menu', 'menu.id_menu = commande.id_menu')
@@ -590,12 +591,13 @@ export class CommandesService {
        JOIN utilisateur u ON u.id_utilisateur = c.id_utilisateur
        JOIN menu m ON m.id_menu = c.id_menu
        JOIN historique_statut h
-         ON h.id_commande = c.id_commande
-        AND h.date_changement = (
-          SELECT MAX(h2.date_changement)
-          FROM historique_statut h2
-          WHERE h2.id_commande = c.id_commande
-        )
+         ON h.id_historique = (
+           SELECT h2.id_historique
+           FROM historique_statut h2
+           WHERE h2.id_commande = c.id_commande
+           ORDER BY h2.date_changement DESC, h2.id_historique DESC
+           LIMIT 1
+         )
        ORDER BY c.date_commande DESC`,
     );
   }
