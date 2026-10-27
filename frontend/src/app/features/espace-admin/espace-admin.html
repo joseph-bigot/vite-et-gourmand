@@ -1,0 +1,43 @@
+<section class="espace-admin">
+  <h1>Espace administrateur</h1>
+
+  <h2>Statistiques générales</h2>
+
+  <p *ngIf="chargement">Chargement des statistiques…</p>
+  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+  <div *ngIf="statistiques as stats" class="statistiques">
+    <article class="carte-statistique">
+      <h3>Commandes</h3>
+      <p>{{ stats.nombre_commandes }}</p>
+    </article>
+
+    <article class="carte-statistique">
+      <h3>Chiffre d’affaires</h3>
+      <p>{{ stats.chiffre_affaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</p>
+    </article>
+  </div>
+
+  <h2>Créer un compte employé</h2>
+
+  <p *ngIf="message" class="succes">{{ message }}</p>
+  <p *ngIf="erreurEmploye" class="erreur">{{ erreurEmploye }}</p>
+
+  <form (ngSubmit)="creerEmploye()">
+    <label for="nom">Nom</label>
+    <input id="nom" name="nom" [(ngModel)]="nom" required maxlength="100">
+
+    <label for="prenom">Prénom</label>
+    <input id="prenom" name="prenom" [(ngModel)]="prenom" required maxlength="100">
+
+    <label for="email">Adresse e-mail</label>
+    <input id="email" name="email" type="email" [(ngModel)]="email" required maxlength="255">
+
+    <label for="motDePasse">Mot de passe temporaire (12 caractères minimum)</label>
+    <input id="motDePasse" name="motDePasse" type="password" [(ngModel)]="motDePasse" required minlength="12" maxlength="72">
+
+    <button type="submit" [disabled]="chargementEmploye">
+      {{ chargementEmploye ? 'Création…' : 'Créer le compte employé' }}
+    </button>
+  </form>
+</section>

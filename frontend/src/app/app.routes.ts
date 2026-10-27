@@ -9,6 +9,7 @@ import { Inscription } from './features/auth/inscription/inscription';
 import { EspaceClient } from './features/espace-client/espace-client';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { adminGuard } from './core/guards/admin.guard';
 import { EspaceEmploye } from './features/espace-employe/espace-employe';
 
 export const routes: Routes = [
@@ -49,6 +50,11 @@ export const routes: Routes = [
         path: 'espace-employe',
         component: EspaceEmploye,
         canActivate: [roleGuard],
+      },
+      {
+        path: 'espace-admin',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./features/espace-admin/espace-admin').then(m => m.EspaceAdmin),
       },
     ],
   },

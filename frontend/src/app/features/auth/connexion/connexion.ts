@@ -63,10 +63,11 @@ this.motDePasse = '';
 this.cdr.detectChanges();
 
 const destination =
-  reponse.utilisateur.role === 'employe' ||
   reponse.utilisateur.role === 'admin'
-    ? '/espace-employe'
-    : '/espace-client';
+    ? '/espace-admin'
+    : reponse.utilisateur.role === 'employe'
+      ? '/espace-employe'
+      : '/espace-client';
 
 this.router.navigate([destination]);
         },
