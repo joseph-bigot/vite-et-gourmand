@@ -141,3 +141,65 @@ h1 {
   margin: 0;
   align-self: center;
 }
+
+
+.ligne-statut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.badge-statut {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.statut-attente {
+  background: #fff1c2;
+  color: #754b00;
+}
+
+.statut-acceptee,
+.statut-livree {
+  background: #d9f2e3;
+  color: #175c37;
+}
+
+.statut-preparation {
+  background: #dceafe;
+  color: #174a8b;
+}
+
+.statut-livraison {
+  background: #e9ddff;
+  color: #542d91;
+}
+
+.statut-terminale {
+  background: #eeeeee;
+  color: #555555;
+}
+
+.statut-neutre {
+  background: #eeeeee;
+  color: #333333;
+}
+
+.commande.prestation-proche {
+  border-color: #d97706;
+  box-shadow: 0 0 0 1px #d97706;
+}
+
+.alerte-prestation {
+  padding: 0.7rem;
+  border-radius: 5px;
+  background: #fff1dc;
+  color: #7c3f00;
+  font-weight: 700;
+}

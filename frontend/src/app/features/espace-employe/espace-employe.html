@@ -50,7 +50,7 @@
   </p>
 
   <div *ngIf="!chargement && commandesFiltrees.length > 0" class="liste-commandes">
-    <article class="commande" *ngFor="let commande of commandesFiltrees; trackBy: suivreCommande">
+    <article class="commande" [class.prestation-proche]="estPrestationProche(commande)" *ngFor="let commande of commandesFiltrees; trackBy: suivreCommande">
       <h2>Commande n°{{ commande.id_commande }}</h2>
       <p><strong>Client :</strong> {{ commande.prenom_client }} {{ commande.nom_client }}</p>
       <p><strong>Email :</strong> {{ commande.email_client }}</p>
@@ -61,19 +61,27 @@
       <p><strong>Lieu :</strong> {{ commande.lieu_prestation }}</p>
       <p><strong>Adresse :</strong> {{ commande.adresse_livraison }}</p>
       <p><strong>Prix total :</strong> {{ commande.prix_total | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</p>
-      <p><strong>Statut actuel :</strong> {{
-        ({
-          en_attente: 'En attente',
-          acceptee: 'Acceptée',
-          refusee: 'Refusée',
-          en_preparation: 'En préparation',
-          en_livraison: 'En livraison',
-          livree: 'Livrée',
-          attente_retour_materiel: 'En attente du retour du matériel',
-          terminee: 'Terminée',
-          annulee: 'Annulée'
-        }[commande.statut] || commande.statut)
-      }}</p>
+      <p class="ligne-statut">
+        <strong>Statut :</strong>
+        <span class="badge-statut" [ngClass]="classeStatut(commande.statut)">
+          {{
+            ({
+              en_attente: 'En attente',
+              acceptee: 'Acceptée',
+              refusee: 'Refusée',
+              en_preparation: 'En préparation',
+              en_livraison: 'En livraison',
+              livree: 'Livrée',
+              attente_retour_materiel: 'En attente du retour du matériel',
+              terminee: 'Terminée',
+              annulee: 'Annulée'
+            }[commande.statut] || commande.statut)
+          }}
+        </span>
+      </p>
+      <p *ngIf="estPrestationProche(commande)" class="alerte-prestation">
+        Prestation prévue dans les prochaines 48 heures.
+      </p>
 
       <div class="gestion" *ngIf="peutGererCommande(commande)">
         <h3>Modifier le statut</h3>

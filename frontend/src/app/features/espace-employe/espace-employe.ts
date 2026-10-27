@@ -31,6 +31,34 @@ export class EspaceEmploye implements OnInit {
     annulee: 'Annulée',
   };
 
+  classeStatut(statut: string): string {
+    const classes: Record<string, string> = {
+      en_attente: 'statut-attente',
+      acceptee: 'statut-acceptee',
+      refusee: 'statut-terminale',
+      en_preparation: 'statut-preparation',
+      en_livraison: 'statut-livraison',
+      livree: 'statut-livree',
+      attente_retour_materiel: 'statut-attente',
+      terminee: 'statut-terminale',
+      annulee: 'statut-terminale',
+    };
+    return classes[statut] || 'statut-neutre';
+  }
+
+  estPrestationProche(commande: CommandeEmploye): boolean {
+    if (['annulee', 'refusee', 'terminee'].includes(commande.statut)) {
+      return false;
+    }
+
+    const datePrestation = new Date(`${commande.date_prestation}T${commande.heure_prestation || '00:00'}:00`);
+    if (Number.isNaN(datePrestation.getTime())) return false;
+
+    const maintenant = new Date();
+    const ecart = datePrestation.getTime() - maintenant.getTime();
+    return ecart >= 0 && ecart <= 48 * 60 * 60 * 1000;
+  }
+
   get commandesFiltrees(): CommandeEmploye[] {
     const recherche = this.recherche.trim().toLocaleLowerCase('fr');
 
