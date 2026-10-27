@@ -18,6 +18,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { CreationEmployeDto } from './dto/creation-employe.dto.js';
+import { DemandeReinitialisationDto } from './dto/demande-reinitialisation.dto.js';
+import { ReinitialisationMotDePasseDto } from './dto/reinitialisation-mot-de-passe.dto.js';
 
 @Controller('utilisateurs')
 export class UtilisateursController {
@@ -32,6 +34,25 @@ export class UtilisateursController {
     return this.utilisateursService.inscrire(donnees);
   }
 
+
+  @Post('mot-de-passe/oublie')
+  @HttpCode(HttpStatus.OK)
+  async demanderReinitialisation(@Body() donnees: DemandeReinitialisationDto) {
+    await this.utilisateursService.demanderReinitialisation(donnees.email);
+    return {
+      message: 'Si un compte correspond à cette adresse, un e-mail de réinitialisation sera envoyé.',
+    };
+  }
+
+  @Post('mot-de-passe/reinitialiser')
+  @HttpCode(HttpStatus.OK)
+  async reinitialiserMotDePasse(@Body() donnees: ReinitialisationMotDePasseDto) {
+    await this.utilisateursService.reinitialiserMotDePasse(
+      donnees.token,
+      donnees.motDePasse,
+    );
+    return { message: 'Votre mot de passe a été modifié. Vous pouvez vous connecter.' };
+  }
 
   @Get('employes')
   @UseGuards(JwtAuthGuard, RolesGuard)

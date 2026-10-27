@@ -1,0 +1,18 @@
+<section class="auth-page">
+  <h1>Mot de passe oublié</h1>
+  <p>Indiquez l’adresse e-mail associée à votre compte. Si un compte correspond, vous recevrez un lien de réinitialisation valable 30 minutes.</p>
+
+  <form #form="ngForm" (ngSubmit)="envoyer()">
+    <label for="email">Adresse e-mail</label>
+    <input id="email" name="email" type="email" [(ngModel)]="email"
+      maxlength="255" autocomplete="email" required email />
+
+    <p *ngIf="message" class="message-succes" role="status">{{ message }}</p>
+    <p *ngIf="erreur" class="message-erreur" role="alert">{{ erreur }}</p>
+
+    <button type="submit" [disabled]="form.invalid || chargement">
+      {{ chargement ? 'Envoi en cours...' : 'Recevoir un lien' }}
+    </button>
+  </form>
+  <p><a routerLink="/connexion">Retour à la connexion</a></p>
+</section>

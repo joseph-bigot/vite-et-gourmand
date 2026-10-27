@@ -3,7 +3,11 @@ import {
   ConflictException,
   UnauthorizedException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { createHash, randomBytes } from 'node:crypto';
+import { EmailService } from '../email/email.service.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -14,10 +18,72 @@ import { CreationEmployeDto } from './dto/creation-employe.dto.js';
 
 @Injectable()
 export class UtilisateursService {
+  private readonly logger = new Logger(UtilisateursService.name);
+
   constructor(
     @InjectRepository(Utilisateur)
     private readonly utilisateursRepository: Repository<Utilisateur>,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
+
+  async demanderReinitialisation(emailBrut: string): Promise<void> {
+    const email = emailBrut.trim().toLowerCase();
+    const utilisateur = await this.utilisateursRepository.findOne({
+      where: { email, actif: true },
+    });
+
+    // Ne jamais révéler si un compte existe pour cette adresse.
+    if (!utilisateur) return;
+
+    const token = randomBytes(32).toString('hex');
+    utilisateur.reset_password_token_hash = createHash('sha256')
+      .update(token)
+      .digest('hex');
+    utilisateur.reset_password_expires_at = new Date(Date.now() + 30 * 60 * 1000);
+
+    await this.utilisateursRepository.save(utilisateur);
+
+    const frontendUrl = (
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200'
+    ).replace(/\/$/, '');
+    const lien = `${frontendUrl}/reinitialiser-mot-de-passe?token=${token}`;
+
+    try {
+      await this.emailService.envoyerEmail(
+        utilisateur.email,
+        'Réinitialisation de votre mot de passe - Vite & Gourmand',
+        `Bonjour ${utilisateur.prenom},\n\nUne demande de réinitialisation de mot de passe a été effectuée pour votre compte.\n\nPour choisir un nouveau mot de passe dans les 30 minutes, ouvrez ce lien :\n${lien}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.\n\nVite & Gourmand`,
+      );
+    } catch (error) {
+      // Ne pas révéler l'existence du compte dans la réponse HTTP.
+      this.logger.error('Échec de l’envoi du courriel de réinitialisation.');
+      this.logger.debug(String(error));
+    }
+  }
+
+  async reinitialiserMotDePasse(token: string, nouveauMotDePasse: string): Promise<void> {
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const utilisateur = await this.utilisateursRepository.findOne({
+      where: { reset_password_token_hash: tokenHash },
+    });
+
+    if (
+      !utilisateur ||
+      !utilisateur.actif ||
+      !utilisateur.reset_password_expires_at ||
+      utilisateur.reset_password_expires_at.getTime() <= Date.now()
+    ) {
+      throw new UnauthorizedException(
+        'Ce lien est invalide ou expiré. Demandez une nouvelle réinitialisation.',
+      );
+    }
+
+    utilisateur.mot_de_passe_hash = await bcrypt.hash(nouveauMotDePasse, 12);
+    utilisateur.reset_password_token_hash = null;
+    utilisateur.reset_password_expires_at = null;
+    await this.utilisateursRepository.save(utilisateur);
+  }
 
   async inscrire(donnees: InscriptionDto) {
     const email = donnees.email.trim().toLowerCase();

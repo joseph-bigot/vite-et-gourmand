@@ -40,4 +40,19 @@ export class Utilisateur {
     default: () => 'CURRENT_TIMESTAMP',
   })
   date_creation!: Date;
+
+  @Column({
+    type: 'varchar',
+    length: 64,
+    name: 'reset_password_token_hash',
+    nullable: true,
+  })
+  reset_password_token_hash!: string | null;
+
+  @Column({
+    type: 'timestamptz',
+    name: 'reset_password_expires_at',
+    nullable: true,
+  })
+  reset_password_expires_at!: Date | null;
 }

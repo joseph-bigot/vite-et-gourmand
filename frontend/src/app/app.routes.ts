@@ -6,6 +6,8 @@ import { DetailMenu } from './features/detail-menu/detail-menu';
 import { Commande } from './features/commandes/commande/commande';
 import { Connexion } from './features/auth/connexion/connexion';
 import { Inscription } from './features/auth/inscription/inscription';
+import { MotDePasseOublie } from './features/auth/mot-de-passe-oublie/mot-de-passe-oublie';
+import { ReinitialiserMotDePasse } from './features/auth/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe';
 import { EspaceClient } from './features/espace-client/espace-client';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
@@ -40,6 +42,14 @@ export const routes: Routes = [
       {
         path: 'inscription',
         component: Inscription,
+      },
+      {
+        path: 'mot-de-passe-oublie',
+        component: MotDePasseOublie,
+      },
+      {
+        path: 'reinitialiser-mot-de-passe',
+        component: ReinitialiserMotDePasse,
       },
       {
         path: 'espace-client',
