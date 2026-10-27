@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, StatistiquesAdmin } from '../../core/services/admin';
+import { AdminService, StatistiquesAdmin, EmployeCree } from '../../core/services/admin';
 
 @Component({
   selector: 'app-espace-admin',
@@ -22,6 +22,8 @@ export class EspaceAdmin implements OnInit {
   message = '';
   erreurEmploye = '';
   chargementEmploye = false;
+  employes: EmployeCree[] = [];
+  erreurListeEmployes = '';
 
   constructor(
     private readonly adminService: AdminService,
@@ -29,6 +31,7 @@ export class EspaceAdmin implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.chargerEmployes();
     this.adminService.obtenirStatistiques().subscribe({
       next: (statistiques) => {
         this.statistiques = statistiques;
@@ -38,6 +41,40 @@ export class EspaceAdmin implements OnInit {
       error: () => {
         this.erreur = 'Impossible de charger les statistiques.';
         this.chargement = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  chargerEmployes(): void {
+    this.erreurListeEmployes = '';
+
+    this.adminService.obtenirEmployes().subscribe({
+      next: (employes) => {
+        this.employes = employes;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erreurListeEmployes = 'Impossible de charger la liste des employés.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  desactiverEmploye(id: number): void {
+    const employe = this.employes.find((item) => item.id_utilisateur === id);
+
+    if (!employe || !employe.actif) {
+      return;
+    }
+
+    this.adminService.desactiverEmploye(id).subscribe({
+      next: () => {
+        this.message = 'Le compte employé a été désactivé.';
+        this.chargerEmployes();
+      },
+      error: () => {
+        this.erreurListeEmployes = 'Impossible de désactiver ce compte employé.';
         this.cdr.detectChanges();
       },
     });

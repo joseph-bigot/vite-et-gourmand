@@ -86,6 +86,24 @@ export class UtilisateursService {
   }
 
 
+  async trouverEmployes() {
+    const employes = await this.utilisateursRepository.find({
+      where: { role: 'employe' },
+      select: {
+        id_utilisateur: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        role: true,
+        actif: true,
+        date_creation: true,
+      },
+      order: { date_creation: 'DESC' },
+    });
+
+    return employes;
+  }
+
   async desactiverEmploye(id: string) {
     const employe = await this.utilisateursRepository.findOne({
       where: { id_utilisateur: id, role: 'employe' },

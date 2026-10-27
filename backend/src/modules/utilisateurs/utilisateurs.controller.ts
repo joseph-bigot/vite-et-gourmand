@@ -4,6 +4,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Get,
   Post,
   Patch,
   Param,
@@ -31,6 +32,13 @@ export class UtilisateursController {
     return this.utilisateursService.inscrire(donnees);
   }
 
+
+  @Get('employes')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  trouverEmployes() {
+    return this.utilisateursService.trouverEmployes();
+  }
 
   @Post('employes')
   @HttpCode(HttpStatus.CREATED)

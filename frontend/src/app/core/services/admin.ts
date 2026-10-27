@@ -32,6 +32,10 @@ export class AdminService {
     return this.http.get<StatistiquesAdmin>(`${API_URL}/statistiques`);
   }
 
+  obtenirEmployes(): Observable<EmployeCree[]> {
+    return this.http.get<EmployeCree[]>(`${API_URL}/utilisateurs/employes`);
+  }
+
   creerEmploye(donnees: {
     nom: string;
     prenom: string;

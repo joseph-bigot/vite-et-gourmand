@@ -18,6 +18,26 @@
     </article>
   </div>
 
+  <h2>Gestion des employés</h2>
+
+  <p *ngIf="erreurListeEmployes" class="erreur">{{ erreurListeEmployes }}</p>
+
+  <p *ngIf="!erreurListeEmployes && employes.length === 0">
+    Aucun compte employé à afficher.
+  </p>
+
+  <div *ngFor="let employe of employes" class="carte-statistique">
+    <h3>{{ employe.prenom }} {{ employe.nom }}</h3>
+    <p>{{ employe.email }}</p>
+    <p>Statut : {{ employe.actif ? 'Actif' : 'Désactivé' }}</p>
+    <button
+      *ngIf="employe.actif"
+      type="button"
+      (click)="desactiverEmploye(employe.id_utilisateur)">
+      Désactiver le compte
+    </button>
+  </div>
+
   <h2>Créer un compte employé</h2>
 
   <p *ngIf="message" class="succes">{{ message }}</p>
