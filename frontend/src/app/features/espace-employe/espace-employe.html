@@ -36,7 +36,7 @@
         }[commande.statut] || commande.statut)
       }}</p>
 
-      <div class="gestion">
+      <div class="gestion" *ngIf="peutGererCommande(commande)">
         <h3>Modifier le statut</h3>
         <label [for]="'statut-' + commande.id_commande">Nouveau statut</label>
         <select
@@ -44,7 +44,7 @@
           [(ngModel)]="statutSelectionne[commande.id_commande]"
           [disabled]="commandeEnCours === commande.id_commande">
           <option value="">Choisir un statut</option>
-          <option *ngFor="let statut of statutsPossibles" [value]="statut.valeur">
+          <option *ngFor="let statut of statutsPourCommande(commande)" [value]="statut.valeur">
             {{ statut.libelle }}
           </option>
         </select>

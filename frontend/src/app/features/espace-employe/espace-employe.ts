@@ -23,6 +23,25 @@ export class EspaceEmploye implements OnInit {
   motifAnnulation: Record<number, string> = {};
   moyenContact: Record<number, string> = {};
 
+  readonly transitionsAutorisees: Record<string, string[]> = {
+    en_attente: ['acceptee', 'refusee'],
+    acceptee: ['en_preparation'],
+    en_preparation: ['en_livraison'],
+    en_livraison: ['livree'],
+    livree: ['attente_retour_materiel'],
+    attente_retour_materiel: ['terminee'],
+  };
+
+  peutGererCommande(commande: CommandeEmploye): boolean {
+    return !!this.transitionsAutorisees[commande.statut]?.length;
+  }
+
+  statutsPourCommande(commande: CommandeEmploye) {
+    return this.statutsPossibles.filter((statut) =>
+      this.transitionsAutorisees[commande.statut]?.includes(statut.valeur)
+    );
+  }
+
   readonly statutsPossibles = [
     { valeur: 'acceptee', libelle: 'Acceptée' },
     { valeur: 'refusee', libelle: 'Refusée' },
