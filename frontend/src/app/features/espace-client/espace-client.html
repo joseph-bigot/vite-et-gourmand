@@ -210,6 +210,47 @@
         </span>
       </p>
     </div>
+    <section *ngIf="commande.statut === 'terminee'"
+      class="commande-details avis-client">
+      <h4>Déposer un avis</h4>
+
+      <p *ngIf="avisEnvoyes[commande.id_commande]" role="status">
+        {{ messagesAvis[commande.id_commande] }}
+      </p>
+
+      <form *ngIf="!avisEnvoyes[commande.id_commande]"
+        (ngSubmit)="envoyerAvis(commande.id_commande)">
+        <label>
+          Note
+          <select [name]="'note-' + commande.id_commande"
+            [(ngModel)]="formulaireAvis(commande.id_commande).note" required>
+            <option [ngValue]="5">5 — Excellent</option>
+            <option [ngValue]="4">4 — Très bien</option>
+            <option [ngValue]="3">3 — Bien</option>
+            <option [ngValue]="2">2 — Moyen</option>
+            <option [ngValue]="1">1 — Insatisfaisant</option>
+          </select>
+        </label>
+
+        <label>
+          Commentaire
+          <textarea [name]="'commentaire-' + commande.id_commande"
+            [(ngModel)]="formulaireAvis(commande.id_commande).commentaire"
+            minlength="3" maxlength="2000" rows="4" required></textarea>
+        </label>
+
+        <p *ngIf="erreursAvis[commande.id_commande]" role="alert">
+          {{ erreursAvis[commande.id_commande] }}
+        </p>
+
+        <button type="submit"
+          [disabled]="avisEnCours === commande.id_commande">
+          {{ avisEnCours === commande.id_commande
+            ? 'Envoi en cours…' : 'Envoyer mon avis' }}
+        </button>
+      </form>
+    </section>
+
   </article>
 
   <button type="button" (click)="deconnecter()">

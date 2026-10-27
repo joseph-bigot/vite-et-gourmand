@@ -58,23 +58,18 @@
   </p>
 </section>
 
+
+
 <section class="reviews">
   <h2>Ils nous font confiance</h2>
-
-  <div class="review-cards">
-    <article class="review-card">
-      <blockquote>
-        « Des plats délicieux et une présentation soignée.
-        Toute la famille a apprécié le repas. »
-      </blockquote>
-      <p>★★★★★ — Valérie B.</p>
-    </article>
-
-    <article class="review-card">
-      <blockquote>
-        « Une prestation sérieuse et un menu adapté à notre événement. »
-      </blockquote>
-      <p>★★★★★ — Johan C.</p>
+  <p *ngIf="avis.length === 0">Aucun avis publié pour le moment.</p>
+  <div class="review-cards" *ngIf="avis.length > 0">
+    <article class="review-card" *ngFor="let avisClient of avis">
+      <blockquote>{{ avisClient.commentaire }}</blockquote>
+      <p>
+        <span [attr.aria-label]="avisClient.note + ' sur 5'">{{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }}</span>
+        — {{ avisClient.auteur }}
+      </p>
     </article>
   </div>
 </section>

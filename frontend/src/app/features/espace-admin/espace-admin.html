@@ -18,6 +18,25 @@
     </article>
   </div>
 
+
+  <h2>Modération des avis</h2>
+  <p>Seuls les avis approuvés seront visibles sur l’accueil.</p>
+  <p *ngIf="chargementAvis">Chargement des avis…</p>
+  <p *ngIf="erreurAvis" class="erreur">{{ erreurAvis }}</p>
+  <p *ngIf="messageAvis" class="succes">{{ messageAvis }}</p>
+  <p *ngIf="!chargementAvis && !erreurAvis && avis.length === 0">Aucun avis en attente de modération.</p>
+
+  <article *ngFor="let avisClient of avis" class="carte-statistique">
+    <h3>Avis n°{{ avisClient.id_avis }}</h3>
+    <p><strong>Commande :</strong> n°{{ avisClient.id_commande }}</p>
+    <p><strong>Client :</strong> {{ avisClient.prenom_client }} {{ avisClient.nom_client }}</p>
+    <p><strong>Note :</strong> {{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }} ({{ avisClient.note }}/5)</p>
+    <blockquote>{{ avisClient.commentaire }}</blockquote>
+    <p><small>Soumis le {{ avisClient.date_creation | date:'dd/MM/yyyy à HH:mm' }}</small></p>
+    <button type="button" (click)="modererAvis(avisClient, 'approuve')" [disabled]="avisEnCours === avisClient.id_avis">Approuver</button>
+    <button type="button" (click)="modererAvis(avisClient, 'rejete')" [disabled]="avisEnCours === avisClient.id_avis">Rejeter</button>
+  </article>
+
   <h2>Gestion des employés</h2>
 
   <p *ngIf="erreurListeEmployes" class="erreur">{{ erreurListeEmployes }}</p>

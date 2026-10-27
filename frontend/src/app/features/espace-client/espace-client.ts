@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Commandes, CommandeClient, HistoriqueStatutCommande } from '../../core/services/commandes';
 import { Session } from '../../core/services/session';
+import { AvisService } from '../../core/services/avis';
 
 @Component({
   selector: 'app-espace-client',
@@ -22,6 +23,7 @@ export class EspaceClient implements OnInit {
   readonly session = inject(Session);
   private readonly router = inject(Router);
   private readonly commandesService = inject(Commandes);
+  private readonly avisService = inject(AvisService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   commandes: CommandeClient[] = [];
@@ -30,6 +32,11 @@ export class EspaceClient implements OnInit {
   commandeDetailsOuverte: number | null = null;
   historiques: Record<number, HistoriqueStatutCommande[]> = {};
   chargementHistorique: number | null = null;
+  avisFormulaires: Record<number, { note: number; commentaire: string }> = {};
+  avisEnvoyes: Record<number, boolean> = {};
+  avisEnCours: number | null = null;
+  erreursAvis: Record<number, string> = {};
+  messagesAvis: Record<number, string> = {};
   erreurHistorique: number | null = null;
   commanderEnModification: number | null = null;
   modification = {
@@ -152,6 +159,54 @@ export class EspaceClient implements OnInit {
           );
         },
       });
+  }
+
+  formulaireAvis(idCommande: number) {
+    if (!this.avisFormulaires[idCommande]) {
+      this.avisFormulaires[idCommande] = { note: 5, commentaire: '' };
+    }
+    return this.avisFormulaires[idCommande];
+  }
+
+  envoyerAvis(idCommande: number): void {
+    const formulaire = this.formulaireAvis(idCommande);
+    const commentaire = formulaire.commentaire.trim();
+    this.erreursAvis[idCommande] = '';
+
+    if (!Number.isInteger(formulaire.note) ||
+        formulaire.note < 1 || formulaire.note > 5) {
+      this.erreursAvis[idCommande] = 'Choisissez une note entre 1 et 5.';
+      return;
+    }
+
+    if (commentaire.length < 3 || commentaire.length > 2000) {
+      this.erreursAvis[idCommande] =
+        'Le commentaire doit contenir entre 3 et 2 000 caractères.';
+      return;
+    }
+
+    this.avisEnCours = idCommande;
+    this.avisService.creerAvis({
+      id_commande: String(idCommande),
+      note: formulaire.note,
+      commentaire,
+    }).subscribe({
+      next: (reponse) => {
+        this.avisEnvoyes[idCommande] = true;
+        this.messagesAvis[idCommande] =
+          reponse.message || 'Avis transmis pour modération.';
+        this.avisEnCours = null;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.erreursAvis[idCommande] =
+          Array.isArray(error.error?.message)
+            ? error.error.message.join(' ')
+            : error.error?.message || 'Impossible de transmettre votre avis.';
+        this.avisEnCours = null;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   deconnecter(): void {

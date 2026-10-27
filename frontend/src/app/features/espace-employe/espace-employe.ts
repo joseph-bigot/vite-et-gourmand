@@ -1,3 +1,4 @@
+import { AvisAModerer, AvisService } from '../../core/services/avis';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,11 +19,18 @@ import {
   styleUrl: './espace-employe.scss',
 })
 export class EspaceEmploye implements OnInit {
+  private readonly avisService = inject(AvisService);
+
   private readonly commandesService = inject(Commandes);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly menusService = inject(MenusGestion);
 
-  ongletActif: 'commandes' | 'menus' | 'plats' = 'commandes';
+  ongletActif: 'commandes' | 'menus' | 'plats' | 'avis' = 'commandes';
+  avis: AvisAModerer[] = [];
+  chargementAvis = false;
+  erreurAvis = '';
+  messageAvis = '';
+  avisEnCours: string | null = null;
   menus: MenuGestion[] = [];
   plats: PlatGestion[] = [];
   referencesMenus: ReferencesMenus = { themes: [], regimes: [], allergenes: [] };
@@ -173,8 +181,9 @@ export class EspaceEmploye implements OnInit {
     };
   }
 
-  ouvrirOnglet(onglet: 'commandes' | 'menus' | 'plats'): void {
+  ouvrirOnglet(onglet: 'commandes' | 'menus' | 'plats' | 'avis'): void {
     this.ongletActif = onglet;
+    if (onglet === 'avis') this.chargerAvis();
     this.erreurMenus = '';
     this.messageMenus = '';
     if (onglet === 'menus') this.chargerGestionMenus();
@@ -359,6 +368,44 @@ export class EspaceEmploye implements OnInit {
         this.erreur = 'Impossible de charger les commandes. Vérifiez votre connexion et vos droits.';
         this.chargement = false;
         this.cdr.detectChanges();
+      },
+    });
+  }
+
+  chargerAvis(): void {
+    this.chargementAvis = true;
+    this.erreurAvis = '';
+
+    this.avisService.trouverAvisAModerer().subscribe({
+      next: (avis) => {
+        this.avis = avis;
+        this.chargementAvis = false;
+      },
+      error: (erreur) => {
+        this.erreurAvis = erreur.error?.message || 'Impossible de charger les avis.';
+        this.chargementAvis = false;
+      },
+    });
+  }
+
+  modererAvis(avis: AvisAModerer, statut: 'approuve' | 'rejete'): void {
+    if (this.avisEnCours) return;
+    const decision = statut === 'approuve' ? 'approuver' : 'rejeter';
+    if (!confirm(`Confirmer la décision : ${decision} cet avis ?`)) return;
+
+    this.avisEnCours = avis.id_avis;
+    this.erreurAvis = '';
+    this.messageAvis = '';
+
+    this.avisService.modererAvis(avis.id_avis, statut).subscribe({
+      next: (reponse) => {
+        this.messageAvis = reponse.message;
+        this.avisEnCours = null;
+        this.chargerAvis();
+      },
+      error: (erreur) => {
+        this.erreurAvis = erreur.error?.message || 'Impossible de modérer cet avis.';
+        this.avisEnCours = null;
       },
     });
   }

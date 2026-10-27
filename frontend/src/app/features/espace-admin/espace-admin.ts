@@ -1,7 +1,8 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, StatistiquesAdmin, EmployeCree } from '../../core/services/admin';
+import { AvisAModerer, AvisService } from '../../core/services/avis';
 
 @Component({
   selector: 'app-espace-admin',
@@ -11,6 +12,7 @@ import { AdminService, StatistiquesAdmin, EmployeCree } from '../../core/service
   styleUrl: './espace-admin.scss',
 })
 export class EspaceAdmin implements OnInit {
+  private readonly avisService = inject(AvisService);
   statistiques: StatistiquesAdmin | null = null;
   chargement = true;
   erreur = '';
@@ -24,6 +26,11 @@ export class EspaceAdmin implements OnInit {
   chargementEmploye = false;
   employes: EmployeCree[] = [];
   erreurListeEmployes = '';
+  avis: AvisAModerer[] = [];
+  chargementAvis = false;
+  erreurAvis = '';
+  messageAvis = '';
+  avisEnCours: string | null = null;
 
   constructor(
     private readonly adminService: AdminService,
@@ -31,6 +38,7 @@ export class EspaceAdmin implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.chargerAvis();
     this.chargerEmployes();
     this.adminService.obtenirStatistiques().subscribe({
       next: (statistiques) => {
@@ -41,6 +49,49 @@ export class EspaceAdmin implements OnInit {
       error: () => {
         this.erreur = 'Impossible de charger les statistiques.';
         this.chargement = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+
+  chargerAvis(): void {
+    this.chargementAvis = true;
+    this.erreurAvis = '';
+
+    this.avisService.trouverAvisAModerer().subscribe({
+      next: (avis) => {
+        this.avis = avis;
+        this.chargementAvis = false;
+        this.cdr.detectChanges();
+      },
+      error: (erreur) => {
+        this.erreurAvis = erreur.error?.message || 'Impossible de charger les avis à modérer.';
+        this.chargementAvis = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  modererAvis(avis: AvisAModerer, statut: 'approuve' | 'rejete'): void {
+    if (this.avisEnCours) return;
+
+    const decision = statut === 'approuve' ? 'approuver' : 'rejeter';
+    if (!confirm(`Confirmer la décision : ${decision} cet avis ?`)) return;
+
+    this.avisEnCours = avis.id_avis;
+    this.erreurAvis = '';
+    this.messageAvis = '';
+
+    this.avisService.modererAvis(avis.id_avis, statut).subscribe({
+      next: (reponse) => {
+        this.messageAvis = reponse.message;
+        this.avisEnCours = null;
+        this.chargerAvis();
+      },
+      error: (erreur) => {
+        this.erreurAvis = erreur.error?.message || 'Impossible de modérer cet avis.';
+        this.avisEnCours = null;
         this.cdr.detectChanges();
       },
     });
