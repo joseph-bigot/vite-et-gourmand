@@ -2,15 +2,153 @@
   <h1>Espace employé</h1>
   <p>Consultez et gérez les commandes des clients.</p>
 
-  <p *ngIf="chargement">Chargement des commandes...</p>
-  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
-  <p *ngIf="message" class="message">{{ message }}</p>
 
-  <div *ngIf="!chargement && !erreur && commandes.length === 0" class="commandes">
+  <nav class="onglets-employe" aria-label="Gestion des menus et des plats">
+    <button type="button" [class.actif]="ongletActif === 'commandes'" (click)="ouvrirOnglet('commandes')">Commandes</button>
+    <button type="button" [class.actif]="ongletActif === 'menus'" (click)="ouvrirOnglet('menus')">Gestion des menus</button>
+    <button type="button" [class.actif]="ongletActif === 'plats'" (click)="ouvrirOnglet('plats')">Gestion des plats</button>
+  </nav>
+
+  <section *ngIf="ongletActif === 'menus'" class="gestion-catalogue">
+    <h2>Gestion des menus</h2>
+    <p *ngIf="erreurMenus" class="erreur">{{ erreurMenus }}</p>
+    <p *ngIf="messageMenus" class="message">{{ messageMenus }}</p>
+    <p *ngIf="chargementMenus">Chargement du catalogue…</p>
+
+    <button type="button" (click)="nouveauMenu()">Créer un menu</button>
+
+    <form class="formulaire-catalogue" (ngSubmit)="enregistrerMenu()">
+      <h3>{{ menuEnEdition ? 'Modifier le menu' : 'Nouveau menu' }}</h3>
+
+      <label for="menu-titre">Titre</label>
+      <input id="menu-titre" name="titre" [(ngModel)]="formulaireMenu.titre" required minlength="2">
+
+      <label for="menu-description">Description</label>
+      <textarea id="menu-description" name="description" [(ngModel)]="formulaireMenu.description" required minlength="2"></textarea>
+
+      <label for="menu-theme">Thème</label>
+      <select id="menu-theme" name="theme" [(ngModel)]="formulaireMenu.id_theme" required>
+        <option [ngValue]="0" disabled>Choisir un thème</option>
+        <option *ngFor="let theme of referencesMenus.themes" [ngValue]="theme.id_theme">{{ theme.nom }}</option>
+      </select>
+
+      <label for="menu-regime">Régime alimentaire</label>
+      <select id="menu-regime" name="regime" [(ngModel)]="formulaireMenu.id_regime" required>
+        <option [ngValue]="0" disabled>Choisir un régime</option>
+        <option *ngFor="let regime of referencesMenus.regimes" [ngValue]="regime.id_regime">{{ regime.nom }}</option>
+      </select>
+
+      <label for="menu-prix">Prix par personne (€)</label>
+      <input id="menu-prix" name="prix" type="number" min="0" step="0.01" [(ngModel)]="formulaireMenu.prix_par_personne" required>
+
+      <label for="menu-personnes">Nombre minimum de personnes</label>
+      <input id="menu-personnes" name="personnes" type="number" min="1" step="1" [(ngModel)]="formulaireMenu.nombre_minimum_personnes" required>
+
+      <label for="menu-stock">Stock</label>
+      <input id="menu-stock" name="stock" type="number" min="0" step="1" [(ngModel)]="formulaireMenu.stock" required>
+
+      <label for="menu-conditions-commande">Conditions de commande</label>
+      <textarea id="menu-conditions-commande" name="conditionsCommande" [(ngModel)]="formulaireMenu.conditions_commande" required></textarea>
+
+      <label for="menu-conditions-conservation">Conditions de conservation</label>
+      <textarea id="menu-conditions-conservation" name="conditionsConservation" [(ngModel)]="formulaireMenu.conditions_conservation" required></textarea>
+
+      <div *ngIf="!menuEnEdition">
+        <label for="menu-ajout-plat">Ajouter un plat</label>
+        <select #selectPlat id="menu-ajout-plat" name="ajoutPlat">
+          <option value="">Choisir un plat</option>
+          <option *ngFor="let plat of plats" [value]="plat.id_plat">{{ plat.nom }} ({{ plat.categorie }})</option>
+        </select>
+        <button type="button" (click)="ajouterPlatAuMenu(selectPlat.value); selectPlat.value = ''">Ajouter au menu</button>
+      </div>
+
+      <ul *ngIf="formulaireMenu.plats.length">
+        <li *ngFor="let composition of formulaireMenu.plats">
+          {{ nomPlat(composition.id_plat) }}
+          <label>Quantité
+            <input type="number" min="1" [(ngModel)]="composition.quantite" [name]="'quantite-' + composition.id_plat">
+          </label>
+          <button type="button" (click)="retirerPlatDuMenu(composition.id_plat)">Retirer</button>
+        </li>
+      </ul>
+
+      <p *ngIf="menuEnEdition">La modification des informations ne change pas la composition actuelle du menu.</p>
+      <button type="submit" [disabled]="enregistrementMenu">
+        {{ enregistrementMenu ? 'Enregistrement…' : (menuEnEdition ? 'Enregistrer les modifications' : 'Créer le menu') }}
+      </button>
+      <button type="button" (click)="nouveauMenu()">Réinitialiser le formulaire</button>
+    </form>
+
+    <h3>Catalogue existant</h3>
+    <p *ngIf="!chargementMenus && menus.length === 0">Aucun menu trouvé.</p>
+    <article class="carte-menu-gestion" *ngFor="let menu of menus">
+      <h4>{{ menu.titre }}</h4>
+      <p>{{ menu.theme }} · {{ menu.regime_alimentaire }}</p>
+      <p>{{ menu.prix_par_personne | currency:'EUR':'symbol':'1.2-2':'fr-FR' }} par personne</p>
+      <p>Stock : {{ menu.stock }} · Minimum : {{ menu.nombre_minimum_personnes }} personne(s)</p>
+      <p>Disponibilité : <strong>{{ menu.disponible ? 'Disponible' : 'Indisponible' }}</strong></p>
+      <button type="button" (click)="editerMenu(menu)">Modifier les informations</button>
+      <button type="button" (click)="basculerDisponibilite(menu)">
+        {{ menu.disponible ? 'Rendre indisponible' : 'Rendre disponible' }}
+      </button>
+    </article>
+  </section>
+
+  <section *ngIf="ongletActif === 'plats'" class="gestion-catalogue">
+    <h2>Gestion des plats</h2>
+    <p *ngIf="erreurMenus" class="erreur">{{ erreurMenus }}</p>
+    <p *ngIf="messageMenus" class="message">{{ messageMenus }}</p>
+
+    <form class="formulaire-catalogue" (ngSubmit)="enregistrerPlat()">
+      <h3>Créer un plat</h3>
+      <label for="plat-nom">Nom</label>
+      <input id="plat-nom" name="platNom" [(ngModel)]="nouveauPlat.nom" required minlength="2">
+
+      <label for="plat-description">Description</label>
+      <textarea id="plat-description" name="platDescription" [(ngModel)]="nouveauPlat.description"></textarea>
+
+      <label for="plat-categorie">Catégorie</label>
+      <select id="plat-categorie" name="platCategorie" [(ngModel)]="nouveauPlat.categorie">
+        <option value="entree">Entrée</option>
+        <option value="plat">Plat</option>
+        <option value="dessert">Dessert</option>
+      </select>
+
+      <fieldset>
+        <legend>Allergènes</legend>
+        <label *ngFor="let allergene of referencesMenus.allergenes" class="choix-allergene">
+          <input
+            type="checkbox"
+            [checked]="nouveauPlat.allergenes.includes(allergene.id_allergene)"
+            (change)="$any($event.target).checked
+              ? nouveauPlat.allergenes.push(allergene.id_allergene)
+              : nouveauPlat.allergenes = nouveauPlat.allergenes.filter(id => id !== allergene.id_allergene)">
+          {{ allergene.nom }}
+        </label>
+      </fieldset>
+
+      <button type="submit">Créer le plat</button>
+    </form>
+
+    <h3>Plats existants</h3>
+    <p *ngIf="chargementMenus">Chargement des plats…</p>
+    <article class="carte-menu-gestion" *ngFor="let plat of plats">
+      <h4>{{ plat.nom }}</h4>
+      <p>{{ plat.categorie }}</p>
+      <p>{{ plat.description || 'Aucune description' }}</p>
+      <p>Allergènes : {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}</p>
+    </article>
+  </section>
+
+  <p *ngIf="ongletActif === 'commandes' && chargement">Chargement des commandes...</p>
+  <p *ngIf="ongletActif === 'commandes' && erreur" class="erreur">{{ erreur }}</p>
+  <p *ngIf="ongletActif === 'commandes' && message" class="message">{{ message }}</p>
+
+  <div *ngIf="ongletActif === 'commandes' && !chargement && !erreur && commandes.length === 0" class="commandes">
     <p>Aucune commande à afficher.</p>
   </div>
 
-  <section class="outils-commandes" *ngIf="!chargement && commandes.length > 0" aria-label="Recherche et filtres">
+  <section class="outils-commandes" *ngIf="ongletActif === 'commandes' && !chargement && commandes.length > 0" aria-label="Recherche et filtres">
     <div>
       <label for="recherche-commandes">Rechercher une commande</label>
       <input
@@ -45,11 +183,11 @@
     </p>
   </section>
 
-  <p *ngIf="!chargement && commandes.length > 0 && commandesFiltrees.length === 0" class="aucun-resultat">
+  <p *ngIf="ongletActif === 'commandes' && !chargement && commandes.length > 0 && commandesFiltrees.length === 0" class="aucun-resultat">
     Aucune commande ne correspond à votre recherche.
   </p>
 
-  <div *ngIf="!chargement && commandesFiltrees.length > 0" class="liste-commandes">
+  <div *ngIf="ongletActif === 'commandes' && !chargement && commandesFiltrees.length > 0" class="liste-commandes">
     <article class="commande" [class.prestation-proche]="estPrestationProche(commande)" *ngFor="let commande of commandesFiltrees; trackBy: suivreCommande">
       <h2>Commande n°{{ commande.id_commande }}</h2>
       <p><strong>Client :</strong> {{ commande.prenom_client }} {{ commande.nom_client }}</p>

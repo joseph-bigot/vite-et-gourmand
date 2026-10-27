@@ -2,6 +2,13 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Commandes, CommandeEmploye } from '../../core/services/commandes';
+import {
+  MenusGestion,
+  MenuGestion,
+  PlatGestion,
+  ReferencesMenus,
+  DonneesMenu,
+} from '../../core/services/menus-gestion';
 
 @Component({
   selector: 'app-espace-employe',
@@ -13,6 +20,25 @@ import { Commandes, CommandeEmploye } from '../../core/services/commandes';
 export class EspaceEmploye implements OnInit {
   private readonly commandesService = inject(Commandes);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly menusService = inject(MenusGestion);
+
+  ongletActif: 'commandes' | 'menus' | 'plats' = 'commandes';
+  menus: MenuGestion[] = [];
+  plats: PlatGestion[] = [];
+  referencesMenus: ReferencesMenus = { themes: [], regimes: [], allergenes: [] };
+  chargementMenus = false;
+  erreurMenus = '';
+  messageMenus = '';
+  enregistrementMenu = false;
+  menuEnEdition: number | null = null;
+
+  formulaireMenu: DonneesMenu = this.nouveauFormulaireMenu();
+  nouveauPlat = {
+    nom: '',
+    description: '',
+    categorie: 'plat' as 'entree' | 'plat' | 'dessert',
+    allergenes: [] as number[],
+  };
 
   commandes: CommandeEmploye[] = [];
   recherche = '';
@@ -128,6 +154,188 @@ export class EspaceEmploye implements OnInit {
 
   suivreCommande(index: number, commande: CommandeEmploye): number {
     return commande.id_commande;
+  }
+
+
+  private nouveauFormulaireMenu(): DonneesMenu {
+    return {
+      id_theme: 0,
+      id_regime: 0,
+      titre: '',
+      description: '',
+      prix_par_personne: 0,
+      nombre_minimum_personnes: 1,
+      stock: 0,
+      conditions_commande: '',
+      conditions_conservation: '',
+      disponible: true,
+      plats: [],
+    };
+  }
+
+  ouvrirOnglet(onglet: 'commandes' | 'menus' | 'plats'): void {
+    this.ongletActif = onglet;
+    this.erreurMenus = '';
+    this.messageMenus = '';
+    if (onglet === 'menus') this.chargerGestionMenus();
+    if (onglet === 'plats') this.chargerPlats();
+  }
+
+  chargerGestionMenus(): void {
+    this.chargementMenus = true;
+    this.erreurMenus = '';
+    this.menusService.listerReferences().subscribe({
+      next: (references) => {
+        this.referencesMenus = references;
+        this.menusService.listerPlats().subscribe({
+          next: (plats) => {
+            this.plats = plats;
+          },
+          error: (e) => {
+            this.erreurMenus = e.error?.message || 'Impossible de charger les plats.';
+          },
+        });
+        this.menusService.listerTous().subscribe({
+          next: (menus) => {
+            this.menus = menus;
+            this.chargementMenus = false;
+          },
+          error: (e) => {
+            this.erreurMenus = e.error?.message || 'Impossible de charger les menus.';
+            this.chargementMenus = false;
+          },
+        });
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de charger les références des menus.';
+        this.chargementMenus = false;
+      },
+    });
+  }
+
+  chargerPlats(): void {
+    this.chargementMenus = true;
+    this.erreurMenus = '';
+    this.menusService.listerReferences().subscribe({
+      next: (references) => {
+        this.referencesMenus = references;
+        this.menusService.listerPlats().subscribe({
+          next: (plats) => {
+            this.plats = plats;
+            this.chargementMenus = false;
+          },
+          error: (e) => {
+            this.erreurMenus = e.error?.message || 'Impossible de charger les plats.';
+            this.chargementMenus = false;
+          },
+        });
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de charger les allergènes.';
+        this.chargementMenus = false;
+      },
+    });
+  }
+
+  editerMenu(menu: MenuGestion): void {
+    this.menuEnEdition = menu.id_menu;
+    this.formulaireMenu = {
+      id_theme: Number(menu.id_theme),
+      id_regime: Number(menu.id_regime),
+      titre: menu.titre,
+      description: menu.description,
+      prix_par_personne: Number(menu.prix_par_personne),
+      nombre_minimum_personnes: Number(menu.nombre_minimum_personnes),
+      stock: Number(menu.stock),
+      conditions_commande: menu.conditions_commande,
+      conditions_conservation: menu.conditions_conservation,
+      disponible: menu.disponible,
+      plats: [],
+    };
+  }
+
+  nouveauMenu(): void {
+    this.menuEnEdition = null;
+    this.formulaireMenu = this.nouveauFormulaireMenu();
+  }
+
+  ajouterPlatAuMenu(idPlat: string): void {
+    const id = Number(idPlat);
+    if (!id || this.formulaireMenu.plats.some((p) => p.id_plat === id)) return;
+    this.formulaireMenu.plats.push({
+      id_plat: id,
+      quantite: 1,
+      ordre_affichage: this.formulaireMenu.plats.length + 1,
+    });
+  }
+
+  retirerPlatDuMenu(idPlat: number): void {
+    this.formulaireMenu.plats = this.formulaireMenu.plats
+      .filter((p) => p.id_plat !== idPlat)
+      .map((p, index) => ({ ...p, ordre_affichage: index + 1 }));
+  }
+
+  nomPlat(idPlat: number): string {
+    return this.plats.find((p) => p.id_plat === idPlat)?.nom || `Plat ${idPlat}`;
+  }
+
+  enregistrerMenu(): void {
+    if (!this.formulaireMenu.titre.trim() || !this.formulaireMenu.description.trim()) {
+      this.erreurMenus = 'Le titre et la description sont obligatoires.';
+      return;
+    }
+    if (!this.menuEnEdition && !this.formulaireMenu.plats.length) {
+      this.erreurMenus = 'Ajoutez au moins un plat au menu.';
+      return;
+    }
+    this.enregistrementMenu = true;
+    this.erreurMenus = '';
+    const requete = this.menuEnEdition
+      ? this.menusService.modifierMenu(this.menuEnEdition, this.formulaireMenu)
+      : this.menusService.creerMenu(this.formulaireMenu);
+
+    requete.subscribe({
+      next: (reponse) => {
+        this.messageMenus = reponse.message;
+        this.enregistrementMenu = false;
+        this.nouveauMenu();
+        this.chargerGestionMenus();
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible d’enregistrer le menu.';
+        this.enregistrementMenu = false;
+      },
+    });
+  }
+
+  basculerDisponibilite(menu: MenuGestion): void {
+    this.menusService.changerDisponibilite(menu.id_menu, !menu.disponible).subscribe({
+      next: () => {
+        this.messageMenus = `Disponibilité du menu « ${menu.titre} » mise à jour.`;
+        this.chargerGestionMenus();
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de modifier la disponibilité.';
+      },
+    });
+  }
+
+  enregistrerPlat(): void {
+    if (this.nouveauPlat.nom.trim().length < 2) {
+      this.erreurMenus = 'Le nom du plat doit contenir au moins deux caractères.';
+      return;
+    }
+    this.erreurMenus = '';
+    this.menusService.creerPlat(this.nouveauPlat).subscribe({
+      next: (reponse) => {
+        this.messageMenus = reponse.message;
+        this.nouveauPlat = { nom: '', description: '', categorie: 'plat', allergenes: [] };
+        this.chargerPlats();
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de créer le plat.';
+      },
+    });
   }
 
   ngOnInit(): void {

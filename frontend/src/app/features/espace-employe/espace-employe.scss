@@ -203,3 +203,80 @@ h1 {
   color: #7c3f00;
   font-weight: 700;
 }
+
+.onglets-employe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.5rem 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1rem;
+}
+
+.onglets-employe button,
+.gestion-catalogue button {
+  border: 0;
+  border-radius: 5px;
+  padding: 0.7rem 1rem;
+  background: #285943;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.onglets-employe button.actif {
+  background: #173d2d;
+  outline: 2px solid #8db6a0;
+}
+
+.gestion-catalogue {
+  margin: 1.5rem 0 2rem;
+}
+
+.formulaire-catalogue {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 720px;
+  margin: 1rem 0 2rem;
+  padding: 1.25rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f8f9f8;
+}
+
+.formulaire-catalogue input:not([type="checkbox"]),
+.formulaire-catalogue select,
+.formulaire-catalogue textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  font: inherit;
+}
+
+.formulaire-catalogue fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.choix-allergene {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.carte-menu-gestion {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.carte-menu-gestion button {
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
