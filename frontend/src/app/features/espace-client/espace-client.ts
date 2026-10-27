@@ -41,6 +41,13 @@ export class EspaceClient implements OnInit {
   };
 
   ngOnInit(): void {
+    this.chargerCommandes();
+  }
+
+  chargerCommandes(): void {
+    this.chargement = true;
+    this.erreur = '';
+
     this.commandesService.trouverMesCommandes().subscribe({
       next: (commandes) => {
         this.commandes = commandes;
@@ -101,8 +108,9 @@ export class EspaceClient implements OnInit {
       this.modification,
     ).subscribe({
       next: () => {
+        this.commanderEnModification = null;
+        this.chargerCommandes();
         window.alert('Commande modifiée avec succès.');
-        window.location.reload();
       },
       error: (error) => {
         window.alert(
@@ -133,8 +141,10 @@ export class EspaceClient implements OnInit {
       .annulerCommande(idCommande, motif, moyenContact)
       .subscribe({
         next: () => {
+          this.commandeDetailsOuverte = null;
+          delete this.historiques[idCommande];
+          this.chargerCommandes();
           window.alert('Commande annulée.');
-          window.location.reload();
         },
         error: (error) => {
           window.alert(
