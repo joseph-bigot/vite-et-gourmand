@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, StatistiquesAdmin, EmployeCree } from '../../core/services/admin';
 import { AvisAModerer, AvisService } from '../../core/services/avis';
+import { MenusGestion, MenuGestion } from '../../core/services/menus-gestion';
 
 @Component({
   selector: 'app-espace-admin',
@@ -13,6 +14,12 @@ import { AvisAModerer, AvisService } from '../../core/services/avis';
 })
 export class EspaceAdmin implements OnInit {
   private readonly avisService = inject(AvisService);
+  private readonly menusService = inject(MenusGestion);
+  menusDisponibles: MenuGestion[] = [];
+  filtreMenuId = '';
+  filtreDateDebut = '';
+  filtreDateFin = '';
+  erreurFiltres = '';
   statistiques: StatistiquesAdmin | null = null;
   chargement = true;
   erreur = '';
@@ -40,20 +47,77 @@ export class EspaceAdmin implements OnInit {
   ngOnInit(): void {
     this.chargerAvis();
     this.chargerEmployes();
-    this.adminService.obtenirStatistiques().subscribe({
+    this.chargerStatistiques();
+    this.menusService.listerTous().subscribe({
+      next: (menus) => {
+        this.menusDisponibles = menus;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erreurFiltres = 'Impossible de charger la liste des menus.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+
+
+  chargerStatistiques(): void {
+    this.chargement = true;
+    this.erreur = '';
+    this.erreurFiltres = '';
+
+    const filtres: { menuId?: string; dateDebut?: string; dateFin?: string } = {};
+    if (this.filtreMenuId) filtres.menuId = this.filtreMenuId;
+    if (this.filtreDateDebut) filtres.dateDebut = this.filtreDateDebut;
+    if (this.filtreDateFin) filtres.dateFin = this.filtreDateFin;
+
+    this.adminService.obtenirStatistiques(filtres).subscribe({
       next: (statistiques) => {
         this.statistiques = statistiques;
         this.chargement = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.erreur = 'Impossible de charger les statistiques.';
+      error: (erreur) => {
+        this.erreur = erreur.error?.message
+          || 'Impossible de charger les statistiques.';
         this.chargement = false;
         this.cdr.detectChanges();
       },
     });
   }
 
+  appliquerFiltresStatistiques(): void {
+    if (this.filtreDateDebut && this.filtreDateFin
+      && this.filtreDateDebut > this.filtreDateFin) {
+      this.erreurFiltres = 'La date de début doit précéder la date de fin.';
+      return;
+    }
+    this.chargerStatistiques();
+  }
+
+  reinitialiserFiltresStatistiques(): void {
+    this.filtreMenuId = '';
+    this.filtreDateDebut = '';
+    this.filtreDateFin = '';
+    this.chargerStatistiques();
+  }
+
+  maximumCommandes(): number {
+    return Math.max(
+      1,
+      ...(this.statistiques?.statistiques_par_menu ?? [])
+        .map((menu) => menu.nombreCommandes),
+    );
+  }
+
+  maximumChiffreAffaires(): number {
+    return Math.max(
+      1,
+      ...(this.statistiques?.statistiques_par_menu ?? [])
+        .map((menu) => menu.chiffreAffaires),
+    );
+  }
 
   chargerAvis(): void {
     this.chargementAvis = true;

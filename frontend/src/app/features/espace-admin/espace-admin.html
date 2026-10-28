@@ -18,6 +18,76 @@
     </article>
   </div>
 
+  <section class="filtres-statistiques" aria-labelledby="titre-filtres">
+    <h3 id="titre-filtres">Filtrer les statistiques</h3>
+    <form (ngSubmit)="appliquerFiltresStatistiques()">
+      <label for="filtre-menu">Menu</label>
+      <select id="filtre-menu" name="filtreMenuId" [(ngModel)]="filtreMenuId">
+        <option value="">Tous les menus</option>
+        <option *ngFor="let menu of menusDisponibles" [value]="menu.id_menu">
+          {{ menu.titre }}
+        </option>
+      </select>
+
+      <label for="filtre-date-debut">Date de début</label>
+      <input
+        id="filtre-date-debut"
+        name="filtreDateDebut"
+        type="date"
+        [(ngModel)]="filtreDateDebut"
+      >
+
+      <label for="filtre-date-fin">Date de fin</label>
+      <input
+        id="filtre-date-fin"
+        name="filtreDateFin"
+        type="date"
+        [(ngModel)]="filtreDateFin"
+      >
+
+      <div class="actions-filtres">
+        <button type="submit" [disabled]="chargement">Appliquer les filtres</button>
+        <button type="button" class="bouton-secondaire"
+          (click)="reinitialiserFiltresStatistiques()"
+          [disabled]="chargement">
+          Réinitialiser
+        </button>
+      </div>
+      <p *ngIf="erreurFiltres" class="erreur">{{ erreurFiltres }}</p>
+    </form>
+  </section>
+
+  <section class="graphique-menus" *ngIf="statistiques as stats">
+    <h3>Comparaison des menus</h3>
+    <p *ngIf="stats.statistiques_par_menu.length === 0">
+      Aucune donnée pour les filtres sélectionnés.
+    </p>
+
+    <article class="ligne-menu"
+      *ngFor="let menu of stats.statistiques_par_menu">
+      <h4>{{ menu.titreMenu }}</h4>
+
+      <div class="libelle-barre">
+        <span>Commandes</span>
+        <strong>{{ menu.nombreCommandes }}</strong>
+      </div>
+      <div class="fond-barre" role="img"
+        [attr.aria-label]="menu.nombreCommandes + ' commandes'">
+        <div class="barre barre-commandes"
+          [style.width.%]="menu.nombreCommandes / maximumCommandes() * 100"></div>
+      </div>
+
+      <div class="libelle-barre">
+        <span>Chiffre d’affaires</span>
+        <strong>{{ menu.chiffreAffaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</strong>
+      </div>
+      <div class="fond-barre" role="img"
+        [attr.aria-label]="'Chiffre d’affaires : ' + menu.chiffreAffaires + ' euros'">
+        <div class="barre barre-revenu"
+          [style.width.%]="menu.chiffreAffaires / maximumChiffreAffaires() * 100"></div>
+      </div>
+    </article>
+  </section>
 
   <h2>Modération des avis</h2>
   <p>Seuls les avis approuvés seront visibles sur l’accueil.</p>

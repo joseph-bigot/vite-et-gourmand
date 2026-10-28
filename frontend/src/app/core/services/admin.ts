@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 const API_URL = 'http://localhost:3000';
+
+export interface StatistiquesParMenu {
+  menuId: string;
+  titreMenu: string;
+  nombreCommandes: number;
+  chiffreAffaires: number;
+}
 
 export interface StatistiquesAdmin {
   nombre_commandes: number;
@@ -11,6 +18,12 @@ export interface StatistiquesAdmin {
     statut: string | null;
     nombre: number;
   }[];
+  statistiques_par_menu: StatistiquesParMenu[];
+  filtres_appliques?: {
+    menuId: string | null;
+    dateDebut: string | null;
+    dateFin: string | null;
+  };
 }
 
 export interface EmployeCree {
@@ -22,14 +35,30 @@ export interface EmployeCree {
   actif: boolean;
 }
 
+export interface FiltresStatistiquesAdmin {
+  menuId?: string;
+  dateDebut?: string;
+  dateFin?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AdminService {
   constructor(private readonly http: HttpClient) {}
 
-  obtenirStatistiques(): Observable<StatistiquesAdmin> {
-    return this.http.get<StatistiquesAdmin>(`${API_URL}/statistiques`);
+  obtenirStatistiques(
+    filtres: FiltresStatistiquesAdmin = {},
+  ): Observable<StatistiquesAdmin> {
+    let params = new HttpParams();
+
+    if (filtres.menuId) params = params.set('menuId', filtres.menuId);
+    if (filtres.dateDebut) params = params.set('dateDebut', filtres.dateDebut);
+    if (filtres.dateFin) params = params.set('dateFin', filtres.dateFin);
+
+    return this.http.get<StatistiquesAdmin>(`${API_URL}/statistiques`, {
+      params,
+    });
   }
 
   obtenirEmployes(): Observable<EmployeCree[]> {
