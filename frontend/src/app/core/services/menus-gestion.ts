@@ -70,20 +70,18 @@ export class MenusGestion {
   }
 
   creerMenu(donnees: DonneesMenu): Observable<{ id_menu: number; message: string }> {
-    return this.http.post<{ id_menu: number; message: string }>(
-      this.apiUrl,
-      donnees,
-    );
+    return this.http.post<{ id_menu: number; message: string }>(this.apiUrl, donnees);
   }
 
   modifierMenu(
     id: number,
     donnees: Partial<DonneesMenu>,
   ): Observable<{ id_menu: number; message: string }> {
-    return this.http.patch<{ id_menu: number; message: string }>(
-      `${this.apiUrl}/${id}`,
-      donnees,
-    );
+    return this.http.patch<{ id_menu: number; message: string }>(`${this.apiUrl}/${id}`, donnees);
+  }
+
+  supprimerMenu(id: number): Observable<{ id_menu: number; message: string }> {
+    return this.http.delete<{ id_menu: number; message: string }>(`${this.apiUrl}/${id}`);
   }
 
   changerDisponibilite(
@@ -102,9 +100,6 @@ export class MenusGestion {
     categorie: 'entree' | 'plat' | 'dessert';
     allergenes?: number[];
   }): Observable<{ id_plat: number; message: string }> {
-    return this.http.post<{ id_plat: number; message: string }>(
-      `${this.apiUrl}/plats`,
-      donnees,
-    );
+    return this.http.post<{ id_plat: number; message: string }>(`${this.apiUrl}/plats`, donnees);
   }
 }

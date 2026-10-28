@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -47,9 +46,7 @@ export class MenusService {
       Number.isFinite(filtres.nombrePersonnes)
     ) {
       parametres.push(filtres.nombrePersonnes);
-      conditions.push(
-        `m.nombre_minimum_personnes <= $${parametres.length}`,
-      );
+      conditions.push(`m.nombre_minimum_personnes <= $${parametres.length}`);
     }
 
     return this.dataSource.query(
@@ -155,8 +152,12 @@ export class MenusService {
   async listerReferences() {
     const [themes, regimes, allergenes] = await Promise.all([
       this.dataSource.query('SELECT id_theme, nom FROM theme ORDER BY nom'),
-      this.dataSource.query('SELECT id_regime, nom FROM regime_alimentaire ORDER BY nom'),
-      this.dataSource.query('SELECT id_allergene, nom FROM allergene ORDER BY nom'),
+      this.dataSource.query(
+        'SELECT id_regime, nom FROM regime_alimentaire ORDER BY nom',
+      ),
+      this.dataSource.query(
+        'SELECT id_allergene, nom FROM allergene ORDER BY nom',
+      ),
     ]);
     return { themes, regimes, allergenes };
   }
@@ -190,9 +191,15 @@ export class MenusService {
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
          RETURNING id_menu`,
         [
-          dto.id_theme, dto.id_regime, dto.titre, dto.description,
-          dto.prix_par_personne, dto.nombre_minimum_personnes, dto.stock,
-          dto.conditions_commande, dto.conditions_conservation,
+          dto.id_theme,
+          dto.id_regime,
+          dto.titre,
+          dto.description,
+          dto.prix_par_personne,
+          dto.nombre_minimum_personnes,
+          dto.stock,
+          dto.conditions_commande,
+          dto.conditions_conservation,
           dto.disponible ?? true,
         ],
       );
@@ -249,9 +256,13 @@ export class MenusService {
 
       if (dto.plats !== undefined) {
         if (!dto.plats.length) {
-          throw new BadRequestException('Un menu doit contenir au moins un plat.');
+          throw new BadRequestException(
+            'Un menu doit contenir au moins un plat.',
+          );
         }
-        await manager.query('DELETE FROM composer_menu WHERE id_menu = $1', [id]);
+        await manager.query('DELETE FROM composer_menu WHERE id_menu = $1', [
+          id,
+        ]);
         for (const plat of dto.plats) {
           await manager.query(
             `INSERT INTO composer_menu (id_menu, id_plat, quantite, ordre_affichage)
@@ -267,7 +278,9 @@ export class MenusService {
 
   async changerDisponibilite(id: number, disponible: boolean) {
     if (typeof disponible !== 'boolean') {
-      throw new BadRequestException('Le champ disponible doit être un booléen.');
+      throw new BadRequestException(
+        'Le champ disponible doit être un booléen.',
+      );
     }
     const resultat = await this.dataSource.query(
       `UPDATE menu SET disponible = $1 WHERE id_menu = $2 RETURNING id_menu, disponible`,
@@ -275,6 +288,34 @@ export class MenusService {
     );
     if (!resultat.length) throw new NotFoundException('Menu introuvable.');
     return resultat[0];
+  }
+
+  async supprimerMenu(id: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const menus = await manager.query(
+        'SELECT id_menu FROM menu WHERE id_menu = $1 FOR UPDATE',
+        [id],
+      );
+
+      if (!menus.length) {
+        throw new NotFoundException('Menu introuvable.');
+      }
+
+      const commandes = await manager.query(
+        'SELECT id_commande FROM commande WHERE id_menu = $1 LIMIT 1',
+        [id],
+      );
+
+      if (commandes.length) {
+        throw new BadRequestException(
+          'Ce menu ne peut pas être supprimé car il est associé à une commande. Rendez-le indisponible à la place.',
+        );
+      }
+
+      await manager.query('DELETE FROM menu WHERE id_menu = $1', [id]);
+
+      return { id_menu: id, message: 'Menu supprimé.' };
+    });
   }
 
   async creerPlat(dto: CreerPlatDto) {
@@ -296,5 +337,4 @@ export class MenusService {
       return { id_plat: idPlat, message: 'Plat créé.' };
     });
   }
-
 }

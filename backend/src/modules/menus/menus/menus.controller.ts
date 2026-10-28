@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -85,6 +86,13 @@ export class MenusController {
     @Body() dto: ModifierMenuDto,
   ) {
     return this.menusService.modifierMenu(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('employe', 'admin')
+  supprimerMenu(@Param('id', ParseIntPipe) id: number) {
+    return this.menusService.supprimerMenu(id);
   }
 
   @Post('plats')

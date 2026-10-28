@@ -103,7 +103,9 @@ export class EspaceEmploye implements OnInit {
       return false;
     }
 
-    const datePrestation = new Date(`${commande.date_prestation}T${commande.heure_prestation || '00:00'}:00`);
+    const datePrestation = new Date(
+      `${commande.date_prestation}T${commande.heure_prestation || '00:00'}:00`,
+    );
     if (Number.isNaN(datePrestation.getTime())) return false;
 
     const maintenant = new Date();
@@ -116,16 +118,22 @@ export class EspaceEmploye implements OnInit {
 
     return this.commandes
       .filter((commande) => {
-        const nomComplet = `${commande.prenom_client} ${commande.nom_client}`.toLocaleLowerCase('fr');
-        const nomInverse = `${commande.nom_client} ${commande.prenom_client}`.toLocaleLowerCase('fr');
+        const nomComplet = `${commande.prenom_client} ${commande.nom_client}`.toLocaleLowerCase(
+          'fr',
+        );
+        const nomInverse = `${commande.nom_client} ${commande.prenom_client}`.toLocaleLowerCase(
+          'fr',
+        );
         const correspondRecherche =
           !recherche ||
           String(commande.id_commande).includes(recherche) ||
           nomComplet.includes(recherche) ||
           nomInverse.includes(recherche);
 
-        return correspondRecherche &&
-          (this.filtreStatut === 'tous' || commande.statut === this.filtreStatut);
+        return (
+          correspondRecherche &&
+          (this.filtreStatut === 'tous' || commande.statut === this.filtreStatut)
+        );
       })
       .sort((a, b) => {
         const dateA = `${a.date_prestation}T${a.heure_prestation || '00:00'}`;
@@ -136,10 +144,13 @@ export class EspaceEmploye implements OnInit {
   }
 
   get nombreCommandesParStatut(): Record<string, number> {
-    return this.commandes.reduce((compteurs, commande) => {
-      compteurs[commande.statut] = (compteurs[commande.statut] || 0) + 1;
-      return compteurs;
-    }, {} as Record<string, number>);
+    return this.commandes.reduce(
+      (compteurs, commande) => {
+        compteurs[commande.statut] = (compteurs[commande.statut] || 0) + 1;
+        return compteurs;
+      },
+      {} as Record<string, number>,
+    );
   }
   chargement = true;
   erreur = '';
@@ -164,7 +175,7 @@ export class EspaceEmploye implements OnInit {
 
   statutsPourCommande(commande: CommandeEmploye) {
     return this.statutsPossibles.filter((statut) =>
-      this.transitionsAutorisees[commande.statut]?.includes(statut.valeur)
+      this.transitionsAutorisees[commande.statut]?.includes(statut.valeur),
     );
   }
 
@@ -181,7 +192,6 @@ export class EspaceEmploye implements OnInit {
   suivreCommande(index: number, commande: CommandeEmploye): number {
     return commande.id_commande;
   }
-
 
   private nouveauFormulaireMenu(): DonneesMenu {
     return {
@@ -336,6 +346,28 @@ export class EspaceEmploye implements OnInit {
     });
   }
 
+  supprimerMenu(menu: MenuGestion): void {
+    if (!confirm(`Confirmer la suppression définitive du menu « ${menu.titre} » ?`)) {
+      return;
+    }
+
+    this.erreurMenus = '';
+    this.messageMenus = '';
+
+    this.menusService.supprimerMenu(menu.id_menu).subscribe({
+      next: (reponse) => {
+        this.messageMenus = reponse.message;
+        if (this.menuEnEdition === menu.id_menu) {
+          this.nouveauMenu();
+        }
+        this.chargerGestionMenus();
+      },
+      error: (erreur) => {
+        this.erreurMenus = erreur.error?.message || 'Impossible de supprimer ce menu.';
+      },
+    });
+  }
+
   basculerDisponibilite(menu: MenuGestion): void {
     this.menusService.changerDisponibilite(menu.id_menu, !menu.disponible).subscribe({
       next: () => {
@@ -375,19 +407,20 @@ export class EspaceEmploye implements OnInit {
       next: (horaires) => {
         this.horaires = this.joursSemaine.map((jour) => {
           const horaire = horaires.find((h) => h.jour_semaine === jour.numero);
-          return horaire ?? {
-            jour_semaine: jour.numero,
-            heure_ouverture: '09:00',
-            heure_fermeture: '18:00',
-            ferme: false,
-          };
+          return (
+            horaire ?? {
+              jour_semaine: jour.numero,
+              heure_ouverture: '09:00',
+              heure_fermeture: '18:00',
+              ferme: false,
+            }
+          );
         });
         this.chargementHoraires = false;
         this.cdr.detectChanges();
       },
       error: (erreur) => {
-        this.erreurHoraires =
-          erreur.error?.message || 'Impossible de charger les horaires.';
+        this.erreurHoraires = erreur.error?.message || 'Impossible de charger les horaires.';
         this.chargementHoraires = false;
         this.cdr.detectChanges();
       },
@@ -408,8 +441,7 @@ export class EspaceEmploye implements OnInit {
         this.cdr.detectChanges();
       },
       error: (erreur) => {
-        this.erreurHoraires =
-          erreur.error?.message || 'Impossible d’enregistrer les horaires.';
+        this.erreurHoraires = erreur.error?.message || 'Impossible d’enregistrer les horaires.';
         this.enregistrementHoraires = false;
         this.cdr.detectChanges();
       },
@@ -434,7 +466,8 @@ export class EspaceEmploye implements OnInit {
       },
       error: (erreur) => {
         console.error('[EspaceEmploye] Erreur API :', erreur);
-        this.erreur = 'Impossible de charger les commandes. Vérifiez votre connexion et vos droits.';
+        this.erreur =
+          'Impossible de charger les commandes. Vérifiez votre connexion et vos droits.';
         this.chargement = false;
         this.cdr.detectChanges();
       },
@@ -509,7 +542,8 @@ export class EspaceEmploye implements OnInit {
           this.chargerCommandes();
         },
         error: (erreur) => {
-          this.erreur = erreur.error?.message || 'Impossible de modifier le statut de cette commande.';
+          this.erreur =
+            erreur.error?.message || 'Impossible de modifier le statut de cette commande.';
           this.commandeEnCours = null;
         },
       });
