@@ -426,6 +426,8 @@
       <p><strong>Nombre de personnes :</strong> {{ commande.nombre_personnes }}</p>
       <p><strong>Lieu :</strong> {{ commande.lieu_prestation }}</p>
       <p><strong>Adresse :</strong> {{ commande.adresse_livraison }}</p>
+      <p><strong>Distance :</strong> {{ commande.livraison_hors_bordeaux ? (commande.distance_km + " km (hors Bordeaux)") : "Livraison à Bordeaux" }}</p>
+      <p><strong>Frais de livraison :</strong> {{ commande.frais_livraison | currency: "EUR" : "symbol" : "1.2-2" : "fr-FR" }}</p>
       <p>
         <strong>Prix total :</strong>
         {{ commande.prix_total | currency: 'EUR' : 'symbol' : '1.2-2' : 'fr-FR' }}

@@ -15,6 +15,9 @@ export interface CommandeEmploye {
   heure_prestation: string;
   nombre_personnes: number;
   adresse_livraison: string;
+  distance_km: string;
+  livraison_hors_bordeaux: boolean;
+  frais_livraison: string;
   lieu_prestation: string;
   prix_total: number;
   nom_client: string;

@@ -25,7 +25,12 @@ describe('CommandesService - changements de statut et stock', () => {
     managerQuery
       .mockResolvedValueOnce([{ id_commande: '12' }])
       .mockResolvedValueOnce([{ statut: 'en_attente' }])
-      .mockResolvedValueOnce([{ id_menu: '5' }])
+      .mockResolvedValueOnce([{
+        id_menu: '5',
+        distance_km: '10.00',
+        livraison_hors_bordeaux: true,
+        frais_livraison: '10.90',
+      }])
       .mockResolvedValueOnce([{ stock: 2 }])
       .mockResolvedValueOnce([{ stock: 1 }])
       .mockResolvedValueOnce([]);
@@ -46,11 +51,34 @@ describe('CommandesService - changements de statut et stock', () => {
     );
   });
 
+  it('refuse une commande lorsque les frais de livraison sont incohérents', async () => {
+    managerQuery
+      .mockResolvedValueOnce([{ id_commande: '12' }])
+      .mockResolvedValueOnce([{ statut: 'en_attente' }])
+      .mockResolvedValueOnce([{
+        id_menu: '5',
+        distance_km: '10.00',
+        livraison_hors_bordeaux: true,
+        frais_livraison: '5.00',
+      }]);
+
+    await expect(
+      service.changerStatutCommande('12', 'acceptee'),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(managerQuery).toHaveBeenCalledTimes(3);
+  });
+
   it('refuse une commande lorsque le stock est épuisé', async () => {
     managerQuery
       .mockResolvedValueOnce([{ id_commande: '12' }])
       .mockResolvedValueOnce([{ statut: 'en_attente' }])
-      .mockResolvedValueOnce([{ id_menu: '5' }])
+      .mockResolvedValueOnce([{
+        id_menu: '5',
+        distance_km: '10.00',
+        livraison_hors_bordeaux: true,
+        frais_livraison: '10.90',
+      }])
       .mockResolvedValueOnce([{ stock: 0 }]);
 
     await expect(
@@ -97,7 +125,12 @@ describe('CommandesService - annulation par un employé et restitution du stock'
     managerQuery
       .mockResolvedValueOnce([{ id_commande: '12' }])
       .mockResolvedValueOnce([{ statut: 'acceptee' }])
-      .mockResolvedValueOnce([{ id_menu: '5' }])
+      .mockResolvedValueOnce([{
+        id_menu: '5',
+        distance_km: '10.00',
+        livraison_hors_bordeaux: true,
+        frais_livraison: '10.90',
+      }])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
@@ -133,7 +166,12 @@ describe('CommandesService - annulation par un employé et restitution du stock'
     managerQuery
       .mockResolvedValueOnce([{ id_commande: '12' }])
       .mockResolvedValueOnce([{ statut: 'acceptee' }])
-      .mockResolvedValueOnce([{ id_menu: '5' }])
+      .mockResolvedValueOnce([{
+        id_menu: '5',
+        distance_km: '10.00',
+        livraison_hors_bordeaux: true,
+        frais_livraison: '10.90',
+      }])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])

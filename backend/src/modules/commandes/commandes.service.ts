@@ -500,13 +500,42 @@ export class CommandesService {
       }
 
       if (nouveauStatut === 'acceptee') {
-        const commandesAvecMenu: Array<{ id_menu: string }> =
-          await manager.query(
-            'SELECT id_menu FROM commande WHERE id_commande = $1',
-            [idCommande],
-          );
+        const commandesAvecMenu: Array<{
+          id_menu: string;
+          distance_km: string;
+          livraison_hors_bordeaux: boolean;
+          frais_livraison: string;
+        }> = await manager.query(
+          `SELECT id_menu, distance_km, livraison_hors_bordeaux, frais_livraison
+           FROM commande
+           WHERE id_commande = $1`,
+          [idCommande],
+        );
 
-        const idMenu = commandesAvecMenu[0]?.id_menu;
+        const commande = commandesAvecMenu[0];
+        if (!commande) {
+          throw new NotFoundException('Commande introuvable.');
+        }
+
+        const distance = Number(commande.distance_km);
+        const fraisEnregistres = Number(commande.frais_livraison);
+        const fraisAttendus = commande.livraison_hors_bordeaux
+          ? 5 + distance * 0.59
+          : 5;
+        const fraisArrondis = Math.round(fraisAttendus * 100) / 100;
+
+        if (
+          !Number.isFinite(distance) ||
+          distance < 0 ||
+          !Number.isFinite(fraisEnregistres) ||
+          Math.abs(fraisEnregistres - fraisArrondis) > 0.01
+        ) {
+          throw new BadRequestException(
+            'Les frais de livraison sont incohérents. Vérifiez la distance avant d’accepter la commande.',
+          );
+        }
+
+        const idMenu = commande.id_menu;
         if (!idMenu) {
           throw new NotFoundException('Menu de la commande introuvable.');
         }
@@ -644,6 +673,9 @@ export class CommandesService {
          c.heure_prestation,
          c.nombre_personnes,
          c.adresse_livraison,
+         c.distance_km,
+         c.livraison_hors_bordeaux,
+         c.frais_livraison,
          c.lieu_prestation,
          c.prix_total,
          u.nom AS nom_client,
