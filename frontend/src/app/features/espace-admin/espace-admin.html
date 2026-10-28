@@ -55,7 +55,55 @@
       </div>
       <p *ngIf="erreurFiltres" class="erreur">{{ erreurFiltres }}</p>
     </form>
-  </section>
+
+  <h2>Gestion des horaires d'ouverture</h2>
+  <p>Les modifications seront visibles dans le pied de page du site.</p>
+
+  <p *ngIf="chargementHoraires">Chargement des horaires…</p>
+  <p *ngIf="erreurHoraires" class="erreur">{{ erreurHoraires }}</p>
+  <p *ngIf="messageHoraires" class="succes">{{ messageHoraires }}</p>
+
+  <form *ngIf="!chargementHoraires && horaires.length"
+    class="formulaire-catalogue"
+    (ngSubmit)="enregistrerHoraires()">
+
+    <div *ngFor="let jour of joursSemaine; let i = index" class="carte-statistique">
+      <h3>{{ jour.nom }}</h3>
+
+      <label [for]="'admin-ferme-' + jour.numero">
+        <input
+          [id]="'admin-ferme-' + jour.numero"
+          [name]="'admin-ferme-' + jour.numero"
+          type="checkbox"
+          [(ngModel)]="horaires[i].ferme">
+        Fermé
+      </label>
+
+      <div *ngIf="!horaires[i].ferme">
+        <label [for]="'admin-ouverture-' + jour.numero">Heure d'ouverture</label>
+        <input
+          [id]="'admin-ouverture-' + jour.numero"
+          [name]="'admin-ouverture-' + jour.numero"
+          type="time"
+          [(ngModel)]="horaires[i].heure_ouverture"
+          required>
+
+        <label [for]="'admin-fermeture-' + jour.numero">Heure de fermeture</label>
+        <input
+          [id]="'admin-fermeture-' + jour.numero"
+          [name]="'admin-fermeture-' + jour.numero"
+          type="time"
+          [(ngModel)]="horaires[i].heure_fermeture"
+          required>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="enregistrementHoraires">
+      {{ enregistrementHoraires ? 'Enregistrement…' : 'Enregistrer les horaires' }}
+    </button>
+  </form>
+
+</section>
 
   <section class="graphique-menus" *ngIf="statistiques as stats">
     <h3>Comparaison des menus</h3>

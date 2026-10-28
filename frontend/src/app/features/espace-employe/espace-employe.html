@@ -8,7 +8,54 @@
     <button type="button" [class.actif]="ongletActif === 'menus'" (click)="ouvrirOnglet('menus')">Gestion des menus</button>
     <button type="button" [class.actif]="ongletActif === 'plats'" (click)="ouvrirOnglet('plats')">Gestion des plats</button>
   <button type="button" [class.actif]="ongletActif === 'avis'" (click)="ouvrirOnglet('avis')">Modération des avis</button>
-</nav>
+    <button type="button" [class.actif]="ongletActif === 'horaires'" (click)="ouvrirOnglet('horaires')">Horaires</button>
+  </nav>
+
+  <section *ngIf="ongletActif === 'horaires'" class="gestion-catalogue">
+    <h2>Gestion des horaires d'ouverture</h2>
+    <p>Les modifications seront visibles dans le pied de page du site.</p>
+
+    <p *ngIf="chargementHoraires">Chargement des horaires…</p>
+    <p *ngIf="erreurHoraires" class="erreur">{{ erreurHoraires }}</p>
+    <p *ngIf="messageHoraires" class="message">{{ messageHoraires }}</p>
+
+    <form *ngIf="!chargementHoraires && horaires.length" class="formulaire-catalogue" (ngSubmit)="enregistrerHoraires()">
+      <div *ngFor="let jour of joursSemaine; let i = index">
+        <h3>{{ jour.nom }}</h3>
+
+        <label [for]="'ferme-' + jour.numero">
+          <input
+            [id]="'ferme-' + jour.numero"
+            [name]="'ferme-' + jour.numero"
+            type="checkbox"
+            [(ngModel)]="horaires[i].ferme">
+          Fermé
+        </label>
+
+        <div *ngIf="!horaires[i].ferme">
+          <label [for]="'ouverture-' + jour.numero">Heure d'ouverture</label>
+          <input
+            [id]="'ouverture-' + jour.numero"
+            [name]="'ouverture-' + jour.numero"
+            type="time"
+            [(ngModel)]="horaires[i].heure_ouverture"
+            required>
+
+          <label [for]="'fermeture-' + jour.numero">Heure de fermeture</label>
+          <input
+            [id]="'fermeture-' + jour.numero"
+            [name]="'fermeture-' + jour.numero"
+            type="time"
+            [(ngModel)]="horaires[i].heure_fermeture"
+            required>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="enregistrementHoraires">
+        {{ enregistrementHoraires ? 'Enregistrement…' : 'Enregistrer les horaires' }}
+      </button>
+    </form>
+  </section>
 
 <section *ngIf="ongletActif === 'avis'" class="gestion-catalogue">
   <h2>Modération des avis</h2>

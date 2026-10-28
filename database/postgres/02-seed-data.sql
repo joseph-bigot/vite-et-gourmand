@@ -145,3 +145,24 @@ JOIN allergene a ON
     (p.nom = 'Tarte aux fruits' AND a.nom = 'Gluten');
 
 COMMIT;
+
+-- Horaires d'ouverture de démonstration
+INSERT INTO horaire (
+    jour_semaine,
+    heure_ouverture,
+    heure_fermeture,
+    ferme
+)
+VALUES
+    (1, '09:00', '18:00', FALSE),
+    (2, '09:00', '18:00', FALSE),
+    (3, '09:00', '18:00', FALSE),
+    (4, '09:00', '18:00', FALSE),
+    (5, '09:00', '18:00', FALSE),
+    (6, '09:00', '18:00', FALSE),
+    (7, '09:00', '12:00', FALSE)
+ON CONFLICT (jour_semaine)
+DO UPDATE SET
+    heure_ouverture = EXCLUDED.heure_ouverture,
+    heure_fermeture = EXCLUDED.heure_fermeture,
+    ferme = EXCLUDED.ferme;

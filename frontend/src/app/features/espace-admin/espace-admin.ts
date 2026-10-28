@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService, StatistiquesAdmin, EmployeCree } from '../../core/services/admin';
 import { AvisAModerer, AvisService } from '../../core/services/avis';
 import { MenusGestion, MenuGestion } from '../../core/services/menus-gestion';
+import { HorairesService, type Horaire } from '../../core/services/horaires';
 
 @Component({
   selector: 'app-espace-admin',
@@ -15,6 +16,23 @@ import { MenusGestion, MenuGestion } from '../../core/services/menus-gestion';
 export class EspaceAdmin implements OnInit {
   private readonly avisService = inject(AvisService);
   private readonly menusService = inject(MenusGestion);
+  private readonly horairesService = inject(HorairesService);
+
+  readonly joursSemaine = [
+    { numero: 1, nom: 'Lundi' },
+    { numero: 2, nom: 'Mardi' },
+    { numero: 3, nom: 'Mercredi' },
+    { numero: 4, nom: 'Jeudi' },
+    { numero: 5, nom: 'Vendredi' },
+    { numero: 6, nom: 'Samedi' },
+    { numero: 7, nom: 'Dimanche' },
+  ];
+
+  horaires: Horaire[] = [];
+  chargementHoraires = false;
+  enregistrementHoraires = false;
+  erreurHoraires = '';
+  messageHoraires = '';
   menusDisponibles: MenuGestion[] = [];
   filtreMenuId = '';
   filtreDateDebut = '';
@@ -46,6 +64,7 @@ export class EspaceAdmin implements OnInit {
 
   ngOnInit(): void {
     this.chargerAvis();
+    this.chargerHoraires();
     this.chargerEmployes();
     this.chargerStatistiques();
     this.menusService.listerTous().subscribe({
@@ -61,6 +80,60 @@ export class EspaceAdmin implements OnInit {
   }
 
 
+
+  chargerHoraires(): void {
+    this.chargementHoraires = true;
+    this.erreurHoraires = '';
+    this.messageHoraires = '';
+
+    this.horairesService.lister().subscribe({
+      next: (horaires) => {
+        this.horaires = this.joursSemaine.map((jour) => {
+          const horaire = horaires.find((h) => h.jour_semaine === jour.numero);
+          return horaire ?? {
+            jour_semaine: jour.numero,
+            heure_ouverture: '09:00',
+            heure_fermeture: '18:00',
+            ferme: false,
+          };
+        });
+        this.chargementHoraires = false;
+        this.cdr.detectChanges();
+      },
+      error: (erreur) => {
+        this.erreurHoraires =
+          erreur.error?.message || 'Impossible de charger les horaires.';
+        this.chargementHoraires = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  enregistrerHoraires(): void {
+    if (this.enregistrementHoraires) return;
+
+    this.enregistrementHoraires = true;
+    this.erreurHoraires = '';
+    this.messageHoraires = '';
+
+    this.horairesService.modifier(this.horaires).subscribe({
+      next: (reponse) => {
+        this.messageHoraires = reponse?.message || 'Les horaires ont été enregistrés.';
+        this.enregistrementHoraires = false;
+        this.cdr.detectChanges();
+      },
+      error: (erreur) => {
+        this.erreurHoraires =
+          erreur?.error?.message || 'Impossible d’enregistrer les horaires.';
+        this.enregistrementHoraires = false;
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        this.enregistrementHoraires = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   chargerStatistiques(): void {
     this.chargement = true;

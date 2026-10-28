@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Commandes, CommandeEmploye } from '../../core/services/commandes';
+import { HorairesService, type Horaire } from '../../core/services/horaires';
 import {
   MenusGestion,
   MenuGestion,
@@ -24,8 +25,25 @@ export class EspaceEmploye implements OnInit {
   private readonly commandesService = inject(Commandes);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly menusService = inject(MenusGestion);
+  private readonly horairesService = inject(HorairesService);
 
-  ongletActif: 'commandes' | 'menus' | 'plats' | 'avis' = 'commandes';
+  readonly joursSemaine = [
+    { numero: 1, nom: 'Lundi' },
+    { numero: 2, nom: 'Mardi' },
+    { numero: 3, nom: 'Mercredi' },
+    { numero: 4, nom: 'Jeudi' },
+    { numero: 5, nom: 'Vendredi' },
+    { numero: 6, nom: 'Samedi' },
+    { numero: 7, nom: 'Dimanche' },
+  ];
+
+  horaires: Horaire[] = [];
+  chargementHoraires = false;
+  enregistrementHoraires = false;
+  erreurHoraires = '';
+  messageHoraires = '';
+
+  ongletActif: 'commandes' | 'menus' | 'plats' | 'avis' | 'horaires' = 'commandes';
   avis: AvisAModerer[] = [];
   chargementAvis = false;
   erreurAvis = '';
@@ -181,13 +199,14 @@ export class EspaceEmploye implements OnInit {
     };
   }
 
-  ouvrirOnglet(onglet: 'commandes' | 'menus' | 'plats' | 'avis'): void {
+  ouvrirOnglet(onglet: 'commandes' | 'menus' | 'plats' | 'avis' | 'horaires'): void {
     this.ongletActif = onglet;
     if (onglet === 'avis') this.chargerAvis();
     this.erreurMenus = '';
     this.messageMenus = '';
     if (onglet === 'menus') this.chargerGestionMenus();
     if (onglet === 'plats') this.chargerPlats();
+    if (onglet === 'horaires') this.chargerHoraires();
   }
 
   chargerGestionMenus(): void {
@@ -343,6 +362,56 @@ export class EspaceEmploye implements OnInit {
       },
       error: (e) => {
         this.erreurMenus = e.error?.message || 'Impossible de créer le plat.';
+      },
+    });
+  }
+
+  chargerHoraires(): void {
+    this.chargementHoraires = true;
+    this.erreurHoraires = '';
+    this.messageHoraires = '';
+
+    this.horairesService.lister().subscribe({
+      next: (horaires) => {
+        this.horaires = this.joursSemaine.map((jour) => {
+          const horaire = horaires.find((h) => h.jour_semaine === jour.numero);
+          return horaire ?? {
+            jour_semaine: jour.numero,
+            heure_ouverture: '09:00',
+            heure_fermeture: '18:00',
+            ferme: false,
+          };
+        });
+        this.chargementHoraires = false;
+        this.cdr.detectChanges();
+      },
+      error: (erreur) => {
+        this.erreurHoraires =
+          erreur.error?.message || 'Impossible de charger les horaires.';
+        this.chargementHoraires = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  enregistrerHoraires(): void {
+    if (this.enregistrementHoraires) return;
+
+    this.enregistrementHoraires = true;
+    this.erreurHoraires = '';
+    this.messageHoraires = '';
+
+    this.horairesService.modifier(this.horaires).subscribe({
+      next: (reponse) => {
+        this.messageHoraires = reponse.message;
+        this.enregistrementHoraires = false;
+        this.cdr.detectChanges();
+      },
+      error: (erreur) => {
+        this.erreurHoraires =
+          erreur.error?.message || 'Impossible d’enregistrer les horaires.';
+        this.enregistrementHoraires = false;
+        this.cdr.detectChanges();
       },
     });
   }

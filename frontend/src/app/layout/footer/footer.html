@@ -5,13 +5,17 @@
 
   <div class="footer-hours">
     <h2>HORAIRES</h2>
-    <p>Lundi — 09h00 à 18h00</p>
-    <p>Mardi — 09h00 à 18h00</p>
-    <p>Mercredi — 09h00 à 18h00</p>
-    <p>Jeudi — 09h00 à 18h00</p>
-    <p>Vendredi — 09h00 à 18h00</p>
-    <p>Samedi — 09h00 à 18h00</p>
-    <p>Dimanche — 09h00 à 12h00</p>
+    @for (jour of jours; track jour; let i = $index) {
+      <p>
+        {{ jour }} —
+        {{
+          libelleHoraire(
+            horaires.find((horaire) => horaire.jour_semaine === i + 1)
+              ?? { jour_semaine: i + 1, heure_ouverture: null, heure_fermeture: null, ferme: false }
+          )
+        }}
+      </p>
+    }
   </div>
 
   <div class="footer-information">
