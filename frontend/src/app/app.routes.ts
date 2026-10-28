@@ -1,3 +1,6 @@
+import { Cgv } from './features/cgv/cgv';
+import { MentionsLegales } from './features/mentions-legales/mentions-legales';
+import { Contact } from './features/contact/contact';
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { Accueil } from './features/accueil/accueil';
@@ -19,6 +22,9 @@ export const routes: Routes = [
     path: '',
     component: MainLayout,
     children: [
+        { path: 'contact', component: Contact },
+        { path: 'mentions-legales', component: MentionsLegales },
+        { path: 'cgv', component: Cgv },
       {
         path: '',
         component: Accueil,

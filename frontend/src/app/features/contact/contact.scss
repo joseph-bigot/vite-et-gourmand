@@ -1,0 +1,79 @@
+.page-information {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.page-information h1 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.page-information > p {
+  color: #5f5a54;
+  line-height: 1.6;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+label {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #403a34;
+}
+
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d6cabe;
+  border-radius: 8px;
+  background: #fffdf9;
+  color: #302a25;
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #8a5a35;
+  outline-offset: 2px;
+}
+
+button {
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #572d32;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.erreur {
+  color: #b42318;
+}
+
+@media (max-width: 600px) {
+  .page-information {
+    padding: 32px 16px;
+  }
+}
+
+.succes {
+  color: #216e39;
+  font-weight: 600;
+}
