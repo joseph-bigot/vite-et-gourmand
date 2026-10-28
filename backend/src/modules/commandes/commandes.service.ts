@@ -489,6 +489,41 @@ export class CommandesService {
         );
       }
 
+      if (nouveauStatut === 'acceptee') {
+        const commandesAvecMenu: Array<{ id_menu: string }> =
+          await manager.query(
+            'SELECT id_menu FROM commande WHERE id_commande = $1',
+            [idCommande],
+          );
+
+        const idMenu = commandesAvecMenu[0]?.id_menu;
+        if (!idMenu) {
+          throw new NotFoundException('Menu de la commande introuvable.');
+        }
+
+        const menus: Array<{ stock: number }> = await manager.query(
+          'SELECT stock FROM menu WHERE id_menu = $1 FOR UPDATE',
+          [idMenu],
+        );
+
+        if (!menus.length || menus[0].stock <= 0) {
+          throw new BadRequestException(
+            'Le stock de ce menu est épuisé. La commande ne peut pas être acceptée.',
+          );
+        }
+
+        const resultatStock = await manager.query(
+          'UPDATE menu SET stock = stock - 1 WHERE id_menu = $1 AND stock > 0 RETURNING stock',
+          [idMenu],
+        );
+
+        if (!resultatStock.length) {
+          throw new BadRequestException(
+            'Le stock de ce menu est épuisé. La commande ne peut pas être acceptée.',
+          );
+        }
+      }
+
       if (nouveauStatut === 'refusee') {
         await manager.query(
           `UPDATE commande
@@ -550,6 +585,26 @@ export class CommandesService {
       ) {
         throw new BadRequestException(
           'Cette commande ne peut plus être annulée.',
+        );
+      }
+
+      if (
+        ['acceptee', 'en_preparation', 'en_livraison'].includes(statutActuel)
+      ) {
+        const commandesAvecMenu: Array<{ id_menu: string }> =
+          await manager.query(
+            'SELECT id_menu FROM commande WHERE id_commande = $1',
+            [idCommande],
+          );
+
+        const idMenu = commandesAvecMenu[0]?.id_menu;
+        if (!idMenu) {
+          throw new NotFoundException('Menu de la commande introuvable.');
+        }
+
+        await manager.query(
+          'UPDATE menu SET stock = stock + 1 WHERE id_menu = $1',
+          [idMenu],
         );
       }
 

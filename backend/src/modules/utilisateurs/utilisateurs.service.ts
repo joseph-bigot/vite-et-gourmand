@@ -113,7 +113,7 @@ export class UtilisateursService {
     const utilisateurEnregistre =
       await this.utilisateursRepository.save(utilisateur);
 
-    const { mot_de_passe_hash, ...utilisateurPublic } = utilisateurEnregistre;
+    const { mot_de_passe_hash: _mot_de_passe_hash, ...utilisateurPublic } = utilisateurEnregistre;
 
     return utilisateurPublic;
   }
@@ -146,7 +146,7 @@ export class UtilisateursService {
     });
 
     const employeEnregistre = await this.utilisateursRepository.save(employe);
-    const { mot_de_passe_hash, ...employePublic } = employeEnregistre;
+    const { mot_de_passe_hash: _mot_de_passe_hash, ...employePublic } = employeEnregistre;
 
     return employePublic;
   }
@@ -183,7 +183,7 @@ export class UtilisateursService {
 
     employe.actif = false;
     const employeEnregistre = await this.utilisateursRepository.save(employe);
-    const { mot_de_passe_hash, ...employePublic } = employeEnregistre;
+    const { mot_de_passe_hash: _mot_de_passe_hash, ...employePublic } = employeEnregistre;
 
     return employePublic;
   }
@@ -208,7 +208,7 @@ export class UtilisateursService {
       );
     }
 
-    const { mot_de_passe_hash, ...utilisateurPublic } = utilisateur;
+    const { mot_de_passe_hash: _mot_de_passe_hash, ...utilisateurPublic } = utilisateur;
 
     return utilisateurPublic;
   }
