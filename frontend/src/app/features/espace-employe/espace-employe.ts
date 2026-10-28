@@ -380,6 +380,25 @@ export class EspaceEmploye implements OnInit {
     });
   }
 
+  supprimerPlat(plat: PlatGestion): void {
+    if (!confirm(`Confirmer la suppression définitive du plat « ${plat.nom} » ?`)) {
+      return;
+    }
+
+    this.erreurMenus = '';
+    this.messageMenus = '';
+
+    this.menusService.supprimerPlat(plat.id_plat).subscribe({
+      next: (reponse) => {
+        this.messageMenus = reponse.message;
+        this.chargerPlats();
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de supprimer ce plat.';
+      },
+    });
+  }
+
   enregistrerPlat(): void {
     if (this.nouveauPlat.nom.trim().length < 2) {
       this.erreurMenus = 'Le nom du plat doit contenir au moins deux caractères.';

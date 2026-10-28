@@ -334,6 +334,9 @@
       <p>
         Allergènes : {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
       </p>
+      <button type="button" class="bouton-annulation" (click)="supprimerPlat(plat)">
+        Supprimer le plat
+      </button>
     </article>
   </section>
 

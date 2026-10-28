@@ -95,6 +95,13 @@ export class MenusController {
     return this.menusService.supprimerMenu(id);
   }
 
+  @Delete('plats/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('employe', 'admin')
+  supprimerPlat(@Param('id', ParseIntPipe) id: number) {
+    return this.menusService.supprimerPlat(id);
+  }
+
   @Post('plats')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('employe', 'admin')

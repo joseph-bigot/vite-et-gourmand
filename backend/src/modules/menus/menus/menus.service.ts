@@ -318,6 +318,34 @@ export class MenusService {
     });
   }
 
+  async supprimerPlat(id: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const plats = await manager.query(
+        'SELECT id_plat FROM plat WHERE id_plat = $1 FOR UPDATE',
+        [id],
+      );
+
+      if (!plats.length) {
+        throw new NotFoundException('Plat introuvable.');
+      }
+
+      const menus = await manager.query(
+        'SELECT id_menu FROM composer_menu WHERE id_plat = $1 LIMIT 1',
+        [id],
+      );
+
+      if (menus.length) {
+        throw new BadRequestException(
+          'Ce plat est associé à un ou plusieurs menus et ne peut pas être supprimé.',
+        );
+      }
+
+      await manager.query('DELETE FROM plat WHERE id_plat = $1', [id]);
+
+      return { id_plat: id, message: 'Plat supprimé.' };
+    });
+  }
+
   async creerPlat(dto: CreerPlatDto) {
     return this.dataSource.transaction(async (manager) => {
       const resultat = await manager.query(

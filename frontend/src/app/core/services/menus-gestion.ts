@@ -94,6 +94,12 @@ export class MenusGestion {
     );
   }
 
+  supprimerPlat(id: number): Observable<{ id_plat: number; message: string }> {
+    return this.http.delete<{ id_plat: number; message: string }>(
+      `${this.apiUrl}/plats/${id}`,
+    );
+  }
+
   creerPlat(donnees: {
     nom: string;
     description?: string;
