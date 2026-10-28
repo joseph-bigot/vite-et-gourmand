@@ -303,12 +303,13 @@ export class CommandesService {
       const commandes: Array<{
         id_commande: string;
         id_menu: string;
+        adresse_livraison: string;
         frais_livraison: string;
         distance_km: string;
         livraison_hors_bordeaux: boolean;
       }> = await manager.query(
-        `SELECT c.id_commande, c.id_menu, c.frais_livraison,
-                c.distance_km, c.livraison_hors_bordeaux
+        `SELECT c.id_commande, c.id_menu, c.adresse_livraison,
+                c.frais_livraison, c.distance_km, c.livraison_hors_bordeaux
          FROM commande c
          JOIN historique_statut h
            ON h.id_commande = c.id_commande
@@ -329,6 +330,15 @@ export class CommandesService {
       if (!commande) {
         throw new BadRequestException(
           'Commande introuvable ou non modifiable.',
+        );
+      }
+
+      if (
+        commande.adresse_livraison.trim().toLocaleLowerCase('fr-FR') !==
+        donnees.adresse_livraison.trim().toLocaleLowerCase('fr-FR')
+      ) {
+        throw new BadRequestException(
+          'La modification de l’adresse de livraison nécessite une nouvelle vérification des frais de livraison. Contactez l’entreprise.',
         );
       }
 
