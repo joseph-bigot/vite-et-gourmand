@@ -100,8 +100,21 @@ export class EspaceClient implements OnInit {
 
   commencerModification(commande: CommandeClient): void {
     this.commanderEnModification = commande.id_commande;
+
+    const datePrestation = commande.date_prestation.includes('T')
+      ? new Date(commande.date_prestation)
+      : null;
+
+    const dateFormatee = datePrestation
+      ? [
+          datePrestation.getFullYear(),
+          String(datePrestation.getMonth() + 1).padStart(2, '0'),
+          String(datePrestation.getDate()).padStart(2, '0'),
+        ].join('-')
+      : commande.date_prestation.slice(0, 10);
+
     this.modification = {
-      date_prestation: commande.date_prestation.slice(0, 10),
+      date_prestation: dateFormatee,
       heure_prestation: commande.heure_prestation.slice(0, 5),
       adresse_livraison: commande.adresse_livraison,
       lieu_prestation: commande.lieu_prestation,
