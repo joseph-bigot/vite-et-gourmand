@@ -501,10 +501,12 @@ export class EspaceEmploye implements OnInit {
       next: (avis) => {
         this.avis = avis;
         this.chargementAvis = false;
+        this.cdr.detectChanges();
       },
       error: (erreur) => {
         this.erreurAvis = erreur.error?.message || 'Impossible de charger les avis.';
         this.chargementAvis = false;
+        this.cdr.detectChanges();
       },
     });
   }
