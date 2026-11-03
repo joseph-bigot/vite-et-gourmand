@@ -11,7 +11,7 @@ export class ContactService {
   ) {}
 
   async envoyerMessage(donnees: ContactDto): Promise<{ message: string }> {
-    const destinataire = this.configService.get<string>('SMTP_USER');
+    const destinataire = this.configService.get<string>('CONTACT_DESTINATAIRE');
 
     if (!destinataire) {
       throw new InternalServerErrorException(
@@ -19,10 +19,12 @@ export class ContactService {
       );
     }
 
-    const sujet = `Demande de contact Vite & Gourmand — ${donnees.civilite}`;
+    const sujet = `Demande de contact Vite & Gourmand — ${donnees.prenom} ${donnees.nom}`;
     const contenu = [
       'Nouvelle demande depuis le formulaire de contact.',
       '',
+      `Nom : ${donnees.nom}`,
+      `Prénom : ${donnees.prenom}`,
       `Civilité : ${donnees.civilite}`,
       `Adresse e-mail : ${donnees.email}`,
       '',

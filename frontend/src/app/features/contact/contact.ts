@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { Session } from '../../core/services/session';
 
 @Component({
   selector: 'app-contact',
@@ -12,6 +13,8 @@ import { finalize } from 'rxjs';
   styleUrl: './contact.scss',
 })
 export class Contact {
+  nom = '';
+  prenom = '';
   civilite = '';
   email = '';
   description = '';
@@ -22,7 +25,14 @@ export class Contact {
   constructor(
     private readonly http: HttpClient,
     private readonly cdr: ChangeDetectorRef,
-  ) {}
+    private readonly session: Session,
+  ) {
+    const utilisateur = this.session.utilisateur();
+    if (utilisateur) {
+      this.nom = utilisateur.nom;
+      this.prenom = utilisateur.prenom;
+    }
+  }
 
   envoyer(): void {
     if (this.envoiEnCours) return;
@@ -33,6 +43,8 @@ export class Contact {
 
     this.http
       .post<{ message: string }>('http://localhost:3000/contact', {
+        nom: this.nom.trim(),
+        prenom: this.prenom.trim(),
         civilite: this.civilite,
         email: this.email.trim(),
         description: this.description.trim(),
@@ -47,6 +59,8 @@ export class Contact {
         next: (reponse) => {
           this.messageSucces =
             reponse?.message || 'Votre message a bien été envoyé.';
+          this.nom = '';
+          this.prenom = '';
           this.civilite = '';
           this.email = '';
           this.description = '';
