@@ -188,6 +188,22 @@ export class UtilisateursService {
     return employePublic;
   }
 
+  async activerEmploye(id: string) {
+    const employe = await this.utilisateursRepository.findOne({
+      where: { id_utilisateur: id, role: 'employe' },
+    });
+
+    if (!employe) {
+      throw new NotFoundException('Compte employé introuvable.');
+    }
+
+    employe.actif = true;
+    const employeEnregistre = await this.utilisateursRepository.save(employe);
+    const { mot_de_passe_hash: _mot_de_passe_hash, ...employePublic } = employeEnregistre;
+
+    return employePublic;
+  }
+
   async connecter(donnees: ConnexionDto) {
     const email = donnees.email.trim().toLowerCase();
 

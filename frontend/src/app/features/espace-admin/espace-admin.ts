@@ -259,10 +259,31 @@ export class EspaceAdmin implements OnInit {
     this.adminService.desactiverEmploye(id).subscribe({
       next: () => {
         this.message = 'Le compte employé a été désactivé.';
+        this.cdr.detectChanges();
         this.chargerEmployes();
       },
       error: () => {
         this.erreurListeEmployes = 'Impossible de désactiver ce compte employé.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  activerEmploye(id: number): void {
+    const employe = this.employes.find((item) => item.id_utilisateur === id);
+
+    if (!employe || employe.actif) {
+      return;
+    }
+
+    this.adminService.activerEmploye(id).subscribe({
+      next: () => {
+        this.message = 'Le compte employé a été réactivé.';
+        this.cdr.detectChanges();
+        this.chargerEmployes();
+      },
+      error: () => {
+        this.erreurListeEmployes = 'Impossible de réactiver ce compte employé.';
         this.cdr.detectChanges();
       },
     });

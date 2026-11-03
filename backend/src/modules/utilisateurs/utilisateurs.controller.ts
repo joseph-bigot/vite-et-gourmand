@@ -78,6 +78,14 @@ export class UtilisateursController {
     return this.utilisateursService.desactiverEmploye(id);
   }
 
+  @Patch('employes/:id/activer')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  activerEmploye(@Param('id') id: string) {
+    return this.utilisateursService.activerEmploye(id);
+  }
+
   @Post('connexion')
   @HttpCode(HttpStatus.OK)
   async connecter(@Body() donnees: ConnexionDto) {

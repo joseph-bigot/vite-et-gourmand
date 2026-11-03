@@ -173,6 +173,12 @@
       (click)="desactiverEmploye(employe.id_utilisateur)">
       Désactiver le compte
     </button>
+    <button
+      *ngIf="!employe.actif"
+      type="button"
+      (click)="activerEmploye(employe.id_utilisateur)">
+      Réactiver le compte
+    </button>
   </div>
 
   <h2>Créer un compte employé</h2>

@@ -83,4 +83,12 @@ export class AdminService {
       {},
     );
   }
+
+  activerEmploye(id: number): Observable<EmployeCree> {
+    return this.http.patch<EmployeCree>(
+      `${API_URL}/utilisateurs/employes/${id}/activer`,
+      {},
+    );
+  }
+
 }
