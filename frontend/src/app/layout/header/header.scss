@@ -15,8 +15,8 @@
 .logo {
   color: var(--color-bordeaux);
   font-family: 'Lora', serif;
-  font-size: 20px;
-  font-weight: 400;
+  font-size: 25px;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -26,12 +26,12 @@ nav {
   left: 50%;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   transform: translateX(-50%);
 }
 
 nav a {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   text-decoration: none;
   white-space: nowrap;
