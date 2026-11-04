@@ -9,10 +9,12 @@ import {
 
 export class InscriptionDto {
   @IsString()
+  @MinLength(2)
   @MaxLength(100)
   nom!: string;
 
   @IsString()
+  @MinLength(2)
   @MaxLength(100)
   prenom!: string;
 
