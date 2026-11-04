@@ -50,7 +50,13 @@ nav a:hover {
   }
 
   nav {
+    position: static;
+    left: auto;
+    transform: none;
+    display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    justify-content: flex-start;
+    gap: 12px 16px;
+    width: 100%;
   }
 }
