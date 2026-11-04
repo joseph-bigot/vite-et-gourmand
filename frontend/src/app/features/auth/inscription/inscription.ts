@@ -18,10 +18,15 @@ export class Inscription {
   email = '';
   telephone = '';
   motDePasse = '';
+  confirmationMotDePasse = '';
 
   message = '';
   erreur = '';
   chargement = false;
+
+  get motsDePasseIdentiques(): boolean {
+    return this.motDePasse === this.confirmationMotDePasse;
+  }
 
   constructor(
     private readonly http: HttpClient,
@@ -29,6 +34,11 @@ export class Inscription {
   ) {}
 
   inscrire(): void {
+    if (!this.motsDePasseIdentiques) {
+      this.erreur = 'Les deux mots de passe ne correspondent pas.';
+      return;
+    }
+
     this.message = '';
     this.erreur = '';
     this.chargement = true;
@@ -59,6 +69,7 @@ export class Inscription {
           this.email = '';
           this.telephone = '';
           this.motDePasse = '';
+          this.confirmationMotDePasse = '';
 
           this.cdr.detectChanges();
         },

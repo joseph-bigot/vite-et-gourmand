@@ -58,3 +58,16 @@
     padding: 24px;
   }
 }
+
+.auth-page button:disabled {
+  background: #d8d3d0;
+  color: #77716e;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.auth-page button:not(:disabled) {
+  background: #572d32;
+  color: #fff;
+  cursor: pointer;
+}
