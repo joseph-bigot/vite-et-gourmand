@@ -11,7 +11,6 @@
   background-color: var(--color-creme);
 }
 
-
 .logo {
   color: var(--color-bordeaux);
   font-family: 'Lora', serif;
@@ -37,8 +36,58 @@ nav a {
   white-space: nowrap;
 }
 
-nav a:hover {
+nav a:hover,
+.space-link:hover {
   color: var(--color-bordeaux);
+}
+
+.user-actions {
+  position: absolute;
+  right: 7%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.space-link {
+  color: var(--color-bordeaux);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.user-actions button {
+  padding: 9px 14px;
+  border: 1px solid var(--color-bordeaux);
+  border-radius: 4px;
+  background: var(--color-bordeaux);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+.user-actions button:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 1100px) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  nav {
+    position: static;
+    transform: none;
+    flex-wrap: wrap;
+  }
+
+  .user-actions {
+    position: static;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 600px) {
@@ -50,13 +99,14 @@ nav a:hover {
   }
 
   nav {
-    position: static;
-    left: auto;
-    transform: none;
-    display: flex;
-    flex-wrap: wrap;
     justify-content: flex-start;
     gap: 12px 16px;
     width: 100%;
+  }
+
+  .user-actions {
+    align-self: flex-end;
+    margin-left: 0;
+    flex-wrap: wrap;
   }
 }

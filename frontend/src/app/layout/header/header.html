@@ -1,11 +1,24 @@
 <header class="site-header">
   <a class="logo" routerLink="/">Vite & Gourmand</a>
 
- <nav aria-label="Navigation principale">
-  <a routerLink="/">Accueil</a>
-  <a routerLink="/menus">Nos menus</a>
-  <a href="#histoire">Notre histoire</a>
-  <a routerLink="/contact">Contact</a>
-  <a routerLink="/connexion">Connexion</a>
-</nav>
+  <nav aria-label="Navigation principale">
+    <a routerLink="/">Accueil</a>
+    <a routerLink="/menus">Nos menus</a>
+    <a href="#histoire">Notre histoire</a>
+    <a routerLink="/contact">Contact</a>
+
+    @if (!session.utilisateur()) {
+      <a routerLink="/connexion">Connexion</a>
+    }
+  </nav>
+
+  @if (session.utilisateur(); as utilisateur) {
+    <div class="user-actions">
+      <span>Bonjour, {{ utilisateur.prenom }}</span>
+      <a class="space-link" [routerLink]="destinationEspace">
+        {{ libelleEspace }}
+      </a>
+      <button type="button" (click)="deconnexion()">Déconnexion</button>
+    </div>
+  }
 </header>
