@@ -23,7 +23,7 @@
   min-width: 0;
   padding: 1.5rem;
   margin: 1rem 0;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
   background: #fff;
   overflow-wrap: anywhere;
@@ -31,7 +31,7 @@
 
 .statistiques .carte-statistique {
   margin: 0;
-  background: #f8f9f8;
+  background: var(--admin-fond-formulaire);
 }
 
 .carte-statistique h3 {
@@ -55,9 +55,9 @@
   max-width: 720px;
   margin: 1rem 0 2rem;
   padding: 1.25rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
-  background: #f8f9f8;
+  background: var(--admin-fond-formulaire);
 }
 
 .espace-admin label {
@@ -68,12 +68,7 @@
 .espace-admin input {
   width: 100%;
   min-width: 0;
-  box-sizing: border-box;
-  padding: 0.7rem;
-  border: 1px solid #bbb;
-  border-radius: 5px;
   background: #fff;
-  font: inherit;
 }
 
 .espace-admin button {
@@ -82,7 +77,7 @@
   padding: 0.7rem 1rem;
   border: 0;
   border-radius: 5px;
-  background: #285943;
+  background: var(--admin-vert);
   color: #fff;
   font: inherit;
   font-weight: 600;
@@ -90,7 +85,7 @@
 }
 
 .espace-admin button:hover {
-  background: #173d2d;
+  background: var(--admin-vert-fonce);
 }
 
 .espace-admin button:disabled {
@@ -101,7 +96,7 @@
 .espace-admin blockquote {
   margin: 1rem 0;
   padding-left: 1rem;
-  border-left: 3px solid #ddd;
+  border-left: 3px solid var(--admin-bordure);
   line-height: 1.6;
 }
 
@@ -131,16 +126,16 @@
 .graphique-menus {
   margin: 1.5rem 0 2rem;
   padding: 1.25rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
   background: #fff;
 }
 
 .filtres-statistiques form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
-  gap: 0.75rem 1rem;
+  gap: 0.6rem 1rem;
   max-width: none;
   margin-bottom: 0;
   padding: 0;
@@ -148,15 +143,44 @@
   background: transparent;
 }
 
-.filtres-statistiques select {
+.filtres-statistiques label[for="filtre-menu"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.filtres-statistiques #filtre-menu {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.filtres-statistiques label[for="filtre-date-debut"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.filtres-statistiques #filtre-date-debut {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.filtres-statistiques label[for="filtre-date-fin"] {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.filtres-statistiques #filtre-date-fin {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.filtres-statistiques select,
+.filtres-statistiques input {
+  display: block;
   width: 100%;
+  height: 46px;
   min-width: 0;
-  box-sizing: border-box;
-  padding: 0.7rem;
-  border: 1px solid #bbb;
-  border-radius: 5px;
   background: #fff;
-  font: inherit;
+  color: #302a25;
 }
 
 .actions-filtres {
@@ -209,7 +233,7 @@
 }
 
 .barre-commandes {
-  background: #285943;
+  background: var(--admin-vert);
 }
 
 .barre-revenu {
@@ -222,8 +246,133 @@
     padding: 1rem;
   }
 
+  .filtres-statistiques form {
+    grid-template-columns: 1fr;
+  }
+
+  .filtres-statistiques form label,
+  .filtres-statistiques form select,
+  .filtres-statistiques form input {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
   .actions-filtres button {
     width: 100%;
     margin-right: 0;
+  }
+}
+
+
+/* Interrupteur compact pour les jours de fermeture */
+.espace-admin .toggle-fermeture {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 0 0 0.5rem;
+  cursor: pointer;
+}
+
+.espace-admin .toggle-input {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 22px;
+  min-width: 38px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #c8c8c8;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.espace-admin .toggle-input::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.espace-admin .toggle-input:checked {
+  background: var(--admin-vert);
+}
+
+.espace-admin .toggle-input:checked::before {
+  transform: translateX(16px);
+}
+
+.espace-admin .toggle-input:focus-visible {
+  outline: 2px solid var(--admin-vert);
+  outline-offset: 3px;
+}
+
+
+
+/* Navigation par onglets de l'espace administrateur */
+.onglets-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--admin-bordure);
+}
+
+.onglets-admin button:hover {
+  background: var(--admin-vert-fonce);
+}
+
+.onglets-admin button.actif {
+  background: var(--admin-vert-fonce);
+  outline: 2px solid var(--admin-vert-clair);
+}
+
+@media (max-width: 600px) {
+  .onglets-admin button {
+    flex: 1 1 auto;
+  }
+}
+
+
+/* Même disposition des horaires que dans l'espace employé */
+.espace-admin .formulaire-catalogue {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.espace-admin .formulaire-catalogue > .carte-statistique {
+  margin: 0;
+  min-width: 0;
+}
+
+.espace-admin .formulaire-catalogue > button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+@media (max-width: 900px) {
+  .espace-admin .formulaire-catalogue {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .espace-admin .formulaire-catalogue {
+    grid-template-columns: 1fr;
   }
 }

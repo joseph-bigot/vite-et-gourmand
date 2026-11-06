@@ -14,6 +14,12 @@ import { HorairesService, type Horaire } from '../../core/services/horaires';
   styleUrl: './espace-admin.scss',
 })
 export class EspaceAdmin implements OnInit {
+  ongletActif: 'statistiques' | 'horaires' | 'avis' | 'employes' = 'statistiques';
+
+  ouvrirOnglet(onglet: 'statistiques' | 'horaires' | 'avis' | 'employes'): void {
+    this.ongletActif = onglet;
+  }
+
   private readonly avisService = inject(AvisService);
   private readonly menusService = inject(MenusGestion);
   private readonly horairesService = inject(HorairesService);

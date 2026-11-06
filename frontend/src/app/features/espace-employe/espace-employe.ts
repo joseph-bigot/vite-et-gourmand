@@ -1,3 +1,4 @@
+import { forkJoin } from 'rxjs';
 import { AvisAModerer, AvisService } from '../../core/services/avis';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -57,6 +58,7 @@ export class EspaceEmploye implements OnInit {
   messageMenus = '';
   enregistrementMenu = false;
   menuEnEdition: number | null = null;
+  formulaireMenuVisible = false;
 
   formulaireMenu: DonneesMenu = this.nouveauFormulaireMenu();
   nouveauPlat = {
@@ -65,6 +67,9 @@ export class EspaceEmploye implements OnInit {
     categorie: 'plat' as 'entree' | 'plat' | 'dessert',
     allergenes: [] as number[],
   };
+  creationPlatDansMenuVisible = false;
+  enregistrementPlatMenu = false;
+
 
   commandes: CommandeEmploye[] = [];
   recherche = '';
@@ -222,31 +227,24 @@ export class EspaceEmploye implements OnInit {
   chargerGestionMenus(): void {
     this.chargementMenus = true;
     this.erreurMenus = '';
-    this.menusService.listerReferences().subscribe({
-      next: (references) => {
+
+    forkJoin({
+      references: this.menusService.listerReferences(),
+      plats: this.menusService.listerPlats(),
+      menus: this.menusService.listerTous(),
+    }).subscribe({
+      next: ({ references, plats, menus }) => {
         this.referencesMenus = references;
-        this.menusService.listerPlats().subscribe({
-          next: (plats) => {
-            this.plats = plats;
-          },
-          error: (e) => {
-            this.erreurMenus = e.error?.message || 'Impossible de charger les plats.';
-          },
-        });
-        this.menusService.listerTous().subscribe({
-          next: (menus) => {
-            this.menus = menus;
-            this.chargementMenus = false;
-          },
-          error: (e) => {
-            this.erreurMenus = e.error?.message || 'Impossible de charger les menus.';
-            this.chargementMenus = false;
-          },
-        });
+        this.plats = plats;
+        this.menus = menus;
+        this.chargementMenus = false;
+        this.cdr.detectChanges();
       },
       error: (e) => {
-        this.erreurMenus = e.error?.message || 'Impossible de charger les références des menus.';
+        console.error('[EspaceEmploye] Erreur chargement catalogue :', e);
+        this.erreurMenus = e.error?.message || 'Impossible de charger le catalogue.';
         this.chargementMenus = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -277,6 +275,7 @@ export class EspaceEmploye implements OnInit {
 
   editerMenu(menu: MenuGestion): void {
     this.menuEnEdition = menu.id_menu;
+    this.formulaireMenuVisible = true;
     this.formulaireMenu = {
       id_theme: Number(menu.id_theme),
       id_regime: Number(menu.id_regime),
@@ -295,6 +294,15 @@ export class EspaceEmploye implements OnInit {
   nouveauMenu(): void {
     this.menuEnEdition = null;
     this.formulaireMenu = this.nouveauFormulaireMenu();
+    this.formulaireMenuVisible = true;
+    this.erreurMenus = '';
+    this.messageMenus = '';
+  }
+
+  fermerFormulaireMenu(): void {
+    this.formulaireMenuVisible = false;
+    this.menuEnEdition = null;
+    this.formulaireMenu = this.nouveauFormulaireMenu();
   }
 
   ajouterPlatAuMenu(idPlat: string): void {
@@ -304,6 +312,60 @@ export class EspaceEmploye implements OnInit {
       id_plat: id,
       quantite: 1,
       ordre_affichage: this.formulaireMenu.plats.length + 1,
+    });
+  }
+
+  modifierAllergeneNouveauPlat(id: number, coche: boolean): void {
+    if (coche && !this.nouveauPlat.allergenes.includes(id)) {
+      this.nouveauPlat.allergenes.push(id);
+    } else if (!coche) {
+      this.nouveauPlat.allergenes = this.nouveauPlat.allergenes.filter(
+        (allergeneId) => allergeneId !== id
+      );
+    }
+  }
+
+  creerPlatDepuisMenu(): void {
+    if (this.nouveauPlat.nom.trim().length < 2) {
+      this.erreurMenus = 'Le nom du plat doit contenir au moins deux caractères.';
+      return;
+    }
+
+    const donnees = {
+      ...this.nouveauPlat,
+      nom: this.nouveauPlat.nom.trim(),
+      allergenes: [...this.nouveauPlat.allergenes],
+    };
+
+    this.enregistrementPlatMenu = true;
+    this.erreurMenus = '';
+
+    this.menusService.creerPlat(donnees).subscribe({
+      next: (reponse) => {
+        const platCree: PlatGestion = {
+          id_plat: reponse.id_plat,
+          nom: donnees.nom,
+          description: donnees.description,
+          categorie: donnees.categorie,
+          allergenes: donnees.allergenes,
+        };
+
+        this.plats = [...this.plats, platCree];
+        this.ajouterPlatAuMenu(String(platCree.id_plat));
+        this.nouveauPlat = {
+          nom: '',
+          description: '',
+          categorie: 'plat',
+          allergenes: [],
+        };
+        this.creationPlatDansMenuVisible = false;
+        this.enregistrementPlatMenu = false;
+        this.messageMenus = 'Plat créé et ajouté au menu.';
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de créer le plat.';
+        this.enregistrementPlatMenu = false;
+      },
     });
   }
 
@@ -336,7 +398,7 @@ export class EspaceEmploye implements OnInit {
       next: (reponse) => {
         this.messageMenus = reponse.message;
         this.enregistrementMenu = false;
-        this.nouveauMenu();
+        this.fermerFormulaireMenu();
         this.chargerGestionMenus();
       },
       error: (e) => {
@@ -358,7 +420,7 @@ export class EspaceEmploye implements OnInit {
       next: (reponse) => {
         this.messageMenus = reponse.message;
         if (this.menuEnEdition === menu.id_menu) {
-          this.nouveauMenu();
+          this.fermerFormulaireMenu();
         }
         this.chargerGestionMenus();
       },

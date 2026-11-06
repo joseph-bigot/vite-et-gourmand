@@ -1,206 +1,201 @@
 <section class="espace-admin">
   <h1>Espace administrateur</h1>
 
-  <h2>Statistiques générales</h2>
+  <nav class="onglets-admin" aria-label="Navigation administrateur">
+    <button type="button" [class.actif]="ongletActif === 'statistiques'" (click)="ouvrirOnglet('statistiques')">Statistiques</button>
+    <button type="button" [class.actif]="ongletActif === 'horaires'" (click)="ouvrirOnglet('horaires')">Horaires</button>
+    <button type="button" [class.actif]="ongletActif === 'avis'" (click)="ouvrirOnglet('avis')">Modération des avis</button>
+    <button type="button" [class.actif]="ongletActif === 'employes'" (click)="ouvrirOnglet('employes')">Gestion des employés</button>
+  </nav>
 
-  <p *ngIf="chargement">Chargement des statistiques…</p>
-  <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+  <section *ngIf="ongletActif === 'statistiques'">
+    <h2>Statistiques générales</h2>
 
-  <div *ngIf="statistiques as stats" class="statistiques">
-    <article class="carte-statistique">
-      <h3>Commandes</h3>
-      <p>{{ stats.nombre_commandes }}</p>
-    </article>
+    <p *ngIf="chargement">Chargement des statistiques…</p>
+    <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
 
-    <article class="carte-statistique">
-      <h3>Chiffre d’affaires</h3>
-      <p>{{ stats.chiffre_affaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</p>
-    </article>
-  </div>
-
-  <section class="filtres-statistiques" aria-labelledby="titre-filtres">
-    <h3 id="titre-filtres">Filtrer les statistiques</h3>
-    <form (ngSubmit)="appliquerFiltresStatistiques()">
-      <label for="filtre-menu">Menu</label>
-      <select id="filtre-menu" name="filtreMenuId" [(ngModel)]="filtreMenuId">
-        <option value="">Tous les menus</option>
-        <option *ngFor="let menu of menusDisponibles" [value]="menu.id_menu">
-          {{ menu.titre }}
-        </option>
-      </select>
-
-      <label for="filtre-date-debut">Date de début</label>
-      <input
-        id="filtre-date-debut"
-        name="filtreDateDebut"
-        type="date"
-        [(ngModel)]="filtreDateDebut"
-      >
-
-      <label for="filtre-date-fin">Date de fin</label>
-      <input
-        id="filtre-date-fin"
-        name="filtreDateFin"
-        type="date"
-        [(ngModel)]="filtreDateFin"
-      >
-
-      <div class="actions-filtres">
-        <button type="submit" [disabled]="chargement">Appliquer les filtres</button>
-        <button type="button" class="bouton-secondaire"
-          (click)="reinitialiserFiltresStatistiques()"
-          [disabled]="chargement">
-          Réinitialiser
-        </button>
-      </div>
-      <p *ngIf="erreurFiltres" class="erreur">{{ erreurFiltres }}</p>
-    </form>
-
-  <h2>Gestion des horaires d'ouverture</h2>
-  <p>Les modifications seront visibles dans le pied de page du site.</p>
-
-  <p *ngIf="chargementHoraires">Chargement des horaires…</p>
-  <p *ngIf="erreurHoraires" class="erreur">{{ erreurHoraires }}</p>
-  <p *ngIf="messageHoraires" class="succes">{{ messageHoraires }}</p>
-
-  <form *ngIf="!chargementHoraires && horaires.length"
-    class="formulaire-catalogue"
-    (ngSubmit)="enregistrerHoraires()">
-
-    <div *ngFor="let jour of joursSemaine; let i = index" class="carte-statistique">
-      <h3>{{ jour.nom }}</h3>
-
-      <label [for]="'admin-ferme-' + jour.numero">
-        <input
-          [id]="'admin-ferme-' + jour.numero"
-          [name]="'admin-ferme-' + jour.numero"
-          type="checkbox"
-          [(ngModel)]="horaires[i].ferme">
-        Fermé
-      </label>
-
-      <div *ngIf="!horaires[i].ferme">
-        <label [for]="'admin-ouverture-' + jour.numero">Heure d'ouverture</label>
-        <input
-          [id]="'admin-ouverture-' + jour.numero"
-          [name]="'admin-ouverture-' + jour.numero"
-          type="time"
-          [(ngModel)]="horaires[i].heure_ouverture"
-          required>
-
-        <label [for]="'admin-fermeture-' + jour.numero">Heure de fermeture</label>
-        <input
-          [id]="'admin-fermeture-' + jour.numero"
-          [name]="'admin-fermeture-' + jour.numero"
-          type="time"
-          [(ngModel)]="horaires[i].heure_fermeture"
-          required>
-      </div>
+    <div *ngIf="statistiques as stats" class="statistiques">
+      <article class="carte-statistique">
+        <h3>Commandes</h3>
+        <p>{{ stats.nombre_commandes }}</p>
+      </article>
+      <article class="carte-statistique">
+        <h3>Chiffre d’affaires</h3>
+        <p>{{ stats.chiffre_affaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</p>
+      </article>
     </div>
 
-    <button type="submit" [disabled]="enregistrementHoraires">
-      {{ enregistrementHoraires ? 'Enregistrement…' : 'Enregistrer les horaires' }}
-    </button>
-  </form>
+    <section class="filtres-statistiques" aria-labelledby="titre-filtres">
+      <h3 id="titre-filtres">Filtrer les statistiques</h3>
+      <form (ngSubmit)="appliquerFiltresStatistiques()">
+        <label for="filtre-menu">Menu</label>
+        <select id="filtre-menu" name="filtreMenuId" [(ngModel)]="filtreMenuId">
+          <option value="">Tous les menus</option>
+          <option *ngFor="let menu of menusDisponibles" [value]="menu.id_menu">
+            {{ menu.titre }}
+          </option>
+        </select>
 
-</section>
+        <label for="filtre-date-debut">Date de début</label>
+        <input id="filtre-date-debut" name="filtreDateDebut" type="date" [(ngModel)]="filtreDateDebut">
 
-  <section class="graphique-menus" *ngIf="statistiques as stats">
-    <h3>Comparaison des menus</h3>
-    <p *ngIf="stats.statistiques_par_menu.length === 0">
-      Aucune donnée pour les filtres sélectionnés.
+        <label for="filtre-date-fin">Date de fin</label>
+        <input id="filtre-date-fin" name="filtreDateFin" type="date" [(ngModel)]="filtreDateFin">
+
+        <div class="actions-filtres">
+          <button type="submit" [disabled]="chargement">Appliquer les filtres</button>
+          <button type="button" class="bouton-secondaire"
+            (click)="reinitialiserFiltresStatistiques()" [disabled]="chargement">
+            Réinitialiser
+          </button>
+        </div>
+        <p *ngIf="erreurFiltres" class="erreur">{{ erreurFiltres }}</p>
+      </form>
+    </section>
+
+    <section class="graphique-menus" *ngIf="statistiques as stats">
+      <h3>Comparaison des menus</h3>
+      <p *ngIf="stats.statistiques_par_menu.length === 0">
+        Aucune donnée pour les filtres sélectionnés.
+      </p>
+
+      <article class="ligne-menu" *ngFor="let menu of stats.statistiques_par_menu">
+        <h4>{{ menu.titreMenu }}</h4>
+        <div class="libelle-barre">
+          <span>Commandes</span>
+          <strong>{{ menu.nombreCommandes }}</strong>
+        </div>
+        <div class="fond-barre" role="img" [attr.aria-label]="menu.nombreCommandes + ' commandes'">
+          <div class="barre barre-commandes"
+            [style.width.%]="menu.nombreCommandes / maximumCommandes() * 100"></div>
+        </div>
+        <div class="libelle-barre">
+          <span>Chiffre d’affaires</span>
+          <strong>{{ menu.chiffreAffaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</strong>
+        </div>
+        <div class="fond-barre"
+          role="img"
+          [attr.aria-label]="'Chiffre d’affaires : ' + menu.chiffreAffaires + ' euros'">
+          <div class="barre barre-revenu"
+            [style.width.%]="menu.chiffreAffaires / maximumChiffreAffaires() * 100"></div>
+        </div>
+      </article>
+    </section>
+  </section>
+
+  <section *ngIf="ongletActif === 'horaires'">
+    <h2>Gestion des horaires d'ouverture</h2>
+    <p>Les modifications seront visibles dans le pied de page du site.</p>
+
+    <p *ngIf="chargementHoraires">Chargement des horaires…</p>
+    <p *ngIf="erreurHoraires" class="erreur">{{ erreurHoraires }}</p>
+    <p *ngIf="messageHoraires" class="succes">{{ messageHoraires }}</p>
+
+    <form *ngIf="!chargementHoraires && horaires.length"
+      class="formulaire-catalogue"
+      (ngSubmit)="enregistrerHoraires()">
+      <div *ngFor="let jour of joursSemaine; let i = index" class="carte-statistique">
+        <h3>{{ jour.nom }}</h3>
+        <label class="toggle-fermeture" [for]="'admin-ferme-' + jour.numero">
+          <input class="toggle-input"
+            [id]="'admin-ferme-' + jour.numero"
+            [name]="'admin-ferme-' + jour.numero"
+            type="checkbox"
+            [(ngModel)]="horaires[i].ferme">
+          <span>Fermé</span>
+        </label>
+
+        <div *ngIf="!horaires[i].ferme">
+          <label [for]="'admin-ouverture-' + jour.numero">Heure d'ouverture</label>
+          <input [id]="'admin-ouverture-' + jour.numero"
+            [name]="'admin-ouverture-' + jour.numero"
+            type="time"
+            [(ngModel)]="horaires[i].heure_ouverture"
+            required>
+
+          <label [for]="'admin-fermeture-' + jour.numero">Heure de fermeture</label>
+          <input [id]="'admin-fermeture-' + jour.numero"
+            [name]="'admin-fermeture-' + jour.numero"
+            type="time"
+            [(ngModel)]="horaires[i].heure_fermeture"
+            required>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="enregistrementHoraires">
+        {{ enregistrementHoraires ? 'Enregistrement…' : 'Enregistrer les horaires' }}
+      </button>
+    </form>
+  </section>
+
+  <section *ngIf="ongletActif === 'avis'">
+    <h2>Modération des avis</h2>
+    <p>Seuls les avis approuvés seront visibles sur l’accueil.</p>
+    <p *ngIf="chargementAvis">Chargement des avis…</p>
+    <p *ngIf="erreurAvis" class="erreur">{{ erreurAvis }}</p>
+    <p *ngIf="messageAvis" class="succes">{{ messageAvis }}</p>
+    <p *ngIf="!chargementAvis && !erreurAvis && avis.length === 0">
+      Aucun avis en attente de modération.
     </p>
 
-    <article class="ligne-menu"
-      *ngFor="let menu of stats.statistiques_par_menu">
-      <h4>{{ menu.titreMenu }}</h4>
-
-      <div class="libelle-barre">
-        <span>Commandes</span>
-        <strong>{{ menu.nombreCommandes }}</strong>
-      </div>
-      <div class="fond-barre" role="img"
-        [attr.aria-label]="menu.nombreCommandes + ' commandes'">
-        <div class="barre barre-commandes"
-          [style.width.%]="menu.nombreCommandes / maximumCommandes() * 100"></div>
-      </div>
-
-      <div class="libelle-barre">
-        <span>Chiffre d’affaires</span>
-        <strong>{{ menu.chiffreAffaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</strong>
-      </div>
-      <div class="fond-barre" role="img"
-        [attr.aria-label]="'Chiffre d’affaires : ' + menu.chiffreAffaires + ' euros'">
-        <div class="barre barre-revenu"
-          [style.width.%]="menu.chiffreAffaires / maximumChiffreAffaires() * 100"></div>
-      </div>
+    <article *ngFor="let avisClient of avis" class="carte-statistique">
+      <h3>Avis n°{{ avisClient.id_avis }}</h3>
+      <p><strong>Commande :</strong> n°{{ avisClient.id_commande }}</p>
+      <p><strong>Client :</strong> {{ avisClient.prenom_client }} {{ avisClient.nom_client }}</p>
+      <p><strong>Note :</strong> {{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }} ({{ avisClient.note }}/5)</p>
+      <blockquote>{{ avisClient.commentaire }}</blockquote>
+      <p><small>Soumis le {{ avisClient.date_creation | date:'dd/MM/yyyy à HH:mm' }}</small></p>
+      <button type="button" (click)="modererAvis(avisClient, 'approuve')"
+        [disabled]="avisEnCours === avisClient.id_avis">Approuver</button>
+      <button type="button" (click)="modererAvis(avisClient, 'rejete')"
+        [disabled]="avisEnCours === avisClient.id_avis">Rejeter</button>
     </article>
   </section>
 
-  <h2>Modération des avis</h2>
-  <p>Seuls les avis approuvés seront visibles sur l’accueil.</p>
-  <p *ngIf="chargementAvis">Chargement des avis…</p>
-  <p *ngIf="erreurAvis" class="erreur">{{ erreurAvis }}</p>
-  <p *ngIf="messageAvis" class="succes">{{ messageAvis }}</p>
-  <p *ngIf="!chargementAvis && !erreurAvis && avis.length === 0">Aucun avis en attente de modération.</p>
+  <section *ngIf="ongletActif === 'employes'">
+    <h2>Gestion des employés</h2>
+    <p *ngIf="erreurListeEmployes" class="erreur">{{ erreurListeEmployes }}</p>
+    <p *ngIf="!erreurListeEmployes && employes.length === 0">
+      Aucun compte employé à afficher.
+    </p>
 
-  <article *ngFor="let avisClient of avis" class="carte-statistique">
-    <h3>Avis n°{{ avisClient.id_avis }}</h3>
-    <p><strong>Commande :</strong> n°{{ avisClient.id_commande }}</p>
-    <p><strong>Client :</strong> {{ avisClient.prenom_client }} {{ avisClient.nom_client }}</p>
-    <p><strong>Note :</strong> {{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }} ({{ avisClient.note }}/5)</p>
-    <blockquote>{{ avisClient.commentaire }}</blockquote>
-    <p><small>Soumis le {{ avisClient.date_creation | date:'dd/MM/yyyy à HH:mm' }}</small></p>
-    <button type="button" (click)="modererAvis(avisClient, 'approuve')" [disabled]="avisEnCours === avisClient.id_avis">Approuver</button>
-    <button type="button" (click)="modererAvis(avisClient, 'rejete')" [disabled]="avisEnCours === avisClient.id_avis">Rejeter</button>
-  </article>
+    <div class="formulaire-catalogue liste-employes">
+      <div *ngFor="let employe of employes" class="carte-statistique">
+        <h3>{{ employe.prenom }} {{ employe.nom }}</h3>
+        <p>{{ employe.email }}</p>
+        <p>Statut : {{ employe.actif ? 'Actif' : 'Désactivé' }}</p>
+        <button *ngIf="employe.actif" type="button"
+          (click)="desactiverEmploye(employe.id_utilisateur)">
+          Désactiver le compte
+        </button>
+        <button *ngIf="!employe.actif" type="button"
+          (click)="activerEmploye(employe.id_utilisateur)">
+          Réactiver le compte
+        </button>
+      </div>
+    </div>
 
-  <h2>Gestion des employés</h2>
+    <h2>Créer un compte employé</h2>
+    <p *ngIf="message" class="succes">{{ message }}</p>
+    <p *ngIf="erreurEmploye" class="erreur">{{ erreurEmploye }}</p>
 
-  <p *ngIf="erreurListeEmployes" class="erreur">{{ erreurListeEmployes }}</p>
+    <form (ngSubmit)="creerEmploye()">
+      <label for="nom">Nom</label>
+      <input id="nom" name="nom" [(ngModel)]="nom" required maxlength="100">
 
-  <p *ngIf="!erreurListeEmployes && employes.length === 0">
-    Aucun compte employé à afficher.
-  </p>
+      <label for="prenom">Prénom</label>
+      <input id="prenom" name="prenom" [(ngModel)]="prenom" required maxlength="100">
 
-  <div *ngFor="let employe of employes" class="carte-statistique">
-    <h3>{{ employe.prenom }} {{ employe.nom }}</h3>
-    <p>{{ employe.email }}</p>
-    <p>Statut : {{ employe.actif ? 'Actif' : 'Désactivé' }}</p>
-    <button
-      *ngIf="employe.actif"
-      type="button"
-      (click)="desactiverEmploye(employe.id_utilisateur)">
-      Désactiver le compte
-    </button>
-    <button
-      *ngIf="!employe.actif"
-      type="button"
-      (click)="activerEmploye(employe.id_utilisateur)">
-      Réactiver le compte
-    </button>
-  </div>
+      <label for="email">Adresse e-mail</label>
+      <input id="email" name="email" type="email" [(ngModel)]="email" required maxlength="255">
 
-  <h2>Créer un compte employé</h2>
+      <label for="motDePasse">Mot de passe temporaire (12 caractères minimum)</label>
+      <input id="motDePasse" name="motDePasse" type="password"
+        [(ngModel)]="motDePasse" required minlength="12" maxlength="72">
 
-  <p *ngIf="message" class="succes">{{ message }}</p>
-  <p *ngIf="erreurEmploye" class="erreur">{{ erreurEmploye }}</p>
-
-  <form (ngSubmit)="creerEmploye()">
-    <label for="nom">Nom</label>
-    <input id="nom" name="nom" [(ngModel)]="nom" required maxlength="100">
-
-    <label for="prenom">Prénom</label>
-    <input id="prenom" name="prenom" [(ngModel)]="prenom" required maxlength="100">
-
-    <label for="email">Adresse e-mail</label>
-    <input id="email" name="email" type="email" [(ngModel)]="email" required maxlength="255">
-
-    <label for="motDePasse">Mot de passe temporaire (12 caractères minimum)</label>
-    <input id="motDePasse" name="motDePasse" type="password" [(ngModel)]="motDePasse" required minlength="12" maxlength="72">
-
-    <button type="submit" [disabled]="chargementEmploye">
-      {{ chargementEmploye ? 'Création…' : 'Créer le compte employé' }}
-    </button>
-  </form>
+      <button type="submit" [disabled]="chargementEmploye">
+        {{ chargementEmploye ? 'Création…' : 'Créer le compte employé' }}
+      </button>
+    </form>
+  </section>
 </section>

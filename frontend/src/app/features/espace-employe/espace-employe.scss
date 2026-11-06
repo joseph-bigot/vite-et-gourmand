@@ -16,7 +16,7 @@ h1 {
 
 .commande {
   padding: 1.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
   background: #fff;
   overflow-wrap: anywhere;
@@ -43,7 +43,7 @@ h1 {
   gap: 0.65rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--admin-bordure);
 }
 
 .gestion h3 {
@@ -58,11 +58,6 @@ h1 {
 .gestion select,
 .gestion textarea {
   width: 100%;
-  padding: 0.7rem;
-  border: 1px solid #bbb;
-  border-radius: 5px;
-  font: inherit;
-  box-sizing: border-box;
 }
 
 .gestion button {
@@ -72,7 +67,7 @@ h1 {
   cursor: pointer;
   font: inherit;
   font-weight: 600;
-  background: #285943;
+  background: var(--admin-vert);
   color: white;
 }
 
@@ -108,9 +103,9 @@ h1 {
   align-items: end;
   margin-top: 1.5rem;
   padding: 1.25rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
-  background: #f8f9f8;
+  background: var(--admin-fond-formulaire);
 }
 
 .outils-commandes > div {
@@ -128,12 +123,7 @@ h1 {
 .outils-commandes select {
   width: 100%;
   min-width: 0;
-  box-sizing: border-box;
-  padding: 0.7rem;
-  border: 1px solid #bbb;
-  border-radius: 5px;
   background: white;
-  font: inherit;
 }
 
 .compteur-commandes,
@@ -209,24 +199,13 @@ h1 {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin: 1.5rem 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--admin-bordure);
   padding-bottom: 1rem;
 }
 
-.onglets-employe button,
-.gestion-catalogue button {
-  border: 0;
-  border-radius: 5px;
-  padding: 0.7rem 1rem;
-  background: #285943;
-  color: #fff;
-  font: inherit;
-  cursor: pointer;
-}
-
 .onglets-employe button.actif {
-  background: #173d2d;
-  outline: 2px solid #8db6a0;
+  background: var(--admin-vert-fonce);
+  outline: 2px solid var(--admin-vert-clair);
 }
 
 .gestion-catalogue {
@@ -239,20 +218,15 @@ h1 {
   max-width: 720px;
   margin: 1rem 0 2rem;
   padding: 1.25rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
-  background: #f8f9f8;
+  background: var(--admin-fond-formulaire);
 }
 
 .formulaire-catalogue input:not([type="checkbox"]),
 .formulaire-catalogue select,
 .formulaire-catalogue textarea {
   width: 100%;
-  box-sizing: border-box;
-  padding: 0.7rem;
-  border: 1px solid #bbb;
-  border-radius: 5px;
-  font: inherit;
 }
 
 .formulaire-catalogue fieldset {
@@ -272,11 +246,72 @@ h1 {
 .carte-menu-gestion {
   margin: 1rem 0;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-bordure);
   border-radius: 8px;
   background: #fff;
 }
 
 .carte-menu-gestion button {
   margin: 0.3rem 0.5rem 0.3rem 0;
+}
+
+
+/* Harmonisation des horaires avec l'espace administrateur */
+.gestion-catalogue .carte-statistique {
+  min-width: 0;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.gestion-catalogue .carte-statistique h3,
+.composition-menu h4,
+.creation-plat-integree h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.gestion-catalogue .carte-statistique label:not(.toggle-fermeture) {
+  display: block;
+  margin: 0.6rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.gestion-catalogue .carte-statistique input:not([type="checkbox"]) {
+  height: 46px;
+  background: #fff;
+  color: #302a25;
+}
+
+/* Même disposition des cartes horaires que dans l'espace administrateur */
+.espace-employe .formulaire-horaires {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.espace-employe .formulaire-horaires > .carte-statistique {
+  margin: 0;
+  min-width: 0;
+}
+
+.espace-employe .formulaire-horaires > button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+@media (max-width: 900px) {
+  .espace-employe .formulaire-horaires {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .espace-employe .formulaire-horaires {
+    grid-template-columns: 1fr;
+  }
 }

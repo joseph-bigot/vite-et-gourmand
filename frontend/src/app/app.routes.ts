@@ -1,16 +1,9 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { Accueil } from './features/accueil/accueil';
-import { Menus } from './features/menus/menus';
-import { DetailMenu } from './features/detail-menu/detail-menu';
-import { Commande } from './features/commandes/commande/commande';
-import { MotDePasseOublie } from './features/auth/mot-de-passe-oublie/mot-de-passe-oublie';
-import { ReinitialiserMotDePasse } from './features/auth/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe';
-import { EspaceClient } from './features/espace-client/espace-client';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { adminGuard } from './core/guards/admin.guard';
-import { EspaceEmploye } from './features/espace-employe/espace-employe';
 
 export const routes: Routes = [
   {
@@ -26,15 +19,15 @@ export const routes: Routes = [
       },
       {
         path: 'menus',
-        component: Menus,
+        loadComponent: () => import('./features/menus/menus').then(m => m.Menus),
       },
       {
         path: 'menus/:id',
-        component: DetailMenu,
+        loadComponent: () => import('./features/detail-menu/detail-menu').then(m => m.DetailMenu),
       },
       {
         path: 'commande/:id',
-        component: Commande,
+        loadComponent: () => import('./features/commandes/commande/commande').then(m => m.Commande),
       },
       {
         path: 'connexion',
@@ -46,20 +39,20 @@ export const routes: Routes = [
       },
       {
         path: 'mot-de-passe-oublie',
-        component: MotDePasseOublie,
+        loadComponent: () => import('./features/auth/mot-de-passe-oublie/mot-de-passe-oublie').then(m => m.MotDePasseOublie),
       },
       {
         path: 'reinitialiser-mot-de-passe',
-        component: ReinitialiserMotDePasse,
+        loadComponent: () => import('./features/auth/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe').then(m => m.ReinitialiserMotDePasse),
       },
       {
         path: 'espace-client',
-        component: EspaceClient,
+        loadComponent: () => import('./features/espace-client/espace-client').then(m => m.EspaceClient),
         canActivate: [authGuard],
       },
       {
         path: 'espace-employe',
-        component: EspaceEmploye,
+        loadComponent: () => import('./features/espace-employe/espace-employe').then(m => m.EspaceEmploye),
         canActivate: [roleGuard],
       },
       {

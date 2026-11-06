@@ -38,20 +38,21 @@
 
     <form
       *ngIf="!chargementHoraires && horaires.length"
-      class="formulaire-catalogue"
+      class="formulaire-catalogue formulaire-horaires"
       (ngSubmit)="enregistrerHoraires()"
     >
-      <div *ngFor="let jour of joursSemaine; let i = index">
+      <div *ngFor="let jour of joursSemaine; let i = index" class="carte-statistique">
         <h3>{{ jour.nom }}</h3>
 
-        <label [for]="'ferme-' + jour.numero">
+        <label class="toggle-fermeture" [for]="'ferme-' + jour.numero">
           <input
+            class="toggle-input"
             [id]="'ferme-' + jour.numero"
             [name]="'ferme-' + jour.numero"
             type="checkbox"
             [(ngModel)]="horaires[i].ferme"
           />
-          Fermé
+          <span>Fermé</span>
         </label>
 
         <div *ngIf="!horaires[i].ferme">
@@ -126,136 +127,153 @@
     <p *ngIf="messageMenus" class="message">{{ messageMenus }}</p>
     <p *ngIf="chargementMenus">Chargement du catalogue…</p>
 
-    <button type="button" (click)="nouveauMenu()">Créer un menu</button>
+    <button *ngIf="!formulaireMenuVisible" type="button" (click)="nouveauMenu()">Créer un menu</button>
 
-    <form class="formulaire-catalogue" (ngSubmit)="enregistrerMenu()">
-      <h3>{{ menuEnEdition ? 'Modifier le menu' : 'Nouveau menu' }}</h3>
+    <form *ngIf="formulaireMenuVisible" class="formulaire-catalogue formulaire-menu" (ngSubmit)="enregistrerMenu()">
+      <h3 class="formulaire-menu-titre">
+        {{ menuEnEdition ? 'Modifier le menu' : 'Créer un menu' }}
+      </h3>
 
-      <label for="menu-titre">Titre</label>
-      <input
-        id="menu-titre"
-        name="titre"
-        [(ngModel)]="formulaireMenu.titre"
-        required
-        minlength="2"
-      />
-
-      <label for="menu-description">Description</label>
-      <textarea
-        id="menu-description"
-        name="description"
-        [(ngModel)]="formulaireMenu.description"
-        required
-        minlength="2"
-      ></textarea>
-
-      <label for="menu-theme">Thème</label>
-      <select id="menu-theme" name="theme" [(ngModel)]="formulaireMenu.id_theme" required>
-        <option [ngValue]="0" disabled>Choisir un thème</option>
-        <option *ngFor="let theme of referencesMenus.themes" [ngValue]="theme.id_theme">
-          {{ theme.nom }}
-        </option>
-      </select>
-
-      <label for="menu-regime">Régime alimentaire</label>
-      <select id="menu-regime" name="regime" [(ngModel)]="formulaireMenu.id_regime" required>
-        <option [ngValue]="0" disabled>Choisir un régime</option>
-        <option *ngFor="let regime of referencesMenus.regimes" [ngValue]="regime.id_regime">
-          {{ regime.nom }}
-        </option>
-      </select>
-
-      <label for="menu-prix">Prix par personne (€)</label>
-      <input
-        id="menu-prix"
-        name="prix"
-        type="number"
-        min="0"
-        step="0.01"
-        [(ngModel)]="formulaireMenu.prix_par_personne"
-        required
-      />
-
-      <label for="menu-personnes">Nombre minimum de personnes</label>
-      <input
-        id="menu-personnes"
-        name="personnes"
-        type="number"
-        min="1"
-        step="1"
-        [(ngModel)]="formulaireMenu.nombre_minimum_personnes"
-        required
-      />
-
-      <label for="menu-stock">Stock</label>
-      <input
-        id="menu-stock"
-        name="stock"
-        type="number"
-        min="0"
-        step="1"
-        [(ngModel)]="formulaireMenu.stock"
-        required
-      />
-
-      <label for="menu-conditions-commande">Conditions de commande</label>
-      <textarea
-        id="menu-conditions-commande"
-        name="conditionsCommande"
-        [(ngModel)]="formulaireMenu.conditions_commande"
-        required
-      ></textarea>
-
-      <label for="menu-conditions-conservation">Conditions de conservation</label>
-      <textarea
-        id="menu-conditions-conservation"
-        name="conditionsConservation"
-        [(ngModel)]="formulaireMenu.conditions_conservation"
-        required
-      ></textarea>
-
-      <div *ngIf="!menuEnEdition">
-        <label for="menu-ajout-plat">Ajouter un plat</label>
-        <select #selectPlat id="menu-ajout-plat" name="ajoutPlat">
-          <option value="">Choisir un plat</option>
-          <option *ngFor="let plat of plats" [value]="plat.id_plat">
-            {{ plat.nom }} ({{ plat.categorie }})
-          </option>
-        </select>
-        <button type="button" (click)="ajouterPlatAuMenu(selectPlat.value); selectPlat.value = ''">
-          Ajouter au menu
-        </button>
+      <div class="champ-menu">
+        <label for="menu-titre">Titre</label>
+        <input id="menu-titre" name="titre" [(ngModel)]="formulaireMenu.titre" required minlength="2" />
       </div>
 
-      <ul *ngIf="formulaireMenu.plats.length">
-        <li *ngFor="let composition of formulaireMenu.plats">
-          {{ nomPlat(composition.id_plat) }}
-          <label
-            >Quantité
-            <input
-              type="number"
-              min="1"
-              [(ngModel)]="composition.quantite"
-              [name]="'quantite-' + composition.id_plat"
-            />
-          </label>
-          <button type="button" (click)="retirerPlatDuMenu(composition.id_plat)">Retirer</button>
-        </li>
-      </ul>
+      <div class="champ-menu">
+        <label for="menu-description">Description</label>
+        <textarea id="menu-description" name="description" [(ngModel)]="formulaireMenu.description" required minlength="2"></textarea>
+      </div>
 
-      <p *ngIf="menuEnEdition">
+      <div class="champ-menu">
+        <label for="menu-theme">Thème</label>
+        <select id="menu-theme" name="theme" [(ngModel)]="formulaireMenu.id_theme" required>
+          <option [ngValue]="0" disabled>Choisir un thème</option>
+          <option *ngFor="let theme of referencesMenus.themes" [ngValue]="theme.id_theme">{{ theme.nom }}</option>
+        </select>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-regime">Régime alimentaire</label>
+        <select id="menu-regime" name="regime" [(ngModel)]="formulaireMenu.id_regime" required>
+          <option [ngValue]="0" disabled>Choisir un régime</option>
+          <option *ngFor="let regime of referencesMenus.regimes" [ngValue]="regime.id_regime">{{ regime.nom }}</option>
+        </select>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-prix">Prix par personne (€)</label>
+        <input id="menu-prix" name="prix" type="number" min="0" step="0.01" [(ngModel)]="formulaireMenu.prix_par_personne" required />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-personnes">Nombre minimum de personnes</label>
+        <input id="menu-personnes" name="personnes" type="number" min="1" step="1" [(ngModel)]="formulaireMenu.nombre_minimum_personnes" required />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-stock">Stock</label>
+        <input id="menu-stock" name="stock" type="number" min="0" step="1" [(ngModel)]="formulaireMenu.stock" required />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-conditions-commande">Conditions de commande</label>
+        <textarea id="menu-conditions-commande" name="conditionsCommande" [(ngModel)]="formulaireMenu.conditions_commande" required></textarea>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-conditions-conservation">Conditions de conservation</label>
+        <textarea id="menu-conditions-conservation" name="conditionsConservation" [(ngModel)]="formulaireMenu.conditions_conservation" required></textarea>
+      </div>
+
+      <section *ngIf="!menuEnEdition" class="composition-menu">
+        <h4>Composition du menu</h4>
+
+        <div class="ajout-plat-existant">
+          <div class="champ-menu">
+            <label for="menu-ajout-plat">Ajouter un plat existant</label>
+            <select #selectPlat id="menu-ajout-plat" name="ajoutPlat">
+              <option value="">Choisir un plat</option>
+              <option *ngFor="let plat of plats" [value]="plat.id_plat">
+                {{ plat.nom }} ({{ plat.categorie }})
+              </option>
+            </select>
+          </div>
+          <button type="button" (click)="ajouterPlatAuMenu(selectPlat.value); selectPlat.value = ''">
+            Ajouter au menu
+          </button>
+        </div>
+
+        <button type="button" class="bouton-secondaire" (click)="creationPlatDansMenuVisible = !creationPlatDansMenuVisible">
+          {{ creationPlatDansMenuVisible ? 'Fermer la création' : '+ Créer un plat' }}
+        </button>
+
+        <div *ngIf="creationPlatDansMenuVisible" class="creation-plat-integree">
+          <h4>Nouveau plat</h4>
+
+          <div class="champ-menu">
+            <label for="nouveau-plat-nom">Nom du plat</label>
+            <input id="nouveau-plat-nom" name="nouveauPlatNom" [(ngModel)]="nouveauPlat.nom" required minlength="2" />
+          </div>
+
+          <div class="champ-menu">
+            <label for="nouveau-plat-description">Description</label>
+            <textarea id="nouveau-plat-description" name="nouveauPlatDescription" [(ngModel)]="nouveauPlat.description"></textarea>
+          </div>
+
+          <div class="champ-menu">
+            <label for="nouveau-plat-categorie">Catégorie</label>
+            <select id="nouveau-plat-categorie" name="nouveauPlatCategorie" [(ngModel)]="nouveauPlat.categorie">
+              <option value="entree">Entrée</option>
+              <option value="plat">Plat</option>
+              <option value="dessert">Dessert</option>
+            </select>
+          </div>
+
+          <fieldset class="allergenes-menu">
+            <legend>Allergènes</legend>
+            <label *ngFor="let allergene of referencesMenus.allergenes" class="choix-allergene">
+              <input
+                type="checkbox"
+                [checked]="nouveauPlat.allergenes.includes(allergene.id_allergene)"
+                (change)="modifierAllergeneNouveauPlat(allergene.id_allergene, $any($event.target).checked)"
+              />
+              {{ allergene.nom }}
+            </label>
+          </fieldset>
+
+          <button type="button" (click)="creerPlatDepuisMenu()" [disabled]="enregistrementPlatMenu">
+            {{ enregistrementPlatMenu ? 'Création…' : 'Créer et ajouter au menu' }}
+          </button>
+        </div>
+
+        <ul *ngIf="formulaireMenu.plats.length" class="liste-composition-menu">
+          <li *ngFor="let composition of formulaireMenu.plats">
+            <span>{{ nomPlat(composition.id_plat) }}</span>
+            <label>
+              Quantité
+              <input type="number" min="1" [(ngModel)]="composition.quantite" [name]="'quantite-' + composition.id_plat" />
+            </label>
+            <button type="button" class="bouton-annulation" (click)="retirerPlatDuMenu(composition.id_plat)">Retirer</button>
+          </li>
+        </ul>
+      </section>
+
+      <p *ngIf="menuEnEdition" class="information-menu">
         La modification des informations ne change pas la composition actuelle du menu.
       </p>
-      <button type="submit" [disabled]="enregistrementMenu">
-        {{
-          enregistrementMenu
-            ? 'Enregistrement…'
-            : menuEnEdition
-              ? 'Enregistrer les modifications'
-              : 'Créer le menu'
-        }}
-      </button>
-      <button type="button" (click)="nouveauMenu()">Réinitialiser le formulaire</button>
+
+      <div class="actions-formulaire-menu">
+        <button type="submit" [disabled]="enregistrementMenu">
+          {{
+            enregistrementMenu
+              ? 'Enregistrement…'
+              : menuEnEdition
+                ? 'Enregistrer les modifications'
+                : 'Créer le menu'
+          }}
+        </button>
+        <button type="button" class="bouton-annulation" (click)="fermerFormulaireMenu()">Annuler</button>
+      </div>
     </form>
 
     <h3>Catalogue existant</h3>
