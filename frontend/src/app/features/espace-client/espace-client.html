@@ -50,6 +50,23 @@
       <p><strong>Adresse de livraison :</strong> {{ commande.adresse_livraison }}</p>
 <p><strong>Lieu de prestation :</strong> {{ commande.lieu_prestation }}</p>
 
+      <section *ngIf="commande.pret_materiel" class="commande-details">
+        <h4>Retour du matériel</h4>
+        <p>
+          <strong>Date limite de restitution :</strong>
+          {{ commande.date_limite_retour_materiel | date: 'dd/MM/yyyy' }}
+        </p>
+        <p *ngIf="commande.date_retour_materiel">
+          <strong>Date de restitution effective :</strong>
+          {{ commande.date_retour_materiel | date: 'dd/MM/yyyy' }}
+        </p>
+        <p *ngIf="!commande.date_retour_materiel">
+          Le matériel doit être restitué avant la date limite indiquée.
+          Conformément aux conditions générales de vente, une pénalité de 600 €
+          est due en cas de non-restitution dans le délai de 10 jours ouvrés.
+        </p>
+      </section>
+
       <h4>Historique des statuts</h4>
 
       <p *ngIf="chargementHistorique === commande.id_commande">

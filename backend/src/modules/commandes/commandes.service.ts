@@ -53,6 +53,9 @@ export class CommandesService {
         'commande.adresse_livraison AS adresse_livraison',
         'commande.lieu_prestation AS lieu_prestation',
         'commande.prix_total AS prix_total',
+        'commande.pret_materiel AS pret_materiel',
+        'commande.date_limite_retour_materiel AS date_limite_retour_materiel',
+        'commande.date_retour_materiel AS date_retour_materiel',
         'historique.statut AS statut',
         'menu.titre AS titre_menu',
       ])
@@ -443,6 +446,26 @@ export class CommandesService {
 
 
 
+  private calculerDateLimiteRetour(dateDepart: Date): string {
+    const date = new Date(dateDepart);
+    let joursOuvres = 0;
+
+    while (joursOuvres < 10) {
+      date.setDate(date.getDate() + 1);
+      const jour = date.getDay();
+
+      if (jour !== 0 && jour !== 6) {
+        joursOuvres++;
+      }
+    }
+
+    const annee = date.getFullYear();
+    const mois = String(date.getMonth() + 1).padStart(2, '0');
+    const jour = String(date.getDate()).padStart(2, '0');
+
+    return `${annee}-${mois}-${jour}`;
+  }
+
   async changerStatutCommande(
     idCommande: string,
     nouveauStatut: string,
@@ -454,7 +477,7 @@ export class CommandesService {
       acceptee: ['en_preparation'],
       en_preparation: ['en_livraison'],
       en_livraison: ['livree'],
-      livree: ['attente_retour_materiel'],
+      livree: ['attente_retour_materiel', 'terminee'],
       attente_retour_materiel: ['terminee'],
     };
 
@@ -467,14 +490,25 @@ export class CommandesService {
       );
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      const commandes: Array<{ id_commande: string }> =
-        await manager.query(
-          'SELECT id_commande FROM commande WHERE id_commande = $1 FOR UPDATE',
-          [idCommande],
-        );
+    const resultat = await this.dataSource.transaction(async (manager) => {
+      const commandes: Array<{
+        id_commande: string;
+        email_client: string;
+        pret_materiel: boolean;
+        date_limite_retour_materiel: string | null;
+      }> = await manager.query(
+        `SELECT c.id_commande, u.email AS email_client,
+                c.pret_materiel, c.date_limite_retour_materiel
+         FROM commande c
+         JOIN utilisateur u ON u.id_utilisateur = c.id_utilisateur
+         WHERE c.id_commande = $1
+         FOR UPDATE OF c`,
+        [idCommande],
+      );
 
-      if (commandes.length === 0) {
+      const commande = commandes[0];
+
+      if (!commande) {
         throw new NotFoundException('Commande introuvable.');
       }
 
@@ -512,14 +546,14 @@ export class CommandesService {
           [idCommande],
         );
 
-        const commande = commandesAvecMenu[0];
-        if (!commande) {
+        const commandeMenu = commandesAvecMenu[0];
+        if (!commandeMenu) {
           throw new NotFoundException('Commande introuvable.');
         }
 
-        const distance = Number(commande.distance_km);
-        const fraisEnregistres = Number(commande.frais_livraison);
-        const fraisAttendus = commande.livraison_hors_bordeaux
+        const distance = Number(commandeMenu.distance_km);
+        const fraisEnregistres = Number(commandeMenu.frais_livraison);
+        const fraisAttendus = commandeMenu.livraison_hors_bordeaux
           ? 5 + distance * 0.59
           : 5;
         const fraisArrondis = Math.round(fraisAttendus * 100) / 100;
@@ -535,7 +569,7 @@ export class CommandesService {
           );
         }
 
-        const idMenu = commande.id_menu;
+        const idMenu = commandeMenu.id_menu;
         if (!idMenu) {
           throw new NotFoundException('Menu de la commande introuvable.');
         }
@@ -563,6 +597,47 @@ export class CommandesService {
         }
       }
 
+      let dateLimiteRetour: string | null = null;
+
+      if (nouveauStatut === 'attente_retour_materiel') {
+        dateLimiteRetour = this.calculerDateLimiteRetour(new Date());
+
+        await manager.query(
+          `UPDATE commande
+           SET pret_materiel = TRUE,
+               date_limite_retour_materiel = $1,
+               date_retour_materiel = NULL
+           WHERE id_commande = $2`,
+          [dateLimiteRetour, idCommande],
+        );
+      }
+
+      if (nouveauStatut === 'terminee') {
+        if (statutActuel === 'attente_retour_materiel') {
+          if (!commande.pret_materiel || !commande.date_limite_retour_materiel) {
+            throw new BadRequestException(
+              'Les informations de prêt de matériel sont incomplètes.',
+            );
+          }
+
+          await manager.query(
+            `UPDATE commande
+             SET date_retour_materiel = CURRENT_DATE
+             WHERE id_commande = $1`,
+            [idCommande],
+          );
+        } else {
+          await manager.query(
+            `UPDATE commande
+             SET pret_materiel = FALSE,
+                 date_limite_retour_materiel = NULL,
+                 date_retour_materiel = NULL
+             WHERE id_commande = $1`,
+            [idCommande],
+          );
+        }
+      }
+
       if (nouveauStatut === 'refusee') {
         await manager.query(
           `UPDATE commande
@@ -578,11 +653,41 @@ export class CommandesService {
         [idCommande, nouveauStatut],
       );
 
-      return { message: 'Statut de la commande mis à jour.' };
+      return {
+        message: 'Statut de la commande mis à jour.',
+        emailClient: commande.email_client,
+        dateLimiteRetour,
+      };
     });
+
+    if (
+      nouveauStatut === 'attente_retour_materiel' &&
+      resultat.dateLimiteRetour
+    ) {
+      const [annee, mois, jour] = resultat.dateLimiteRetour.split('-');
+
+      try {
+        await this.emailService.envoyerEmail(
+          resultat.emailClient,
+          'Retour du matériel prêté - Vite & Gourmand',
+          `Votre commande n°${idCommande} est en attente du retour du matériel prêté.
+
+La date limite de restitution est le ${jour}/${mois}/${annee}.
+
+Conformément aux conditions générales de vente, en cas de non-restitution du matériel dans un délai de 10 jours ouvrés, une pénalité de 600 € sera due.
+
+Veuillez contacter Vite & Gourmand afin d'organiser la restitution du matériel.`,
+        );
+      } catch (erreur) {
+        console.error(
+          'Échec de l’envoi de l’e-mail concernant le retour du matériel.',
+          erreur,
+        );
+      }
+    }
+
+    return { message: resultat.message };
   }
-
-
 
   async annulerCommandeParEmploye(
     idCommande: string,
@@ -678,6 +783,9 @@ export class CommandesService {
          c.frais_livraison,
          c.lieu_prestation,
          c.prix_total,
+         c.pret_materiel,
+         c.date_limite_retour_materiel,
+         c.date_retour_materiel,
          u.nom AS nom_client,
          u.prenom AS prenom_client,
          u.email AS email_client,

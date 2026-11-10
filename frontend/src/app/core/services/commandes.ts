@@ -26,6 +26,9 @@ export interface CommandeEmploye {
   telephone_client: string | null;
   titre_menu: string;
   statut: string;
+  pret_materiel: boolean;
+  date_limite_retour_materiel: string | null;
+  date_retour_materiel: string | null;
 }
 
 export interface CommandeClient {
@@ -39,6 +42,9 @@ export interface CommandeClient {
   titre_menu: string;
   adresse_livraison: string;
   lieu_prestation: string;
+  pret_materiel: boolean;
+  date_limite_retour_materiel: string | null;
+  date_retour_materiel: string | null;
 }
 
 @Injectable({

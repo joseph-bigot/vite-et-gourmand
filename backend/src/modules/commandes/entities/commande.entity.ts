@@ -71,6 +71,13 @@ export class Commande {
   })
   livraison_hors_bordeaux!: boolean;
 
+  @Column({
+    name: 'pret_materiel',
+    type: 'boolean',
+    default: false,
+  })
+  pret_materiel!: boolean;
+
   @Column({ name: 'prix_total', type: 'numeric', precision: 10, scale: 2 })
   prix_total!: string;
 

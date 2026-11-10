@@ -170,7 +170,7 @@ export class EspaceEmploye implements OnInit {
     acceptee: ['en_preparation'],
     en_preparation: ['en_livraison'],
     en_livraison: ['livree'],
-    livree: ['attente_retour_materiel'],
+    livree: ['attente_retour_materiel', 'terminee'],
     attente_retour_materiel: ['terminee'],
   };
 

@@ -195,3 +195,135 @@ describe('CommandesService - annulation par un employé et restitution du stock'
     ).toHaveLength(1);
   });
 });
+
+
+describe('CommandesService - prêt et restitution du matériel', () => {
+  let service: CommandesService;
+  let managerQuery: ReturnType<typeof vi.fn>;
+  let envoyerEmail: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    managerQuery = vi.fn();
+    envoyerEmail = vi.fn().mockResolvedValue(undefined);
+
+    const manager = { query: managerQuery };
+    const dataSource = {
+      transaction: vi.fn(async (callback) => callback(manager)),
+    };
+    const emailService = { envoyerEmail };
+
+    service = new CommandesService(
+      {} as any,
+      dataSource as any,
+      emailService as any,
+    );
+  });
+
+  it('enregistre le prêt, calcule 10 jours ouvrés et envoie un email', async () => {
+    vi.useFakeTimers();
+
+    try {
+      vi.setSystemTime(new Date(2026, 10, 9, 10, 0, 0));
+
+      managerQuery
+        .mockResolvedValueOnce([{
+          id_commande: '12',
+          email_client: 'client@example.com',
+          pret_materiel: false,
+          date_limite_retour_materiel: null,
+        }])
+        .mockResolvedValueOnce([{ statut: 'livree' }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
+
+      await expect(
+        service.changerStatutCommande('12', 'attente_retour_materiel'),
+      ).resolves.toEqual({
+        message: 'Statut de la commande mis à jour.',
+      });
+
+      expect(
+        managerQuery.mock.calls.some(
+          ([sql, params]) =>
+            String(sql).includes('SET pret_materiel = TRUE') &&
+            JSON.stringify(params) === JSON.stringify(['2026-11-23', '12']),
+        ),
+      ).toBe(true);
+
+      expect(envoyerEmail).toHaveBeenCalledWith(
+        'client@example.com',
+        'Retour du matériel prêté - Vite & Gourmand',
+        expect.stringContaining('23/11/2026'),
+      );
+
+      expect(envoyerEmail.mock.calls[0][2]).toContain('600 €');
+      expect(envoyerEmail.mock.calls[0][2]).toContain('10 jours ouvrés');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('termine directement une commande livrée sans prêt de matériel', async () => {
+    managerQuery
+      .mockResolvedValueOnce([{
+        id_commande: '12',
+        email_client: 'client@example.com',
+        pret_materiel: false,
+        date_limite_retour_materiel: null,
+      }])
+      .mockResolvedValueOnce([{ statut: 'livree' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    await expect(
+      service.changerStatutCommande('12', 'terminee'),
+    ).resolves.toEqual({
+      message: 'Statut de la commande mis à jour.',
+    });
+
+    expect(
+      managerQuery.mock.calls.some(
+        ([sql]) =>
+          String(sql).includes('pret_materiel = FALSE') &&
+          String(sql).includes('date_limite_retour_materiel = NULL') &&
+          String(sql).includes('date_retour_materiel = NULL'),
+      ),
+    ).toBe(true);
+
+    expect(envoyerEmail).not.toHaveBeenCalled();
+  });
+
+  it('enregistre la date de retour lors de la clôture après un prêt', async () => {
+    managerQuery
+      .mockResolvedValueOnce([{
+        id_commande: '12',
+        email_client: 'client@example.com',
+        pret_materiel: true,
+        date_limite_retour_materiel: '2026-11-23',
+      }])
+      .mockResolvedValueOnce([{ statut: 'attente_retour_materiel' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    await expect(
+      service.changerStatutCommande('12', 'terminee'),
+    ).resolves.toEqual({
+      message: 'Statut de la commande mis à jour.',
+    });
+
+    expect(
+      managerQuery.mock.calls.some(
+        ([sql, params]) =>
+          String(sql).includes('SET date_retour_materiel = CURRENT_DATE') &&
+          JSON.stringify(params) === JSON.stringify(['12']),
+      ),
+    ).toBe(true);
+
+    expect(managerQuery).toHaveBeenCalledWith(
+      'INSERT INTO historique_statut (id_commande, statut) VALUES ($1, $2)',
+      ['12', 'terminee'],
+    );
+
+    expect(envoyerEmail).not.toHaveBeenCalled();
+  });
+});
