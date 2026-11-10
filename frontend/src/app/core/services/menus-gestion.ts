@@ -12,6 +12,7 @@ export interface PlatGestion {
 
 export interface CompositionMenu {
   id_plat: number;
+  nom_plat?: string;
   quantite: number;
   ordre_affichage: number;
 }
@@ -30,6 +31,7 @@ export interface MenuGestion {
   disponible: boolean;
   theme?: string;
   regime_alimentaire?: string;
+  plats: CompositionMenu[];
 }
 
 export interface DonneesMenu {

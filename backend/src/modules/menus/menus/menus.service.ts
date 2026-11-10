@@ -141,7 +141,24 @@ export class MenusService {
              m.nombre_minimum_personnes, m.stock, m.disponible,
              m.conditions_commande, m.conditions_conservation,
              m.id_theme, t.nom AS theme, m.id_regime,
-             r.nom AS regime_alimentaire
+             r.nom AS regime_alimentaire,
+             COALESCE(
+               (
+                 SELECT json_agg(
+                   json_build_object(
+                     'id_plat', cm.id_plat,
+                     'nom_plat', p.nom,
+                     'quantite', cm.quantite,
+                     'ordre_affichage', cm.ordre_affichage
+                   )
+                   ORDER BY cm.ordre_affichage
+                 )
+                 FROM composer_menu cm
+                 JOIN plat p ON p.id_plat = cm.id_plat
+                 WHERE cm.id_menu = m.id_menu
+               ),
+               '[]'::json
+             ) AS plats
       FROM menu m
       JOIN theme t ON t.id_theme = m.id_theme
       JOIN regime_alimentaire r ON r.id_regime = m.id_regime

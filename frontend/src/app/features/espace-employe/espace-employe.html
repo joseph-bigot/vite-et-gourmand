@@ -185,7 +185,7 @@
         <textarea id="menu-conditions-conservation" name="conditionsConservation" [(ngModel)]="formulaireMenu.conditions_conservation" required></textarea>
       </div>
 
-      <section *ngIf="!menuEnEdition" class="composition-menu">
+      <section class="composition-menu">
         <h4>Composition du menu</h4>
 
         <div class="ajout-plat-existant">
@@ -203,52 +203,9 @@
           </button>
         </div>
 
-        <button type="button" class="bouton-secondaire" (click)="creationPlatDansMenuVisible = !creationPlatDansMenuVisible">
-          {{ creationPlatDansMenuVisible ? 'Fermer la création' : '+ Créer un plat' }}
-        </button>
-
-        <div *ngIf="creationPlatDansMenuVisible" class="creation-plat-integree">
-          <h4>Nouveau plat</h4>
-
-          <div class="champ-menu">
-            <label for="nouveau-plat-nom">Nom du plat</label>
-            <input id="nouveau-plat-nom" name="nouveauPlatNom" [(ngModel)]="nouveauPlat.nom" required minlength="2" />
-          </div>
-
-          <div class="champ-menu">
-            <label for="nouveau-plat-description">Description</label>
-            <textarea id="nouveau-plat-description" name="nouveauPlatDescription" [(ngModel)]="nouveauPlat.description"></textarea>
-          </div>
-
-          <div class="champ-menu">
-            <label for="nouveau-plat-categorie">Catégorie</label>
-            <select id="nouveau-plat-categorie" name="nouveauPlatCategorie" [(ngModel)]="nouveauPlat.categorie">
-              <option value="entree">Entrée</option>
-              <option value="plat">Plat</option>
-              <option value="dessert">Dessert</option>
-            </select>
-          </div>
-
-          <fieldset class="allergenes-menu">
-            <legend>Allergènes</legend>
-            <label *ngFor="let allergene of referencesMenus.allergenes" class="choix-allergene">
-              <input
-                type="checkbox"
-                [checked]="nouveauPlat.allergenes.includes(allergene.id_allergene)"
-                (change)="modifierAllergeneNouveauPlat(allergene.id_allergene, $any($event.target).checked)"
-              />
-              {{ allergene.nom }}
-            </label>
-          </fieldset>
-
-          <button type="button" (click)="creerPlatDepuisMenu()" [disabled]="enregistrementPlatMenu">
-            {{ enregistrementPlatMenu ? 'Création…' : 'Créer et ajouter au menu' }}
-          </button>
-        </div>
-
         <ul *ngIf="formulaireMenu.plats.length" class="liste-composition-menu">
           <li *ngFor="let composition of formulaireMenu.plats">
-            <span>{{ nomPlat(composition.id_plat) }}</span>
+            <span>{{ composition.nom_plat || nomPlat(composition.id_plat) }}</span>
             <label>
               Quantité
               <input type="number" min="1" [(ngModel)]="composition.quantite" [name]="'quantite-' + composition.id_plat" />
@@ -258,9 +215,6 @@
         </ul>
       </section>
 
-      <p *ngIf="menuEnEdition" class="information-menu">
-        La modification des informations ne change pas la composition actuelle du menu.
-      </p>
 
       <div class="actions-formulaire-menu">
         <button type="submit" [disabled]="enregistrementMenu">

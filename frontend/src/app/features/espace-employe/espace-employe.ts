@@ -287,7 +287,11 @@ export class EspaceEmploye implements OnInit {
       conditions_commande: menu.conditions_commande,
       conditions_conservation: menu.conditions_conservation,
       disponible: menu.disponible,
-      plats: [],
+      plats: (menu.plats ?? []).map((plat) => ({
+        id_plat: Number(plat.id_plat),
+        quantite: Number(plat.quantite),
+        ordre_affichage: Number(plat.ordre_affichage),
+      })),
     };
   }
 
@@ -376,7 +380,7 @@ export class EspaceEmploye implements OnInit {
   }
 
   nomPlat(idPlat: number): string {
-    return this.plats.find((p) => p.id_plat === idPlat)?.nom || `Plat ${idPlat}`;
+    return this.plats.find((p) => Number(p.id_plat) === Number(idPlat))?.nom || `Plat ${idPlat}`;
   }
 
   enregistrerMenu(): void {
@@ -384,14 +388,19 @@ export class EspaceEmploye implements OnInit {
       this.erreurMenus = 'Le titre et la description sont obligatoires.';
       return;
     }
-    if (!this.menuEnEdition && !this.formulaireMenu.plats.length) {
+    if (!this.formulaireMenu.plats.length) {
       this.erreurMenus = 'Ajoutez au moins un plat au menu.';
       return;
     }
     this.enregistrementMenu = true;
     this.erreurMenus = '';
-    const donneesModification: Partial<DonneesMenu> = { ...this.formulaireMenu };
-    delete donneesModification.plats;
+    const donneesModification: Partial<DonneesMenu> = {
+      ...this.formulaireMenu,
+      plats: this.formulaireMenu.plats.map((plat, index) => ({
+        ...plat,
+        ordre_affichage: index + 1,
+      })),
+    };
 
     const requete = this.menuEnEdition
       ? this.menusService.modifierMenu(this.menuEnEdition, donneesModification)
