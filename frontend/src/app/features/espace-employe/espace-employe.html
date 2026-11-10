@@ -299,17 +299,39 @@
 
     <h3>Plats existants</h3>
     <p *ngIf="chargementMenus">Chargement des plats…</p>
-    <article class="carte-menu-gestion" *ngFor="let plat of plats">
-      <h4>{{ plat.nom }}</h4>
-      <p>{{ plat.categorie }}</p>
-      <p>{{ plat.description || 'Aucune description' }}</p>
-      <p>
-        Allergènes : {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
-      </p>
-      <button type="button" class="bouton-annulation" (click)="supprimerPlat(plat)">
-        Supprimer le plat
-      </button>
-    </article>
+    <p *ngIf="!chargementMenus && plats.length === 0">Aucun plat enregistré.</p>
+
+    <section
+      *ngFor="let categorie of categoriesPlats"
+      class="section-categorie-plats"
+      [attr.aria-label]="categorie.libelle"
+    >
+      <div class="titre-categorie-plats" *ngIf="platsParCategorie(categorie.valeur).length > 0">
+        <h4>{{ categorie.libelle }}</h4>
+        <span>{{ platsParCategorie(categorie.valeur).length }} plat(s)</span>
+      </div>
+
+      <div class="grille-plats">
+        <article
+          class="carte-plat"
+          *ngFor="let plat of platsParCategorie(categorie.valeur)"
+        >
+          <h5>{{ plat.nom }}</h5>
+          <p class="description-plat">{{ plat.description || 'Aucune description renseignée.' }}</p>
+          <p class="allergenes-plat">
+            <strong>Allergènes :</strong>
+            {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
+          </p>
+          <button
+            type="button"
+            class="bouton-annulation"
+            (click)="supprimerPlat(plat)"
+          >
+            Supprimer le plat
+          </button>
+        </article>
+      </div>
+    </section>
   </section>
 
   <p *ngIf="ongletActif === 'commandes' && chargement">Chargement des commandes...</p>

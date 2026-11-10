@@ -72,9 +72,13 @@
       <img
         class="menu-image"
         [src]="
-          menu.theme === 'Noël' || menu.theme === 'Événement'
-            ? '/images/menu-festif.png'
-            : '/images/menu-classique.png'
+          menu.theme === 'Noël'
+            ? '/images/menu-noel.png'
+            : menu.theme === 'Pâques'
+              ? '/images/menu-paques.png'
+              : menu.theme === 'Événement'
+                ? '/images/menu-evenement.png'
+                : '/images/menu-classique.png'
         "
         [alt]="'Illustration du ' + menu.titre"
       />

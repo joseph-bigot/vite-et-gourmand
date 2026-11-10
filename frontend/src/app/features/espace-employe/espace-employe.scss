@@ -315,3 +315,86 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Catalogue des plats : affichage par catégories */
+.section-categorie-plats {
+  margin: 2rem 0;
+}
+
+.titre-categorie-plats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 2px solid var(--admin-bordure);
+}
+
+.titre-categorie-plats h4 {
+  margin: 0;
+  color: var(--admin-vert-fonce);
+  font-size: 1.2rem;
+}
+
+.titre-categorie-plats span {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.grille-plats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.carte-plat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--admin-bordure);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.carte-plat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
+}
+
+.carte-plat h5 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  color: #302a25;
+}
+
+.carte-plat p {
+  line-height: 1.5;
+}
+
+.carte-plat .description-plat {
+  flex: 1;
+  margin: 0 0 0.75rem;
+  color: #514b45;
+}
+
+.carte-plat .allergenes-plat {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: #625b54;
+}
+
+.carte-plat button {
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .grille-plats {
+    grid-template-columns: 1fr;
+  }
+}

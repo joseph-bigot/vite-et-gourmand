@@ -1,4 +1,4 @@
-import { forkJoin } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import { AvisAModerer, AvisService } from '../../core/services/avis';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -52,6 +52,19 @@ export class EspaceEmploye implements OnInit {
   avisEnCours: string | null = null;
   menus: MenuGestion[] = [];
   plats: PlatGestion[] = [];
+
+  readonly categoriesPlats: {
+    valeur: 'entree' | 'plat' | 'dessert';
+    libelle: string;
+  }[] = [
+    { valeur: 'entree', libelle: 'Entrées' },
+    { valeur: 'plat', libelle: 'Plats' },
+    { valeur: 'dessert', libelle: 'Desserts' },
+  ];
+
+  platsParCategorie(categorie: 'entree' | 'plat' | 'dessert'): PlatGestion[] {
+    return this.plats.filter((plat) => plat.categorie === categorie);
+  }
   referencesMenus: ReferencesMenus = { themes: [], regimes: [], allergenes: [] };
   chargementMenus = false;
   erreurMenus = '';
@@ -252,27 +265,29 @@ export class EspaceEmploye implements OnInit {
   chargerPlats(): void {
     this.chargementMenus = true;
     this.erreurMenus = '';
-    this.menusService.listerReferences().subscribe({
-      next: (references) => {
-        this.referencesMenus = references;
-        this.menusService.listerPlats().subscribe({
-          next: (plats) => {
-            this.plats = plats;
-            this.chargementMenus = false;
-          },
-          error: (e) => {
-            this.erreurMenus = e.error?.message || 'Impossible de charger les plats.';
-            this.chargementMenus = false;
-          },
-        });
-      },
-      error: (e) => {
-        this.erreurMenus = e.error?.message || 'Impossible de charger les allergènes.';
-        this.chargementMenus = false;
-      },
-    });
-  }
 
+    forkJoin({
+      references: this.menusService.listerReferences(),
+      plats: this.menusService.listerPlats(),
+    })
+      .pipe(
+        finalize(() => {
+          this.chargementMenus = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: ({ references, plats }) => {
+          this.referencesMenus = references;
+          this.plats = plats;
+        },
+        error: (e) => {
+          console.error('[EspaceEmploye] Erreur chargement des plats :', e);
+          this.erreurMenus =
+            e.error?.message || 'Impossible de charger les plats.';
+        },
+      });
+  }
   editerMenu(menu: MenuGestion): void {
     this.menuEnEdition = menu.id_menu;
     this.formulaireMenuVisible = true;
