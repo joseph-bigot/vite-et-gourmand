@@ -367,8 +367,8 @@
               <label *ngFor="let allergene of referencesMenus.allergenes">
                 <input
                   type="checkbox"
-                  [checked]="formulairePlatEdition.allergenes.includes(allergene.id_allergene)"
-                  (change)="modifierAllergenePlat(allergene.id_allergene, $any($event.target).checked)"
+                  [checked]="formulairePlatEdition.allergenes.includes(+$any(allergene).id_allergene)"
+                  (change)="modifierAllergenePlat(+$any(allergene).id_allergene, $any($event.target).checked)"
                 />
                 {{ allergene.nom }}
               </label>

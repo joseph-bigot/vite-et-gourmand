@@ -386,7 +386,11 @@ export class MenusService {
         [id],
       );
 
-      for (const idAllergene of dto.allergenes ?? []) {
+      const allergenesUniques = [
+        ...new Set((dto.allergenes ?? []).map(Number)),
+      ];
+
+      for (const idAllergene of allergenesUniques) {
         await manager.query(
           'INSERT INTO plat_allergene (id_plat, id_allergene) VALUES ($1, $2)',
           [id, idAllergene],
