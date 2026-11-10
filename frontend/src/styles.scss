@@ -314,3 +314,111 @@ textarea {
 }
 
 }
+
+/* Formulaire compact de modification d'un plat */
+.carte-plat .formulaire-edition-plat {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 0.45rem;
+}
+
+.carte-plat .formulaire-edition-plat h5 {
+  margin-bottom: 0.5rem;
+  color: var(--admin-vert-fonce);
+}
+
+.carte-plat .formulaire-edition-plat label {
+  margin-top: 0.25rem;
+  color: #514b45;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.carte-plat .formulaire-edition-plat input[type="text"],
+.carte-plat .formulaire-edition-plat textarea,
+.carte-plat .formulaire-edition-plat select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--admin-bordure);
+  border-radius: 7px;
+  background: #fff;
+  color: #302a25;
+  font: inherit;
+}
+
+.carte-plat .formulaire-edition-plat textarea {
+  min-height: 85px;
+  resize: vertical;
+}
+
+.carte-plat .formulaire-edition-plat fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0.5rem 0;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-bordure);
+  border-radius: 7px;
+}
+
+.carte-plat .formulaire-edition-plat legend {
+  padding: 0 0.3rem;
+  color: #514b45;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.carte-plat .formulaire-edition-plat fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.carte-plat .formulaire-edition-plat input[type="checkbox"] {
+  flex: 0 0 auto;
+  accent-color: var(--admin-vert-fonce);
+}
+
+.carte-plat .formulaire-edition-plat button {
+  width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.carte-plat .formulaire-edition-plat .bouton-enregistrer-edition {
+  margin-top: 0.35rem;
+  background: var(--admin-vert-fonce);
+  color: #fff;
+}
+
+.carte-plat .formulaire-edition-plat .bouton-annuler-edition {
+  background: #f1eee8;
+  color: #514b45;
+  border: 1px solid var(--admin-bordure);
+}
+
+.carte-plat .formulaire-edition-plat button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Espacement entre les actions des cartes de plats */
+.carte-plat > button + button {
+  margin-top: 0.5rem;
+}
+
+
+/* Séparation des boutons d'action des cartes de plats */
+.carte-plat .bouton-modifier-plat {
+  margin-bottom: 0.6rem !important;
+}

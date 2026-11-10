@@ -102,6 +102,21 @@ export class MenusGestion {
     );
   }
 
+  modifierPlat(
+    id: number,
+    donnees: {
+      nom: string;
+      description?: string;
+      categorie: 'entree' | 'plat' | 'dessert';
+      allergenes?: number[];
+    },
+  ): Observable<{ id_plat: number; message: string }> {
+    return this.http.patch<{ id_plat: number; message: string }>(
+      `${this.apiUrl}/plats/${id}`,
+      donnees,
+    );
+  }
+
   creerPlat(donnees: {
     nom: string;
     description?: string;

@@ -102,6 +102,16 @@ export class MenusController {
     return this.menusService.supprimerPlat(id);
   }
 
+  @Patch('plats/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('employe', 'admin')
+  modifierPlat(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreerPlatDto,
+  ) {
+    return this.menusService.modifierPlat(id, dto);
+  }
+
   @Post('plats')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('employe', 'admin')

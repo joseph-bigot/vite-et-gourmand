@@ -80,6 +80,16 @@ export class EspaceEmploye implements OnInit {
     categorie: 'plat' as 'entree' | 'plat' | 'dessert',
     allergenes: [] as number[],
   };
+  platEnEdition: number | null = null;
+  enregistrementModificationPlat = false;
+
+  formulairePlatEdition = {
+    nom: '',
+    description: '',
+    categorie: 'plat' as 'entree' | 'plat' | 'dessert',
+    allergenes: [] as number[],
+  };
+
   creationPlatDansMenuVisible = false;
   enregistrementPlatMenu = false;
 
@@ -465,6 +475,69 @@ export class EspaceEmploye implements OnInit {
       },
       error: (e) => {
         this.erreurMenus = e.error?.message || 'Impossible de modifier la disponibilité.';
+      },
+    });
+  }
+
+  editerPlat(plat: PlatGestion): void {
+    this.platEnEdition = plat.id_plat;
+    this.formulairePlatEdition = {
+      nom: plat.nom,
+      description: plat.description ?? '',
+      categorie: plat.categorie,
+      allergenes: [...(plat.allergenes ?? [])].map(Number),
+    };
+    this.erreurMenus = '';
+    this.messageMenus = '';
+  }
+
+  annulerModificationPlat(): void {
+    this.platEnEdition = null;
+    this.formulairePlatEdition = {
+      nom: '',
+      description: '',
+      categorie: 'plat',
+      allergenes: [],
+    };
+  }
+
+  modifierAllergenePlat(id: number, coche: boolean): void {
+    if (coche && !this.formulairePlatEdition.allergenes.includes(id)) {
+      this.formulairePlatEdition.allergenes.push(id);
+    } else if (!coche) {
+      this.formulairePlatEdition.allergenes =
+        this.formulairePlatEdition.allergenes.filter((allergeneId) => allergeneId !== id);
+    }
+  }
+
+  enregistrerModificationPlat(plat: PlatGestion): void {
+    const nom = this.formulairePlatEdition.nom.trim();
+
+    if (nom.length < 2) {
+      this.erreurMenus = 'Le nom du plat doit contenir au moins deux caractères.';
+      return;
+    }
+
+    this.enregistrementModificationPlat = true;
+    this.erreurMenus = '';
+    this.messageMenus = '';
+
+    this.menusService.modifierPlat(plat.id_plat, {
+      ...this.formulairePlatEdition,
+      nom,
+      allergenes: [...this.formulairePlatEdition.allergenes],
+    }).subscribe({
+      next: (reponse) => {
+        this.messageMenus = reponse.message;
+        this.annulerModificationPlat();
+        this.chargerPlats();
+        this.enregistrementModificationPlat = false;
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.erreurMenus = e.error?.message || 'Impossible de modifier ce plat.';
+        this.enregistrementModificationPlat = false;
+        this.cdr.detectChanges();
       },
     });
   }

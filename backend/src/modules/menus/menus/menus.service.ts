@@ -363,6 +363,40 @@ export class MenusService {
     });
   }
 
+  async modifierPlat(id: number, dto: CreerPlatDto) {
+    return this.dataSource.transaction(async (manager) => {
+      const plats = await manager.query(
+        'SELECT id_plat FROM plat WHERE id_plat = $1 FOR UPDATE',
+        [id],
+      );
+
+      if (!plats.length) {
+        throw new NotFoundException('Plat introuvable.');
+      }
+
+      await manager.query(
+        `UPDATE plat
+         SET nom = $1, description = $2, categorie = $3
+         WHERE id_plat = $4`,
+        [dto.nom, dto.description ?? null, dto.categorie, id],
+      );
+
+      await manager.query(
+        'DELETE FROM plat_allergene WHERE id_plat = $1',
+        [id],
+      );
+
+      for (const idAllergene of dto.allergenes ?? []) {
+        await manager.query(
+          'INSERT INTO plat_allergene (id_plat, id_allergene) VALUES ($1, $2)',
+          [id, idAllergene],
+        );
+      }
+
+      return { id_plat: id, message: 'Plat modifié.' };
+    });
+  }
+
   async creerPlat(dto: CreerPlatDto) {
     return this.dataSource.transaction(async (manager) => {
       const resultat = await manager.query(

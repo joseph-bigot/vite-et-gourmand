@@ -316,19 +316,81 @@
           class="carte-plat"
           *ngFor="let plat of platsParCategorie(categorie.valeur)"
         >
-          <h5>{{ plat.nom }}</h5>
-          <p class="description-plat">{{ plat.description || 'Aucune description renseignée.' }}</p>
-          <p class="allergenes-plat">
-            <strong>Allergènes :</strong>
-            {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
-          </p>
-          <button
-            type="button"
-            class="bouton-annulation"
-            (click)="supprimerPlat(plat)"
-          >
-            Supprimer le plat
-          </button>
+          <ng-container *ngIf="platEnEdition !== plat.id_plat; else formulaireEditionPlat">
+            <h5>{{ plat.nom }}</h5>
+            <p class="description-plat">{{ plat.description || 'Aucune description renseignée.' }}</p>
+            <p class="allergenes-plat">
+              <strong>Allergènes :</strong>
+              {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
+            </p>
+            <button type="button" class="bouton-modifier-plat" (click)="editerPlat(plat)">
+              Modifier
+            </button>
+            <button
+              type="button"
+              class="bouton-annulation"
+              (click)="supprimerPlat(plat)"
+            >
+              Supprimer le plat
+            </button>
+          </ng-container>
+
+          <ng-template #formulaireEditionPlat>
+            <div class="formulaire-edition-plat">
+            <h5>Modifier le plat</h5>
+
+            <label [for]="'nom-plat-' + plat.id_plat">Nom</label>
+            <input
+              [id]="'nom-plat-' + plat.id_plat"
+              type="text"
+              [(ngModel)]="formulairePlatEdition.nom"
+            />
+
+            <label [for]="'description-plat-' + plat.id_plat">Description</label>
+            <textarea
+              [id]="'description-plat-' + plat.id_plat"
+              [(ngModel)]="formulairePlatEdition.description"
+            ></textarea>
+
+            <label [for]="'categorie-plat-' + plat.id_plat">Catégorie</label>
+            <select
+              [id]="'categorie-plat-' + plat.id_plat"
+              [(ngModel)]="formulairePlatEdition.categorie"
+            >
+              <option value="entree">Entrée</option>
+              <option value="plat">Plat</option>
+              <option value="dessert">Dessert</option>
+            </select>
+
+            <fieldset>
+              <legend>Allergènes</legend>
+              <label *ngFor="let allergene of referencesMenus.allergenes">
+                <input
+                  type="checkbox"
+                  [checked]="formulairePlatEdition.allergenes.includes(allergene.id_allergene)"
+                  (change)="modifierAllergenePlat(allergene.id_allergene, $any($event.target).checked)"
+                />
+                {{ allergene.nom }}
+              </label>
+            </fieldset>
+
+            <button
+              type="button"
+              class="bouton-enregistrer-edition"
+              [disabled]="enregistrementModificationPlat"
+              (click)="enregistrerModificationPlat(plat)"
+            >
+              {{ enregistrementModificationPlat ? 'Enregistrement…' : 'Enregistrer' }}
+            </button>
+            <button
+              type="button"
+              class="bouton-annuler-edition"
+              (click)="annulerModificationPlat()"
+            >
+              Annuler
+            </button>
+            </div>
+          </ng-template>
         </article>
       </div>
     </section>
