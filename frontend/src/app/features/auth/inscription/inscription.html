@@ -49,11 +49,11 @@
       name="motDePasse"
       type="password"
       [(ngModel)]="motDePasse"
-      minlength="8"
-      maxlength="72"
+      minlength="10"
+      maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
       required
     />
-    <p class="indication">8 caractères minimum.</p>
+    <p class="indication">10 caractères minimum : une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
 
     <label for="confirmationMotDePasse">Confirmer le mot de passe</label>
     <input
@@ -61,8 +61,8 @@
       name="confirmationMotDePasse"
       type="password"
       [(ngModel)]="confirmationMotDePasse"
-      minlength="8"
-      maxlength="72"
+      minlength="10"
+      maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
       required
     />
 

@@ -1,16 +1,16 @@
 <section class="auth-page">
   <h1>Nouveau mot de passe</h1>
-  <p>Choisissez un mot de passe de 8 à 72 caractères.</p>
+  <p>Choisissez un mot de passe de 10 à 72 caractères comprenant une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
 
   <form #form="ngForm" (ngSubmit)="reinitialiser()">
     <label for="motDePasse">Nouveau mot de passe</label>
     <input id="motDePasse" name="motDePasse" type="password"
-      [(ngModel)]="motDePasse" minlength="8" maxlength="72"
+      [(ngModel)]="motDePasse" minlength="10" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
       autocomplete="new-password" required />
 
     <label for="confirmation">Confirmer le mot de passe</label>
     <input id="confirmation" name="confirmation" type="password"
-      [(ngModel)]="confirmation" minlength="8" maxlength="72"
+      [(ngModel)]="confirmation" minlength="10" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
       autocomplete="new-password" required />
 
     <p *ngIf="message" class="message-succes" role="status">{{ message }}</p>
