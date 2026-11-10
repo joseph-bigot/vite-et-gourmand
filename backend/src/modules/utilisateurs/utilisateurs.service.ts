@@ -113,6 +113,28 @@ export class UtilisateursService {
     const utilisateurEnregistre =
       await this.utilisateursRepository.save(utilisateur);
 
+    try {
+      await this.emailService.envoyerEmail(
+        utilisateurEnregistre.email,
+        'Bienvenue chez Vite & Gourmand !',
+        `Bonjour ${utilisateurEnregistre.prenom},
+
+Bienvenue chez Vite & Gourmand !
+
+Votre compte client a bien été créé. Vous pouvez dès maintenant vous connecter à notre site pour découvrir nos menus et passer vos commandes.
+
+Nous sommes heureux de vous compter parmi nos clients.
+
+À bientôt,
+L'équipe Vite & Gourmand`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Échec de l'envoi de l'e-mail de bienvenue à ${utilisateurEnregistre.email}.`,
+      );
+      this.logger.debug(String(error));
+    }
+
     const { mot_de_passe_hash: _mot_de_passe_hash, ...utilisateurPublic } = utilisateurEnregistre;
 
     return utilisateurPublic;
