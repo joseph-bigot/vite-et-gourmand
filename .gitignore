@@ -12,3 +12,6 @@ coverage/
 /sauvegarde-commande-schema.sql
 /sauvegarde-complete-vite-gourmand.sql
 /sauvegarde-utilisateurs-commandes.sql
+
+# Sauvegardes locales des fichiers SCSS
+/frontend/sauvegardes/
