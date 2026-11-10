@@ -321,7 +321,7 @@
             <p class="description-plat">{{ plat.description || 'Aucune description renseignée.' }}</p>
             <p class="allergenes-plat">
               <strong>Allergènes :</strong>
-              {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
+              {{ nomsAllergenes(plat) }}
             </p>
             <button type="button" class="bouton-modifier-plat" (click)="editerPlat(plat)">
               Modifier

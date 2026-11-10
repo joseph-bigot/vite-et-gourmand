@@ -65,6 +65,18 @@ export class EspaceEmploye implements OnInit {
   platsParCategorie(categorie: 'entree' | 'plat' | 'dessert'): PlatGestion[] {
     return this.plats.filter((plat) => plat.categorie === categorie);
   }
+
+  nomsAllergenes(plat: PlatGestion): string {
+    const noms = (plat.allergenes ?? [])
+      .map((id) =>
+        this.referencesMenus.allergenes.find(
+          (allergene) => Number(allergene.id_allergene) === Number(id),
+        )?.nom,
+      )
+      .filter((nom): nom is string => Boolean(nom));
+
+    return noms.length ? noms.join(', ') : 'Aucun renseigné';
+  }
   referencesMenus: ReferencesMenus = { themes: [], regimes: [], allergenes: [] };
   chargementMenus = false;
   erreurMenus = '';
