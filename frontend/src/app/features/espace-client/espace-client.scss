@@ -150,3 +150,8 @@
 .commande-details p {
   margin: 10px 0;
 }
+
+/* Espacement entre les actions de chaque commande */
+.commande-card > button {
+  margin-right: 12px;
+}
