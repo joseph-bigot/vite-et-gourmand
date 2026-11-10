@@ -45,11 +45,15 @@
         <p><strong>Stock :</strong> {{ menu.stock }}</p>
 
       <a
-  class="commander-menu"
-  [routerLink]="['/commande', menu.id_menu]"
->
-  Commander ce menu
-</a>
+          *ngIf="menu.stock > 0"
+          class="commander-menu"
+          [routerLink]="['/commande', menu.id_menu]"
+        >
+          Commander ce menu
+        </a>
+        <p class="menu-indisponible" *ngIf="menu.stock <= 0">
+          Indisponible : stock épuisé
+        </p>
       </div>
     </div>
 

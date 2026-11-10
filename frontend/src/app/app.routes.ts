@@ -28,6 +28,7 @@ export const routes: Routes = [
       {
         path: 'commande/:id',
         loadComponent: () => import('./features/commandes/commande/commande').then(m => m.Commande),
+        canActivate: [authGuard],
       },
       {
         path: 'connexion',

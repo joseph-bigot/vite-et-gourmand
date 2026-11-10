@@ -390,8 +390,11 @@ export class EspaceEmploye implements OnInit {
     }
     this.enregistrementMenu = true;
     this.erreurMenus = '';
+    const donneesModification: Partial<DonneesMenu> = { ...this.formulaireMenu };
+    delete donneesModification.plats;
+
     const requete = this.menuEnEdition
-      ? this.menusService.modifierMenu(this.menuEnEdition, this.formulaireMenu)
+      ? this.menusService.modifierMenu(this.menuEnEdition, donneesModification)
       : this.menusService.creerMenu(this.formulaireMenu);
 
     requete.subscribe({

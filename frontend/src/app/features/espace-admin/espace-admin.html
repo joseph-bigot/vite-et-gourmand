@@ -3,9 +3,8 @@
 
   <nav class="onglets-admin" aria-label="Navigation administrateur">
     <button type="button" [class.actif]="ongletActif === 'statistiques'" (click)="ouvrirOnglet('statistiques')">Statistiques</button>
-    <button type="button" [class.actif]="ongletActif === 'horaires'" (click)="ouvrirOnglet('horaires')">Horaires</button>
-    <button type="button" [class.actif]="ongletActif === 'avis'" (click)="ouvrirOnglet('avis')">Modération des avis</button>
     <button type="button" [class.actif]="ongletActif === 'employes'" (click)="ouvrirOnglet('employes')">Gestion des employés</button>
+    <a routerLink="/espace-employe" class="lien-espace-operationnel">Gestion opérationnelle</a>
   </nav>
 
   <section *ngIf="ongletActif === 'statistiques'">
@@ -83,74 +82,9 @@
     </section>
   </section>
 
-  <section *ngIf="ongletActif === 'horaires'">
-    <h2>Gestion des horaires d'ouverture</h2>
-    <p>Les modifications seront visibles dans le pied de page du site.</p>
 
-    <p *ngIf="chargementHoraires">Chargement des horaires…</p>
-    <p *ngIf="erreurHoraires" class="erreur">{{ erreurHoraires }}</p>
-    <p *ngIf="messageHoraires" class="succes">{{ messageHoraires }}</p>
 
-    <form *ngIf="!chargementHoraires && horaires.length"
-      class="formulaire-catalogue"
-      (ngSubmit)="enregistrerHoraires()">
-      <div *ngFor="let jour of joursSemaine; let i = index" class="carte-statistique">
-        <h3>{{ jour.nom }}</h3>
-        <label class="toggle-fermeture" [for]="'admin-ferme-' + jour.numero">
-          <input class="toggle-input"
-            [id]="'admin-ferme-' + jour.numero"
-            [name]="'admin-ferme-' + jour.numero"
-            type="checkbox"
-            [(ngModel)]="horaires[i].ferme">
-          <span>Fermé</span>
-        </label>
 
-        <div *ngIf="!horaires[i].ferme">
-          <label [for]="'admin-ouverture-' + jour.numero">Heure d'ouverture</label>
-          <input [id]="'admin-ouverture-' + jour.numero"
-            [name]="'admin-ouverture-' + jour.numero"
-            type="time"
-            [(ngModel)]="horaires[i].heure_ouverture"
-            required>
-
-          <label [for]="'admin-fermeture-' + jour.numero">Heure de fermeture</label>
-          <input [id]="'admin-fermeture-' + jour.numero"
-            [name]="'admin-fermeture-' + jour.numero"
-            type="time"
-            [(ngModel)]="horaires[i].heure_fermeture"
-            required>
-        </div>
-      </div>
-
-      <button type="submit" [disabled]="enregistrementHoraires">
-        {{ enregistrementHoraires ? 'Enregistrement…' : 'Enregistrer les horaires' }}
-      </button>
-    </form>
-  </section>
-
-  <section *ngIf="ongletActif === 'avis'">
-    <h2>Modération des avis</h2>
-    <p>Seuls les avis approuvés seront visibles sur l’accueil.</p>
-    <p *ngIf="chargementAvis">Chargement des avis…</p>
-    <p *ngIf="erreurAvis" class="erreur">{{ erreurAvis }}</p>
-    <p *ngIf="messageAvis" class="succes">{{ messageAvis }}</p>
-    <p *ngIf="!chargementAvis && !erreurAvis && avis.length === 0">
-      Aucun avis en attente de modération.
-    </p>
-
-    <article *ngFor="let avisClient of avis" class="carte-statistique">
-      <h3>Avis n°{{ avisClient.id_avis }}</h3>
-      <p><strong>Commande :</strong> n°{{ avisClient.id_commande }}</p>
-      <p><strong>Client :</strong> {{ avisClient.prenom_client }} {{ avisClient.nom_client }}</p>
-      <p><strong>Note :</strong> {{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }} ({{ avisClient.note }}/5)</p>
-      <blockquote>{{ avisClient.commentaire }}</blockquote>
-      <p><small>Soumis le {{ avisClient.date_creation | date:'dd/MM/yyyy à HH:mm' }}</small></p>
-      <button type="button" (click)="modererAvis(avisClient, 'approuve')"
-        [disabled]="avisEnCours === avisClient.id_avis">Approuver</button>
-      <button type="button" (click)="modererAvis(avisClient, 'rejete')"
-        [disabled]="avisEnCours === avisClient.id_avis">Rejeter</button>
-    </article>
-  </section>
 
   <section *ngIf="ongletActif === 'employes'">
     <h2>Gestion des employés</h2>

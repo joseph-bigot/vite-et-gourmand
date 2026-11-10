@@ -90,6 +90,9 @@
         <p class="menu-prix">
           À partir de {{ menu.prix_par_personne }} € / personne
         </p>
+        <p class="menu-indisponible" *ngIf="menu.stock <= 0">
+          Indisponible
+        </p>
       </div>
 
       <a
