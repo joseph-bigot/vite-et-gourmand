@@ -1,7 +1,6 @@
 
 import {
   IsEmail,
-  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -23,10 +22,10 @@ export class InscriptionDto {
   @MaxLength(255)
   email!: string;
 
-  @IsOptional()
   @IsString()
+  @MinLength(6)
   @MaxLength(20)
-  telephone?: string;
+  telephone!: string;
 
   @IsString()
   @MinLength(10)
