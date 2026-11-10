@@ -6,48 +6,20 @@
   </p>
   <a class="hero-button" routerLink="/menus">Découvrir nos menus</a>
 
-  <img
-    class="hero-image"
-    src="/images/hero-vite-gourmand.png"
-    alt="Table dressée avec un plat gastronomique"
-  />
-</section>
-
-<section class="menus">
-  <h2>Nos menus</h2>
-
-  <div class="menu-cards">
-    <div class="menu-item">
-      <article class="menu-card">
-        <img src="/images/menu-festif.png" alt="Menu Festif" />
-        <h3>Menu Festif</h3>
-        <p>Un menu raffiné pour vos repas de fête.</p>
-        <p>À partir de 45 € / personne</p>
-      </article>
-      <a class="hero-button" routerLink="/menus">Voir le menu</a>
-    </div>
-
-    <div class="menu-item">
-      <article class="menu-card">
-        <img src="/images/menu-vegetarien.png" alt="Menu Végétarien" />
-        <h3>Menu Végétarien</h3>
-        <p>Des produits de saison aux saveurs équilibrées.</p>
-        <p>À partir de 32 € / personne</p>
-      </article>
-      <a class="hero-button" routerLink="/menus">Voir le menu</a>
-    </div>
-
-    <div class="menu-item">
-      <article class="menu-card">
-        <img src="/images/menu-classique.png" alt="Menu Classique" />
-        <h3>Menu Classique</h3>
-        <p>Un menu généreux pour vos repas en famille.</p>
-        <p>À partir de 35 € / personne</p>
-      </article>
-      <a class="hero-button" routerLink="/menus">Voir le menu</a>
-    </div>
+  <div class="hero-image-frame">
+    <span class="frame-ornament top-left" aria-hidden="true">❧</span>
+    <span class="frame-ornament top-right" aria-hidden="true">❧</span>
+    <span class="frame-ornament bottom-left" aria-hidden="true">❧</span>
+    <span class="frame-ornament bottom-right" aria-hidden="true">❧</span>
+    <img
+      class="hero-image"
+      src="/images/hero-vite-gourmand.png"
+      alt="Julie et José dans leur cuisine professionnelle"
+    />
   </div>
 </section>
+
+
 
 <section class="story" id="histoire">
   <h2>Notre histoire</h2>
@@ -65,6 +37,10 @@
   <p *ngIf="avis.length === 0">Aucun avis publié pour le moment.</p>
   <div class="review-cards" *ngIf="avis.length > 0">
     <article class="review-card" *ngFor="let avisClient of avis">
+      <span class="frame-ornament top-left">❧</span>
+      <span class="frame-ornament top-right">❧</span>
+      <span class="frame-ornament bottom-left">❧</span>
+      <span class="frame-ornament bottom-right">❧</span>
       <blockquote>{{ avisClient.commentaire }}</blockquote>
       <p>
         <span [attr.aria-label]="avisClient.note + ' sur 5'">{{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }}</span>
