@@ -17,11 +17,9 @@
       <img
         class="detail-menu-image"
         [src]="
-          menu.theme === 'Festif'
+          menu.theme === 'Noël' || menu.theme === 'Événement'
             ? '/images/menu-festif.png'
-            : menu.theme === 'Végétarien'
-              ? '/images/menu-vegetarien.png'
-              : '/images/menu-classique.png'
+            : '/images/menu-classique.png'
         "
         [alt]="'Illustration du ' + menu.titre"
       />

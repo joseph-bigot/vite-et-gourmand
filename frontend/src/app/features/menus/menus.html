@@ -32,8 +32,9 @@
     >
       <option value="">Tous les thèmes</option>
       <option value="Classique">Classique</option>
-      <option value="Festif">Festif</option>
-      <option value="Végétarien">Végétarien</option>
+      <option value="Noël">Noël</option>
+      <option value="Pâques">Pâques</option>
+      <option value="Événement">Événement</option>
     </select>
 
     <label for="regime">Régime alimentaire</label>
@@ -45,7 +46,6 @@
       <option value="">Tous les régimes</option>
       <option value="Classique">Classique</option>
       <option value="Végétarien">Végétarien</option>
-      <option value="Végétalien">Végétalien</option>
       <option value="Sans gluten">Sans gluten</option>
     </select>
 
@@ -72,11 +72,9 @@
       <img
         class="menu-image"
         [src]="
-          menu.theme === 'Festif'
+          menu.theme === 'Noël' || menu.theme === 'Événement'
             ? '/images/menu-festif.png'
-            : menu.theme === 'Végétarien'
-              ? '/images/menu-vegetarien.png'
-              : '/images/menu-classique.png'
+            : '/images/menu-classique.png'
         "
         [alt]="'Illustration du ' + menu.titre"
       />

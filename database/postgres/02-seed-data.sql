@@ -6,13 +6,13 @@ BEGIN;
 
 INSERT INTO theme (nom) VALUES
     ('Classique'),
-    ('Festif'),
-    ('Végétarien');
+    ('Noël'),
+    ('Pâques'),
+    ('Événement');
 
 INSERT INTO regime_alimentaire (nom) VALUES
     ('Classique'),
     ('Végétarien'),
-    ('Végétalien'),
     ('Sans gluten');
 
 INSERT INTO allergene (nom) VALUES
@@ -82,7 +82,7 @@ SELECT
     TRUE
 FROM theme t
 JOIN regime_alimentaire r ON r.nom = 'Classique'
-WHERE t.nom = 'Festif';
+WHERE t.nom = 'Événement';
 
 INSERT INTO menu (
     id_theme,
@@ -109,7 +109,7 @@ SELECT
     TRUE
 FROM theme t
 JOIN regime_alimentaire r ON r.nom = 'Végétarien'
-WHERE t.nom = 'Végétarien';
+WHERE t.nom = 'Classique';
 
 INSERT INTO composer_menu (id_menu, id_plat, quantite, ordre_affichage)
 SELECT m.id_menu, p.id_plat, 1,
