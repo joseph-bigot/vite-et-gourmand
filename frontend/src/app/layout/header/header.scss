@@ -113,7 +113,7 @@ nav a:hover,
 
 @media (max-width: 600px) {
   .site-header {
-    align-items: flex-start;
+    align-items: center;
     flex-direction: column;
     gap: 18px;
     padding: 20px 5%;
@@ -122,16 +122,25 @@ nav a:hover,
   .logo {
     width: 210px;
     flex-basis: auto;
+    margin: 0 auto;
   }
 
   nav {
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     gap: 12px 18px;
+    flex-wrap: wrap;
+    text-align: center;
   }
 
   .user-actions {
-    align-self: flex-end;
+    align-self: center;
+    justify-items: center;
     margin-left: 0;
+  }
+
+  .user-actions button {
+    justify-self: center;
   }
 }
