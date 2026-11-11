@@ -90,7 +90,7 @@ h1 {
   padding:1.4rem;
   border:1px solid #e4dfd5;
   border-radius:10px;
-  background:#ffffff;
+  background:#fff;
   box-shadow:0 2px 8px rgba(48,39,28,0.04);
 }
 .outils-commandes > div {
@@ -177,14 +177,12 @@ h1 {
   background:#e9ddff;
   color:#542d91;
 }
-.statut-terminale {
-  background:#eeeeee;
-  color:#555555;
-}
+.statut-terminale,
 .statut-neutre {
-  background:#eeeeee;
-  color:#333333;
+  background:#eee;
 }
+.statut-terminale { color:#555; }
+.statut-neutre { color:#333; }
 .commande.prestation-proche {
   border-color:#d97706;
   box-shadow:0 0 0 1px #d97706;
@@ -338,14 +336,11 @@ h1 {
   box-shadow:0 5px 14px rgba(0,0,0,0.08);
 }
 .carte-plat .image-carte-plat {
-  display: block;
   align-self: stretch;
-  width: 100%;
   height: 180px;
   margin: -1.25rem -1.25rem 1rem;
   width: calc(100% + 2.5rem);
   object-fit: cover;
-  object-position: center;
   border-radius: 9px 9px 0 0;
 }
 
@@ -385,7 +380,7 @@ h1 {
   padding:0 6px;
   border-radius:999px;
   background-color:#dc2626;
-  color:#ffffff;
+  color:#fff;
   font-size:12px;
   font-weight:700;
   line-height:1;
