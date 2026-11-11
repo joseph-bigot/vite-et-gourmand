@@ -228,6 +228,7 @@ export class EspaceAdmin implements OnInit {
         this.email = '';
         this.motDePasse = '';
         this.chargementEmploye = false;
+        this.chargerEmployes();
         this.cdr.detectChanges();
       },
       error: (error) => {
