@@ -226,6 +226,34 @@ L'équipe Vite & Gourmand`,
     return employePublic;
   }
 
+  async supprimerEmploye(id: string) {
+    const employe = await this.utilisateursRepository.findOne({
+      where: { id_utilisateur: id, role: 'employe' },
+    });
+
+    if (!employe) {
+      throw new NotFoundException('Compte employé introuvable.');
+    }
+
+    const commandes = await this.utilisateursRepository.query(
+      'SELECT 1 FROM commande WHERE id_utilisateur = $1 LIMIT 1',
+      [id],
+    );
+
+    if (commandes.length > 0) {
+      throw new ConflictException(
+        'Impossible de supprimer ce compte : des commandes sont associées à cet employé.',
+      );
+    }
+
+    await this.utilisateursRepository.remove(employe);
+
+    return {
+      id_utilisateur: id,
+      message: 'Le compte employé a été supprimé.',
+    };
+  }
+
   async connecter(donnees: ConnexionDto) {
     const email = donnees.email.trim().toLowerCase();
 

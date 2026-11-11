@@ -176,6 +176,40 @@ export class EspaceAdmin implements OnInit {
     });
   }
 
+  supprimerEmploye(id: number): void {
+    const employe = this.employes.find((item) => item.id_utilisateur === id);
+
+    if (!employe) {
+      return;
+    }
+
+    const confirmation = window.confirm(
+      `Voulez-vous vraiment supprimer définitivement le compte de ${employe.prenom} ${employe.nom} ? Cette action est irréversible.`,
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
+    this.message = '';
+    this.erreurListeEmployes = '';
+
+    this.adminService.supprimerEmploye(id).subscribe({
+      next: () => {
+        this.employes = this.employes.filter(
+          (item) => item.id_utilisateur !== id,
+        );
+        this.message = 'Le compte employé a été supprimé.';
+        this.cdr.detectChanges();
+      },
+      error: (erreur) => {
+        this.erreurListeEmployes = erreur.error?.message
+          ?? 'Impossible de supprimer ce compte employé.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
   creerEmploye(): void {
     this.message = '';
     this.erreurEmploye = '';

@@ -91,4 +91,10 @@ export class AdminService {
     );
   }
 
+  supprimerEmploye(id: number): Observable<{ id_utilisateur: number; message: string }> {
+    return this.http.delete<{ id_utilisateur: number; message: string }>(
+      `${API_URL}/utilisateurs/employes/${id}`,
+    );
+  }
+
 }

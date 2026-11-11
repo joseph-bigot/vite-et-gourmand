@@ -7,6 +7,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   UseGuards,
 } from '@nestjs/common';
@@ -84,6 +85,14 @@ export class UtilisateursController {
   @Roles('admin')
   activerEmploye(@Param('id') id: string) {
     return this.utilisateursService.activerEmploye(id);
+  }
+
+  @Delete('employes/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  supprimerEmploye(@Param('id') id: string) {
+    return this.utilisateursService.supprimerEmploye(id);
   }
 
   @Post('connexion')
