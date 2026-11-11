@@ -686,6 +686,32 @@ Veuillez contacter Vite & Gourmand afin d'organiser la restitution du matériel.
       }
     }
 
+    if (nouveauStatut === 'terminee') {
+      try {
+        await this.emailService.envoyerEmail(
+          resultat.emailClient,
+          'Votre commande est terminée - Donnez votre avis',
+          `Bonjour,
+
+Votre commande n°${idCommande} est maintenant terminée.
+
+Nous vous invitons à vous connecter à votre espace client sur Vite & Gourmand afin de déposer votre avis.
+
+Vous pourrez attribuer une note de 1 à 5 et partager votre expérience dans un commentaire.
+
+Votre retour nous aidera à améliorer nos services.
+
+À bientôt,
+L'équipe Vite & Gourmand`,
+        );
+      } catch (erreur) {
+        console.error(
+          'Échec de l’envoi de l’e-mail invitant le client à donner son avis.',
+          erreur,
+        );
+      }
+    }
+
     return { message: resultat.message };
   }
 
