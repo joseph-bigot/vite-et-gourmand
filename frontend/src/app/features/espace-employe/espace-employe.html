@@ -318,6 +318,12 @@
           *ngFor="let plat of platsParCategorie(categorie.valeur)"
         >
           <ng-container *ngIf="platEnEdition !== plat.id_plat; else formulaireEditionPlat">
+            <img
+              class="image-carte-plat"
+              [src]="imageDuPlat(plat)"
+              [alt]="'Photo de ' + plat.nom"
+              loading="lazy"
+            />
             <h5>{{ plat.nom }}</h5>
             <p class="description-plat">{{ plat.description || 'Aucune description renseignée.' }}</p>
             <p class="allergenes-plat">

@@ -337,6 +337,18 @@ h1 {
   transform:translateY(-2px);
   box-shadow:0 5px 14px rgba(0,0,0,0.08);
 }
+.carte-plat .image-carte-plat {
+  display: block;
+  align-self: stretch;
+  width: 100%;
+  height: 180px;
+  margin: -1.25rem -1.25rem 1rem;
+  width: calc(100% + 2.5rem);
+  object-fit: cover;
+  object-position: center;
+  border-radius: 9px 9px 0 0;
+}
+
 .carte-plat h5 {
   margin:0 0 0.75rem;
   font-size:1.05rem;
