@@ -171,3 +171,11 @@
   object-position: center;
   border-radius: 8px 8px 0 0;
 }
+
+
+.commander-menu,
+.commander-menu:hover,
+.commander-menu:focus,
+.commander-menu:active {
+  text-decoration: none !important;
+}
