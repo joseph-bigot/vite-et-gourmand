@@ -58,3 +58,40 @@
     padding: 24px;
   }
 }
+
+
+.champ-mot-de-passe {
+  position: relative;
+  width: 100%;
+}
+
+.champ-mot-de-passe input {
+  padding-right: 3.2rem;
+}
+
+.auth-page .bouton-visibilite {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 7px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #572d32;
+  cursor: pointer;
+}
+
+.auth-page .bouton-visibilite:hover {
+  background: #f1e9e5;
+}
+
+.bouton-visibilite svg {
+  width: 21px;
+  height: 21px;
+}

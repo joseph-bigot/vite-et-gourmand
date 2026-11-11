@@ -395,3 +395,41 @@
 .onglets-admin .lien-espace-operationnel:hover {
   background: var(--admin-vert-fonce);
 }
+
+
+.espace-admin .champ-mot-de-passe {
+  position: relative;
+  width: 100%;
+}
+
+.espace-admin .champ-mot-de-passe input {
+  box-sizing: border-box;
+  padding-right: 3.2rem;
+}
+
+.espace-admin .bouton-visibilite {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 7px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--admin-vert);
+  cursor: pointer;
+}
+
+.espace-admin .bouton-visibilite:hover {
+  background: #eef2ee;
+}
+
+.bouton-visibilite svg {
+  width: 21px;
+  height: 21px;
+}

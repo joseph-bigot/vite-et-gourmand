@@ -15,7 +15,9 @@ import { finalize, timeout } from 'rxjs';
 export class ReinitialiserMotDePasse {
   token = '';
   motDePasse = '';
+  motDePasseVisible = false;
   confirmation = '';
+  confirmationVisible = false;
   message = '';
   erreur = '';
   chargement = false;

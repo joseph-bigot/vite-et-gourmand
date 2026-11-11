@@ -36,6 +36,7 @@ export class EspaceAdmin implements OnInit {
   prenom = '';
   email = '';
   motDePasse = '';
+  motDePasseVisible = false;
   message = '';
   erreurEmploye = '';
   chargementEmploye = false;

@@ -18,8 +18,10 @@ export class Inscription {
   email = '';
   telephone = '';
   motDePasse = '';
+  motDePasseVisible = false;
   confirmationMotDePasse = '';
 
+  confirmationMotDePasseVisible = false;
   message = '';
   erreur = '';
   chargement = false;

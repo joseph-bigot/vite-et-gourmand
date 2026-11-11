@@ -46,27 +46,63 @@
     />
 
     <label for="motDePasse">Mot de passe</label>
-    <input
+    <div class="champ-mot-de-passe">
+<input
       id="motDePasse"
       name="motDePasse"
-      type="password"
+      [type]="motDePasseVisible ? 'text' : 'password'"
       [(ngModel)]="motDePasse"
       minlength="10"
       maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
       required
-    />
+    >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="motDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="motDePasseVisible"
+    (click)="motDePasseVisible = !motDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!motDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
     <p class="indication">10 caractères minimum : une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
 
     <label for="confirmationMotDePasse">Confirmer le mot de passe</label>
-    <input
+    <div class="champ-mot-de-passe">
+<input
       id="confirmationMotDePasse"
       name="confirmationMotDePasse"
-      type="password"
+      [type]="confirmationMotDePasseVisible ? 'text' : 'password'"
       [(ngModel)]="confirmationMotDePasse"
       minlength="10"
       maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
       required
-    />
+    >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="confirmationMotDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="confirmationMotDePasseVisible"
+    (click)="confirmationMotDePasseVisible = !confirmationMotDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!confirmationMotDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
 
     <p
       *ngIf="confirmationMotDePasse && !motsDePasseIdentiques"

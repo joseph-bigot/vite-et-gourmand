@@ -77,3 +77,59 @@
   color: #77716e;
   font-size: 0.85rem;
 }
+
+/* Boutons d'affichage des mots de passe */
+.auth-page .champ-mot-de-passe {
+  position: relative;
+  width: 100%;
+}
+
+.auth-page .champ-mot-de-passe input {
+  padding-right: 3.2rem;
+}
+
+.auth-page .bouton-visibilite {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 7px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #572d32;
+  cursor: pointer;
+}
+
+.auth-page .bouton-visibilite:hover {
+  background: #f1e9e5;
+}
+
+.auth-page .bouton-visibilite svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* Harmonisation des boutons œil avec les autres écrans */
+.auth-page button.bouton-visibilite,
+.auth-page button.bouton-visibilite:not(:disabled) {
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 7px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #572d32;
+}
+
+.auth-page button.bouton-visibilite:hover {
+  background: #f1e9e5;
+  color: #572d32;
+}

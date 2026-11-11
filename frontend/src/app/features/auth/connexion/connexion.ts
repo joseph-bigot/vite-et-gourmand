@@ -23,6 +23,7 @@ export class Connexion {
   email = '';
   motDePasse = '';
 
+  motDePasseVisible = false;
   message = '';
   erreur = '';
   chargement = false;
