@@ -643,6 +643,7 @@ export class EspaceEmploye implements OnInit {
 
   ngOnInit(): void {
     this.chargerCommandes();
+    this.chargerAvis();
   }
 
   chargerCommandes(): void {

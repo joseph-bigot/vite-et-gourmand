@@ -398,3 +398,20 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Badge des avis en attente de modération */
+.badge-avis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background-color: #dc2626;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
