@@ -194,9 +194,21 @@
             <label for="menu-ajout-plat">Ajouter un plat existant</label>
             <select #selectPlat id="menu-ajout-plat" name="ajoutPlat">
               <option value="">Choisir un plat</option>
-              <option *ngFor="let plat of plats" [value]="plat.id_plat">
-                {{ plat.nom }} ({{ plat.categorie }})
-              </option>
+              <optgroup label="ENTRÉES">
+                <option *ngFor="let plat of platsParCategorieMenu('entree')" [value]="plat.id_plat">
+                  {{ plat.nom }}
+                </option>
+              </optgroup>
+              <optgroup label="PLATS">
+                <option *ngFor="let plat of platsParCategorieMenu('plat')" [value]="plat.id_plat">
+                  {{ plat.nom }}
+                </option>
+              </optgroup>
+              <optgroup label="DESSERTS">
+                <option *ngFor="let plat of platsParCategorieMenu('dessert')" [value]="plat.id_plat">
+                  {{ plat.nom }}
+                </option>
+              </optgroup>
             </select>
           </div>
           <button type="button" (click)="ajouterPlatAuMenu(selectPlat.value); selectPlat.value = ''">

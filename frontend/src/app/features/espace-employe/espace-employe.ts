@@ -388,6 +388,10 @@ export class EspaceEmploye implements OnInit {
     this.formulaireMenu = this.nouveauFormulaireMenu();
   }
 
+  platsParCategorieMenu(categorie: 'entree' | 'plat' | 'dessert') {
+    return this.plats.filter((plat) => plat.categorie === categorie);
+  }
+
   ajouterPlatAuMenu(idPlat: string): void {
     const id = Number(idPlat);
     if (!id || this.formulaireMenu.plats.some((p) => p.id_plat === id)) return;
