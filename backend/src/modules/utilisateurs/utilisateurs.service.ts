@@ -168,6 +168,35 @@ L'équipe Vite & Gourmand`,
     });
 
     const employeEnregistre = await this.utilisateursRepository.save(employe);
+
+    const frontendUrl = (
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200'
+    ).replace(/\/$/, '');
+
+    try {
+      await this.emailService.envoyerEmail(
+        employeEnregistre.email,
+        'Votre compte employé Vite & Gourmand a été créé',
+        `Bonjour ${employeEnregistre.prenom},
+
+Votre compte employé Vite & Gourmand vient d'être créé par l'administrateur.
+
+Vous pouvez accéder à votre espace depuis cette adresse :
+${frontendUrl}/connexion
+
+Pour définir votre mot de passe personnel, utilisez la fonction « Mot de passe oublié » sur la page de connexion.
+
+Bienvenue dans l'équipe Vite & Gourmand.
+
+L'équipe Vite & Gourmand`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Échec de l'envoi de l'e-mail de création du compte employé à ${employeEnregistre.email}.`,
+      );
+      this.logger.debug(String(error));
+    }
+
     const { mot_de_passe_hash: _mot_de_passe_hash, ...employePublic } = employeEnregistre;
 
     return employePublic;

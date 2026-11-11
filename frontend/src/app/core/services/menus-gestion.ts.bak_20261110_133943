@@ -1,0 +1,112 @@
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+export interface PlatGestion {
+  id_plat: number;
+  nom: string;
+  description?: string | null;
+  categorie: 'entree' | 'plat' | 'dessert';
+  allergenes: number[];
+}
+
+export interface CompositionMenu {
+  id_plat: number;
+  quantite: number;
+  ordre_affichage: number;
+}
+
+export interface MenuGestion {
+  id_menu: number;
+  id_theme: number;
+  id_regime: number;
+  titre: string;
+  description: string;
+  prix_par_personne: number;
+  nombre_minimum_personnes: number;
+  stock: number;
+  conditions_commande: string;
+  conditions_conservation: string;
+  disponible: boolean;
+  theme?: string;
+  regime_alimentaire?: string;
+  plats: CompositionMenu[];
+}
+
+export interface DonneesMenu {
+  id_theme: number;
+  id_regime: number;
+  titre: string;
+  description: string;
+  prix_par_personne: number;
+  nombre_minimum_personnes: number;
+  stock: number;
+  conditions_commande: string;
+  conditions_conservation: string;
+  disponible: boolean;
+  plats: CompositionMenu[];
+}
+
+export interface ReferencesMenus {
+  themes: { id_theme: number; nom: string }[];
+  regimes: { id_regime: number; nom: string }[];
+  allergenes: { id_allergene: number; nom: string }[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class MenusGestion {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:3000/menus';
+
+  listerTous(): Observable<MenuGestion[]> {
+    return this.http.get<MenuGestion[]>(`${this.apiUrl}/gestion/tous`);
+  }
+
+  listerReferences(): Observable<ReferencesMenus> {
+    return this.http.get<ReferencesMenus>(`${this.apiUrl}/gestion/references`);
+  }
+
+  listerPlats(): Observable<PlatGestion[]> {
+    return this.http.get<PlatGestion[]>(`${this.apiUrl}/gestion/plats`);
+  }
+
+  creerMenu(donnees: DonneesMenu): Observable<{ id_menu: number; message: string }> {
+    return this.http.post<{ id_menu: number; message: string }>(this.apiUrl, donnees);
+  }
+
+  modifierMenu(
+    id: number,
+    donnees: Partial<DonneesMenu>,
+  ): Observable<{ id_menu: number; message: string }> {
+    return this.http.patch<{ id_menu: number; message: string }>(`${this.apiUrl}/${id}`, donnees);
+  }
+
+  supprimerMenu(id: number): Observable<{ id_menu: number; message: string }> {
+    return this.http.delete<{ id_menu: number; message: string }>(`${this.apiUrl}/${id}`);
+  }
+
+  changerDisponibilite(
+    id: number,
+    disponible: boolean,
+  ): Observable<{ id_menu: number; disponible: boolean }> {
+    return this.http.patch<{ id_menu: number; disponible: boolean }>(
+      `${this.apiUrl}/${id}/disponibilite`,
+      { disponible },
+    );
+  }
+
+  supprimerPlat(id: number): Observable<{ id_plat: number; message: string }> {
+    return this.http.delete<{ id_plat: number; message: string }>(
+      `${this.apiUrl}/plats/${id}`,
+    );
+  }
+
+  creerPlat(donnees: {
+    nom: string;
+    description?: string;
+    categorie: 'entree' | 'plat' | 'dessert';
+    allergenes?: number[];
+  }): Observable<{ id_plat: number; message: string }> {
+    return this.http.post<{ id_plat: number; message: string }>(`${this.apiUrl}/plats`, donnees);
+  }
+}

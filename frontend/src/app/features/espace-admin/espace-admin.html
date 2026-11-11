@@ -54,31 +54,52 @@
 
     <section class="graphique-menus" *ngIf="statistiques as stats">
       <h3>Comparaison des menus</h3>
+
       <p *ngIf="stats.statistiques_par_menu.length === 0">
         Aucune donnée pour les filtres sélectionnés.
       </p>
 
-      <article class="ligne-menu" *ngFor="let menu of stats.statistiques_par_menu">
-        <h4>{{ menu.titreMenu }}</h4>
-        <div class="libelle-barre">
-          <span>Commandes</span>
-          <strong>{{ menu.nombreCommandes }}</strong>
-        </div>
-        <div class="fond-barre" role="img" [attr.aria-label]="menu.nombreCommandes + ' commandes'">
-          <div class="barre barre-commandes"
-            [style.width.%]="menu.nombreCommandes / maximumCommandes() * 100"></div>
-        </div>
-        <div class="libelle-barre">
-          <span>Chiffre d’affaires</span>
-          <strong>{{ menu.chiffreAffaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</strong>
-        </div>
-        <div class="fond-barre"
-          role="img"
-          [attr.aria-label]="'Chiffre d’affaires : ' + menu.chiffreAffaires + ' euros'">
-          <div class="barre barre-revenu"
-            [style.width.%]="menu.chiffreAffaires / maximumChiffreAffaires() * 100"></div>
-        </div>
-      </article>
+      <div class="graphiques-comparaison"
+        *ngIf="stats.statistiques_par_menu.length > 0">
+
+        <article class="carte-graphique">
+          <h4>Nombre de commandes</h4>
+          <p class="description-graphique">Volume de commandes par menu</p>
+
+          <div class="ligne-graphique"
+            *ngFor="let menu of stats.statistiques_par_menu">
+            <div class="entete-graphique">
+              <span>{{ menu.titreMenu }}</span>
+              <strong>{{ menu.nombreCommandes }}
+                {{ menu.nombreCommandes > 1 ? 'commandes' : 'commande' }}</strong>
+            </div>
+            <div class="fond-barre" role="img"
+              [attr.aria-label]="menu.titreMenu + ' : ' + menu.nombreCommandes + ' commandes'">
+              <div class="barre barre-commandes"
+                [style.width.%]="menu.nombreCommandes / maximumCommandes() * 100"></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="carte-graphique">
+          <h4>Chiffre d’affaires</h4>
+          <p class="description-graphique">Revenus par menu</p>
+
+          <div class="ligne-graphique"
+            *ngFor="let menu of stats.statistiques_par_menu">
+            <div class="entete-graphique">
+              <span>{{ menu.titreMenu }}</span>
+              <strong>{{ menu.chiffreAffaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</strong>
+            </div>
+            <div class="fond-barre" role="img"
+              [attr.aria-label]="menu.titreMenu + ' : ' + menu.chiffreAffaires + ' euros'">
+              <div class="barre barre-revenu"
+                [style.width.%]="menu.chiffreAffaires / maximumChiffreAffaires() * 100"></div>
+            </div>
+          </div>
+        </article>
+
+      </div>
     </section>
   </section>
 

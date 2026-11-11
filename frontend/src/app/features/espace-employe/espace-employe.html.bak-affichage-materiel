@@ -1,0 +1,530 @@
+<section class="espace-employe">
+  <h1>Espace employé</h1>
+  <p>Consultez et gérez les commandes des clients.</p>
+
+  <nav class="onglets-employe" aria-label="Gestion des menus et des plats">
+    <button
+      type="button"
+      [class.actif]="ongletActif === 'commandes'"
+      (click)="ouvrirOnglet('commandes')"
+    >
+      Commandes
+    </button>
+    <button type="button" [class.actif]="ongletActif === 'menus'" (click)="ouvrirOnglet('menus')">
+      Gestion des menus
+    </button>
+    <button type="button" [class.actif]="ongletActif === 'plats'" (click)="ouvrirOnglet('plats')">
+      Gestion des plats
+    </button>
+    <button type="button" [class.actif]="ongletActif === 'avis'" (click)="ouvrirOnglet('avis')">
+      Modération des avis
+    </button>
+    <button
+      type="button"
+      [class.actif]="ongletActif === 'horaires'"
+      (click)="ouvrirOnglet('horaires')"
+    >
+      Horaires
+    </button>
+  </nav>
+
+  <section *ngIf="ongletActif === 'horaires'" class="gestion-catalogue">
+    <h2>Gestion des horaires d'ouverture</h2>
+    <p>Les modifications seront visibles dans le pied de page du site.</p>
+
+    <p *ngIf="chargementHoraires">Chargement des horaires…</p>
+    <p *ngIf="erreurHoraires" class="erreur">{{ erreurHoraires }}</p>
+    <p *ngIf="messageHoraires" class="message">{{ messageHoraires }}</p>
+
+    <form
+      *ngIf="!chargementHoraires && horaires.length"
+      class="formulaire-catalogue formulaire-horaires"
+      (ngSubmit)="enregistrerHoraires()"
+    >
+      <div *ngFor="let jour of joursSemaine; let i = index" class="carte-statistique">
+        <h3>{{ jour.nom }}</h3>
+
+        <label class="toggle-fermeture" [for]="'ferme-' + jour.numero">
+          <input
+            class="toggle-input"
+            [id]="'ferme-' + jour.numero"
+            [name]="'ferme-' + jour.numero"
+            type="checkbox"
+            [(ngModel)]="horaires[i].ferme"
+          />
+          <span>Fermé</span>
+        </label>
+
+        <div *ngIf="!horaires[i].ferme">
+          <label [for]="'ouverture-' + jour.numero">Heure d'ouverture</label>
+          <input
+            [id]="'ouverture-' + jour.numero"
+            [name]="'ouverture-' + jour.numero"
+            type="time"
+            [(ngModel)]="horaires[i].heure_ouverture"
+            required
+          />
+
+          <label [for]="'fermeture-' + jour.numero">Heure de fermeture</label>
+          <input
+            [id]="'fermeture-' + jour.numero"
+            [name]="'fermeture-' + jour.numero"
+            type="time"
+            [(ngModel)]="horaires[i].heure_fermeture"
+            required
+          />
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="enregistrementHoraires">
+        {{ enregistrementHoraires ? 'Enregistrement…' : 'Enregistrer les horaires' }}
+      </button>
+    </form>
+  </section>
+
+  <section *ngIf="ongletActif === 'avis'" class="gestion-catalogue">
+    <h2>Modération des avis</h2>
+    <p>Seuls les avis approuvés seront visibles sur l’accueil.</p>
+    <p *ngIf="chargementAvis">Chargement des avis…</p>
+    <p *ngIf="erreurAvis" class="erreur">{{ erreurAvis }}</p>
+    <p *ngIf="messageAvis" class="message">{{ messageAvis }}</p>
+    <p *ngIf="!chargementAvis && !erreurAvis && avis.length === 0">
+      Aucun avis en attente de modération.
+    </p>
+
+    <article class="carte-menu-gestion" *ngFor="let avisClient of avis">
+      <h3>Avis n°{{ avisClient.id_avis }}</h3>
+      <p><strong>Commande :</strong> n°{{ avisClient.id_commande }}</p>
+      <p><strong>Client :</strong> {{ avisClient.prenom_client }} {{ avisClient.nom_client }}</p>
+      <p>
+        <strong>Note :</strong> {{ '★'.repeat(avisClient.note)
+        }}{{ '☆'.repeat(5 - avisClient.note) }} ({{ avisClient.note }}/5)
+      </p>
+      <blockquote>{{ avisClient.commentaire }}</blockquote>
+      <p>
+        <small>Soumis le {{ avisClient.date_creation | date: 'dd/MM/yyyy à HH:mm' }}</small>
+      </p>
+      <button
+        type="button"
+        (click)="modererAvis(avisClient, 'approuve')"
+        [disabled]="avisEnCours === avisClient.id_avis"
+      >
+        Approuver
+      </button>
+      <button
+        type="button"
+        (click)="modererAvis(avisClient, 'rejete')"
+        [disabled]="avisEnCours === avisClient.id_avis"
+      >
+        Rejeter
+      </button>
+    </article>
+  </section>
+
+  <section *ngIf="ongletActif === 'menus'" class="gestion-catalogue">
+    <h2>Gestion des menus</h2>
+    <p *ngIf="erreurMenus" class="erreur">{{ erreurMenus }}</p>
+    <p *ngIf="messageMenus" class="message">{{ messageMenus }}</p>
+    <p *ngIf="chargementMenus">Chargement du catalogue…</p>
+
+    <button *ngIf="!formulaireMenuVisible" type="button" (click)="nouveauMenu()">Créer un menu</button>
+
+    <form *ngIf="formulaireMenuVisible" class="formulaire-catalogue formulaire-menu" (ngSubmit)="enregistrerMenu()">
+      <h3 class="formulaire-menu-titre">
+        {{ menuEnEdition ? 'Modifier le menu' : 'Créer un menu' }}
+      </h3>
+
+      <div class="champ-menu">
+        <label for="menu-titre">Titre</label>
+        <input id="menu-titre" name="titre" [(ngModel)]="formulaireMenu.titre" required minlength="2" />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-description">Description</label>
+        <textarea id="menu-description" name="description" [(ngModel)]="formulaireMenu.description" required minlength="2"></textarea>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-theme">Thème</label>
+        <select id="menu-theme" name="theme" [(ngModel)]="formulaireMenu.id_theme" required>
+          <option [ngValue]="0" disabled>Choisir un thème</option>
+          <option *ngFor="let theme of referencesMenus.themes" [ngValue]="theme.id_theme">{{ theme.nom }}</option>
+        </select>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-regime">Régime alimentaire</label>
+        <select id="menu-regime" name="regime" [(ngModel)]="formulaireMenu.id_regime" required>
+          <option [ngValue]="0" disabled>Choisir un régime</option>
+          <option *ngFor="let regime of referencesMenus.regimes" [ngValue]="regime.id_regime">{{ regime.nom }}</option>
+        </select>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-prix">Prix par personne (€)</label>
+        <input id="menu-prix" name="prix" type="number" min="0" step="0.01" [(ngModel)]="formulaireMenu.prix_par_personne" required />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-personnes">Nombre minimum de personnes</label>
+        <input id="menu-personnes" name="personnes" type="number" min="1" step="1" [(ngModel)]="formulaireMenu.nombre_minimum_personnes" required />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-stock">Stock</label>
+        <input id="menu-stock" name="stock" type="number" min="0" step="1" [(ngModel)]="formulaireMenu.stock" required />
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-conditions-commande">Conditions de commande</label>
+        <textarea id="menu-conditions-commande" name="conditionsCommande" [(ngModel)]="formulaireMenu.conditions_commande" required></textarea>
+      </div>
+
+      <div class="champ-menu">
+        <label for="menu-conditions-conservation">Conditions de conservation</label>
+        <textarea id="menu-conditions-conservation" name="conditionsConservation" [(ngModel)]="formulaireMenu.conditions_conservation" required></textarea>
+      </div>
+
+      <section *ngIf="!menuEnEdition" class="composition-menu">
+        <h4>Composition du menu</h4>
+
+        <div class="ajout-plat-existant">
+          <div class="champ-menu">
+            <label for="menu-ajout-plat">Ajouter un plat existant</label>
+            <select #selectPlat id="menu-ajout-plat" name="ajoutPlat">
+              <option value="">Choisir un plat</option>
+              <option *ngFor="let plat of plats" [value]="plat.id_plat">
+                {{ plat.nom }} ({{ plat.categorie }})
+              </option>
+            </select>
+          </div>
+          <button type="button" (click)="ajouterPlatAuMenu(selectPlat.value); selectPlat.value = ''">
+            Ajouter au menu
+          </button>
+        </div>
+
+        <button type="button" class="bouton-secondaire" (click)="creationPlatDansMenuVisible = !creationPlatDansMenuVisible">
+          {{ creationPlatDansMenuVisible ? 'Fermer la création' : '+ Créer un plat' }}
+        </button>
+
+        <div *ngIf="creationPlatDansMenuVisible" class="creation-plat-integree">
+          <h4>Nouveau plat</h4>
+
+          <div class="champ-menu">
+            <label for="nouveau-plat-nom">Nom du plat</label>
+            <input id="nouveau-plat-nom" name="nouveauPlatNom" [(ngModel)]="nouveauPlat.nom" required minlength="2" />
+          </div>
+
+          <div class="champ-menu">
+            <label for="nouveau-plat-description">Description</label>
+            <textarea id="nouveau-plat-description" name="nouveauPlatDescription" [(ngModel)]="nouveauPlat.description"></textarea>
+          </div>
+
+          <div class="champ-menu">
+            <label for="nouveau-plat-categorie">Catégorie</label>
+            <select id="nouveau-plat-categorie" name="nouveauPlatCategorie" [(ngModel)]="nouveauPlat.categorie">
+              <option value="entree">Entrée</option>
+              <option value="plat">Plat</option>
+              <option value="dessert">Dessert</option>
+            </select>
+          </div>
+
+          <fieldset class="allergenes-menu">
+            <legend>Allergènes</legend>
+            <label *ngFor="let allergene of referencesMenus.allergenes" class="choix-allergene">
+              <input
+                type="checkbox"
+                [checked]="nouveauPlat.allergenes.includes(allergene.id_allergene)"
+                (change)="modifierAllergeneNouveauPlat(allergene.id_allergene, $any($event.target).checked)"
+              />
+              {{ allergene.nom }}
+            </label>
+          </fieldset>
+
+          <button type="button" (click)="creerPlatDepuisMenu()" [disabled]="enregistrementPlatMenu">
+            {{ enregistrementPlatMenu ? 'Création…' : 'Créer et ajouter au menu' }}
+          </button>
+        </div>
+
+        <ul *ngIf="formulaireMenu.plats.length" class="liste-composition-menu">
+          <li *ngFor="let composition of formulaireMenu.plats">
+            <span>{{ nomPlat(composition.id_plat) }}</span>
+            <label>
+              Quantité
+              <input type="number" min="1" [(ngModel)]="composition.quantite" [name]="'quantite-' + composition.id_plat" />
+            </label>
+            <button type="button" class="bouton-annulation" (click)="retirerPlatDuMenu(composition.id_plat)">Retirer</button>
+          </li>
+        </ul>
+      </section>
+
+      <p *ngIf="menuEnEdition" class="information-menu">
+        La modification des informations ne change pas la composition actuelle du menu.
+      </p>
+
+      <div class="actions-formulaire-menu">
+        <button type="submit" [disabled]="enregistrementMenu">
+          {{
+            enregistrementMenu
+              ? 'Enregistrement…'
+              : menuEnEdition
+                ? 'Enregistrer les modifications'
+                : 'Créer le menu'
+          }}
+        </button>
+        <button type="button" class="bouton-annulation" (click)="fermerFormulaireMenu()">Annuler</button>
+      </div>
+    </form>
+
+    <h3>Catalogue existant</h3>
+    <p *ngIf="!chargementMenus && menus.length === 0">Aucun menu trouvé.</p>
+    <article class="carte-menu-gestion" *ngFor="let menu of menus">
+      <h4>{{ menu.titre }}</h4>
+      <p>{{ menu.theme }} · {{ menu.regime_alimentaire }}</p>
+      <p>
+        {{ menu.prix_par_personne | currency: 'EUR' : 'symbol' : '1.2-2' : 'fr-FR' }} par personne
+      </p>
+      <p>Stock : {{ menu.stock }} · Minimum : {{ menu.nombre_minimum_personnes }} personne(s)</p>
+      <p>
+        Disponibilité : <strong>{{ menu.disponible ? 'Disponible' : 'Indisponible' }}</strong>
+      </p>
+      <button type="button" (click)="editerMenu(menu)">Modifier les informations</button>
+      <button type="button" (click)="basculerDisponibilite(menu)">
+        {{ menu.disponible ? 'Rendre indisponible' : 'Rendre disponible' }}
+      </button>
+      <button type="button" class="bouton-annulation" (click)="supprimerMenu(menu)">
+        Supprimer le menu
+      </button>
+    </article>
+  </section>
+
+  <section *ngIf="ongletActif === 'plats'" class="gestion-catalogue">
+    <h2>Gestion des plats</h2>
+    <p *ngIf="erreurMenus" class="erreur">{{ erreurMenus }}</p>
+    <p *ngIf="messageMenus" class="message">{{ messageMenus }}</p>
+
+    <form class="formulaire-catalogue" (ngSubmit)="enregistrerPlat()">
+      <h3>Créer un plat</h3>
+      <label for="plat-nom">Nom</label>
+      <input id="plat-nom" name="platNom" [(ngModel)]="nouveauPlat.nom" required minlength="2" />
+
+      <label for="plat-description">Description</label>
+      <textarea
+        id="plat-description"
+        name="platDescription"
+        [(ngModel)]="nouveauPlat.description"
+      ></textarea>
+
+      <label for="plat-categorie">Catégorie</label>
+      <select id="plat-categorie" name="platCategorie" [(ngModel)]="nouveauPlat.categorie">
+        <option value="entree">Entrée</option>
+        <option value="plat">Plat</option>
+        <option value="dessert">Dessert</option>
+      </select>
+
+      <fieldset>
+        <legend>Allergènes</legend>
+        <label *ngFor="let allergene of referencesMenus.allergenes" class="choix-allergene">
+          <input
+            type="checkbox"
+            [checked]="nouveauPlat.allergenes.includes(allergene.id_allergene)"
+            (change)="
+              $any($event.target).checked
+                ? nouveauPlat.allergenes.push(allergene.id_allergene)
+                : (nouveauPlat.allergenes = nouveauPlat.allergenes.filter(
+                    (id) => id !== allergene.id_allergene
+                  ))
+            "
+          />
+          {{ allergene.nom }}
+        </label>
+      </fieldset>
+
+      <button type="submit">Créer le plat</button>
+    </form>
+
+    <h3>Plats existants</h3>
+    <p *ngIf="chargementMenus">Chargement des plats…</p>
+    <article class="carte-menu-gestion" *ngFor="let plat of plats">
+      <h4>{{ plat.nom }}</h4>
+      <p>{{ plat.categorie }}</p>
+      <p>{{ plat.description || 'Aucune description' }}</p>
+      <p>
+        Allergènes : {{ plat.allergenes.length ? plat.allergenes.join(', ') : 'Aucun renseigné' }}
+      </p>
+      <button type="button" class="bouton-annulation" (click)="supprimerPlat(plat)">
+        Supprimer le plat
+      </button>
+    </article>
+  </section>
+
+  <p *ngIf="ongletActif === 'commandes' && chargement">Chargement des commandes...</p>
+  <p *ngIf="ongletActif === 'commandes' && erreur" class="erreur">{{ erreur }}</p>
+  <p *ngIf="ongletActif === 'commandes' && message" class="message">{{ message }}</p>
+
+  <div
+    *ngIf="ongletActif === 'commandes' && !chargement && !erreur && commandes.length === 0"
+    class="commandes"
+  >
+    <p>Aucune commande à afficher.</p>
+  </div>
+
+  <section
+    class="outils-commandes"
+    *ngIf="ongletActif === 'commandes' && !chargement && commandes.length > 0"
+    aria-label="Recherche et filtres"
+  >
+    <div>
+      <label for="recherche-commandes">Rechercher une commande</label>
+      <input
+        id="recherche-commandes"
+        type="search"
+        [(ngModel)]="recherche"
+        placeholder="Numéro, nom ou prénom du client"
+      />
+    </div>
+
+    <div>
+      <label for="filtre-statut">Filtrer par statut</label>
+      <select id="filtre-statut" [(ngModel)]="filtreStatut">
+        <option value="tous">Tous les statuts</option>
+        <option value="en_attente">
+          En attente ({{ nombreCommandesParStatut['en_attente'] || 0 }})
+        </option>
+        <option *ngFor="let statut of statutsPossibles" [value]="statut.valeur">
+          {{ statut.libelle }} ({{ nombreCommandesParStatut[statut.valeur] || 0 }})
+        </option>
+        <option value="annulee">Annulée ({{ nombreCommandesParStatut['annulee'] || 0 }})</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="tri-date">Trier par date de prestation</label>
+      <select id="tri-date" [(ngModel)]="ordreDate">
+        <option value="croissant">Plus proche d’abord</option>
+        <option value="decroissant">Plus éloignée d’abord</option>
+      </select>
+    </div>
+
+    <p class="compteur-commandes">
+      {{ commandesFiltrees.length }} commande(s) affichée(s) sur {{ commandes.length }}
+    </p>
+  </section>
+
+  <p
+    *ngIf="
+      ongletActif === 'commandes' &&
+      !chargement &&
+      commandes.length > 0 &&
+      commandesFiltrees.length === 0
+    "
+    class="aucun-resultat"
+  >
+    Aucune commande ne correspond à votre recherche.
+  </p>
+
+  <div
+    *ngIf="ongletActif === 'commandes' && !chargement && commandesFiltrees.length > 0"
+    class="liste-commandes"
+  >
+    <article
+      class="commande"
+      [class.prestation-proche]="estPrestationProche(commande)"
+      *ngFor="let commande of commandesFiltrees; trackBy: suivreCommande"
+    >
+      <h2>Commande n°{{ commande.id_commande }}</h2>
+      <p><strong>Client :</strong> {{ commande.prenom_client }} {{ commande.nom_client }}</p>
+      <p><strong>Email :</strong> {{ commande.email_client }}</p>
+      <p><strong>Téléphone :</strong> {{ commande.telephone_client || 'Non renseigné' }}</p>
+      <p><strong>Menu :</strong> {{ commande.titre_menu }}</p>
+      <p>
+        <strong>Date de prestation :</strong> {{ commande.date_prestation | date: 'dd/MM/yyyy' }} à
+        {{ commande.heure_prestation }}
+      </p>
+      <p><strong>Nombre de personnes :</strong> {{ commande.nombre_personnes }}</p>
+      <p><strong>Lieu :</strong> {{ commande.lieu_prestation }}</p>
+      <p><strong>Adresse :</strong> {{ commande.adresse_livraison }}</p>
+      <p><strong>Distance :</strong> {{ commande.livraison_hors_bordeaux ? (commande.distance_km + " km (hors Bordeaux)") : "Livraison à Bordeaux" }}</p>
+      <p><strong>Frais de livraison :</strong> {{ commande.frais_livraison | currency: "EUR" : "symbol" : "1.2-2" : "fr-FR" }}</p>
+      <p>
+        <strong>Prix total :</strong>
+        {{ commande.prix_total | currency: 'EUR' : 'symbol' : '1.2-2' : 'fr-FR' }}
+      </p>
+      <p class="ligne-statut">
+        <strong>Statut :</strong>
+        <span class="badge-statut" [ngClass]="classeStatut(commande.statut)">
+          {{
+            {
+              en_attente: 'En attente',
+              acceptee: 'Acceptée',
+              refusee: 'Refusée',
+              en_preparation: 'En préparation',
+              en_livraison: 'En livraison',
+              livree: 'Livrée',
+              attente_retour_materiel: 'En attente du retour du matériel',
+              terminee: 'Terminée',
+              annulee: 'Annulée',
+            }[commande.statut] || commande.statut
+          }}
+        </span>
+      </p>
+      <p *ngIf="estPrestationProche(commande)" class="alerte-prestation">
+        Prestation prévue dans les prochaines 48 heures.
+      </p>
+
+      <div class="gestion" *ngIf="peutGererCommande(commande)">
+        <h3>Modifier le statut</h3>
+        <label [for]="'statut-' + commande.id_commande">Nouveau statut</label>
+        <select
+          [id]="'statut-' + commande.id_commande"
+          [(ngModel)]="statutSelectionne[commande.id_commande]"
+          [disabled]="commandeEnCours === commande.id_commande"
+        >
+          <option value="">Choisir un statut</option>
+          <option *ngFor="let statut of statutsPourCommande(commande)" [value]="statut.valeur">
+            {{ statut.libelle }}
+          </option>
+        </select>
+
+        <label [for]="'motif-' + commande.id_commande"
+          >Motif (obligatoire pour un refus ou une annulation)</label
+        >
+        <textarea
+          [id]="'motif-' + commande.id_commande"
+          [(ngModel)]="motifAnnulation[commande.id_commande]"
+          rows="2"
+          placeholder="Indiquer le motif"
+        ></textarea>
+
+        <label [for]="'contact-' + commande.id_commande"
+          >Moyen de contact (obligatoire pour un refus ou une annulation)</label
+        >
+        <select
+          [id]="'contact-' + commande.id_commande"
+          [(ngModel)]="moyenContact[commande.id_commande]"
+        >
+          <option value="">Choisir un moyen de contact</option>
+          <option value="telephone">Téléphone</option>
+          <option value="email">E-mail</option>
+        </select>
+
+        <button
+          type="button"
+          (click)="changerStatut(commande)"
+          [disabled]="commandeEnCours === commande.id_commande"
+        >
+          Enregistrer le statut
+        </button>
+
+        <button
+          type="button"
+          class="bouton-annulation"
+          (click)="annulerCommande(commande)"
+          [disabled]="commandeEnCours === commande.id_commande"
+        >
+          Annuler la commande
+        </button>
+      </div>
+    </article>
+  </div>
+</section>

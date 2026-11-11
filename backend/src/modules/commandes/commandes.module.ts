@@ -5,9 +5,10 @@ import { Commande } from './entities/commande.entity.js';
 import { EmailModule } from '../email/email.module.js';
 import { CommandesService } from './commandes.service.js';
 import { CommandesController } from './commandes.controller.js';
+import { StatistiquesModule } from '../statistiques/statistiques.module.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Commande]), EmailModule],
+  imports: [TypeOrmModule.forFeature([Commande]), EmailModule, StatistiquesModule],
   controllers: [CommandesController],
   providers: [CommandesService],
 })

@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Commande } from './entities/commande.entity.js';
 import { EmailService } from '../email/email.service.js';
+import { StatistiquesService } from '../statistiques/statistiques.service.js';
 
 interface DonneesCommande {
   id_menu: string;
@@ -27,7 +28,19 @@ export class CommandesService {
     private readonly commandesRepository: Repository<Commande>,
     private readonly dataSource: DataSource,
     private readonly emailService: EmailService,
+    private readonly statistiquesService: StatistiquesService,
   ) {}
+
+  private async synchroniserStatistiques(idCommande: string): Promise<void> {
+    try {
+      await this.statistiquesService.synchroniserCommande(idCommande);
+    } catch (erreur) {
+      console.error(
+        `Échec de la synchronisation MongoDB pour la commande ${idCommande}.`,
+        erreur,
+      );
+    }
+  }
 
   async trouverParUtilisateur(idUtilisateur: string) {
     return this.commandesRepository
@@ -204,6 +217,10 @@ export class CommandesService {
       };
     });
 
+    await this.synchroniserStatistiques(
+      String(resultat.commande.id_commande),
+    );
+
     try {
       await this.emailService.envoyerEmail(
         emailClient,
@@ -223,7 +240,7 @@ export class CommandesService {
     motif: string,
     moyenContact: string,
   ) {
-    return this.dataSource.transaction(async (manager) => {
+    const resultat = await this.dataSource.transaction(async (manager) => {
       const commandes: Array<{ id_commande: string }> =
         await manager.query(
           `SELECT c.id_commande
@@ -276,6 +293,10 @@ export class CommandesService {
 
       return { message: 'Commande annulée avec succès.' };
     });
+
+    await this.synchroniserStatistiques(idCommande);
+
+    return resultat;
   }
 
   async modifierCommande(
@@ -302,7 +323,7 @@ export class CommandesService {
       );
     }
 
-    return this.dataSource.transaction(async (manager) => {
+    const resultat = await this.dataSource.transaction(async (manager) => {
       const commandes: Array<{
         id_commande: string;
         id_menu: string;
@@ -426,6 +447,10 @@ export class CommandesService {
         },
       };
     });
+
+    await this.synchroniserStatistiques(idCommande);
+
+    return resultat;
   }
 
 
@@ -712,6 +737,8 @@ L'équipe Vite & Gourmand`,
       }
     }
 
+    await this.synchroniserStatistiques(idCommande);
+
     return { message: resultat.message };
   }
 
@@ -726,7 +753,7 @@ L'équipe Vite & Gourmand`,
       );
     }
 
-    return this.dataSource.transaction(async (manager) => {
+    const resultat = await this.dataSource.transaction(async (manager) => {
       const commandes: Array<{ id_commande: string }> =
         await manager.query(
           'SELECT id_commande FROM commande WHERE id_commande = $1 FOR UPDATE',
@@ -793,6 +820,10 @@ L'équipe Vite & Gourmand`,
 
       return { message: 'Commande annulée avec succès.' };
     });
+
+    await this.synchroniserStatistiques(idCommande);
+
+    return resultat;
   }
 
   async trouverToutesLesCommandes() {

@@ -80,6 +80,64 @@ export class StatistiquesService {
     return commandes.length;
   }
 
+  async synchroniserCommande(idCommande: string): Promise<void> {
+    const commandes: Array<{
+      id_commande: string;
+      id_menu: string;
+      titre_menu: string;
+      date_commande: Date;
+      prix_total: string;
+      statut: string | null;
+    }> = await this.dataSource.query(
+      `
+        SELECT
+          c.id_commande::text AS id_commande,
+          c.id_menu::text AS id_menu,
+          m.titre AS titre_menu,
+          c.date_commande,
+          c.prix_total::text AS prix_total,
+          dernier.statut
+        FROM commande c
+        JOIN menu m ON m.id_menu = c.id_menu
+        LEFT JOIN LATERAL (
+          SELECT h.statut
+          FROM historique_statut h
+          WHERE h.id_commande = c.id_commande
+          ORDER BY h.date_changement DESC, h.id_historique DESC
+          LIMIT 1
+        ) dernier ON TRUE
+        WHERE c.id_commande = $1
+      `,
+      [idCommande],
+    );
+
+    const collection = this.mongoDbService
+      .getDb()
+      .collection('statistiques_commandes');
+
+    const commande = commandes[0];
+
+    if (!commande) {
+      await collection.deleteOne({ commandeId: idCommande });
+      return;
+    }
+
+    await collection.updateOne(
+      { commandeId: commande.id_commande },
+      {
+        $set: {
+          commandeId: commande.id_commande,
+          menuId: commande.id_menu,
+          titreMenu: commande.titre_menu,
+          dateCommande: new Date(commande.date_commande),
+          montant: Number(commande.prix_total),
+          statut: commande.statut ?? null,
+        },
+      },
+      { upsert: true },
+    );
+  }
+
   async obtenirStatistiques(filtres: FiltresStatistiques = {}) {
     const dateDebut = filtres.dateDebut
       ? new Date(filtres.dateDebut)
@@ -87,6 +145,10 @@ export class StatistiquesService {
     const dateFin = filtres.dateFin
       ? new Date(filtres.dateFin)
       : undefined;
+
+    if (dateFin && /^\d{4}-\d{2}-\d{2}$/.test(filtres.dateFin ?? '')) {
+      dateFin.setUTCHours(23, 59, 59, 999);
+    }
 
     if (dateDebut && Number.isNaN(dateDebut.getTime())) {
       throw new BadRequestException('Le paramètre dateDebut est invalide.');
