@@ -46,6 +46,45 @@ export class DetailMenu implements OnInit {
     private readonly cdr: ChangeDetectorRef,
   ) {}
 
+
+  imageDuPlat(plat: Plat): string {
+    const nom = plat.nom
+      .toLowerCase()
+      .replace(/œ/g, 'oe')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '');
+
+    const images: Record<string, string> = {
+      creme_brulee: 'creme_brulee.png',
+      fondant_au_chocolat: 'fondant_chocolat.png',
+      salade_de_fruits_frais: 'salade_fruits_frais.png',
+      tarte_au_citron_meringuee: 'tarte_citron_meringuee.png',
+      tarte_aux_fruits: 'tarte_fruits.png',
+      tiramisu_traditionnel: 'tiramisu_traditionnel.png',
+      feuillete_aux_champignons: 'feuillete_champignons.png',
+      feuillete_aux_legumes: 'feuillete_legumes.png',
+      salade_de_chevre_chaud: 'salade_chevre_chaud.png',
+      tartare_de_saumon_et_avocat: 'tartare_saumon_avocat.png',
+      tomates_et_mozzarella: 'tomates_mozzarella.png',
+      veloute_de_potimarron: 'veloute_potimarron.png',
+      veloute_de_saison: 'veloute_saison.png',
+      boeuf_bourguignon: 'boeuf_bourguignon.png',
+      filet_de_saumon_sauce_citron: 'filet_saumon_sauce_citron.png',
+      lasagnes_vegetariennes: 'lasagnes_vegetariennes.png',
+      magret_de_canard_sauce_miel: 'magret_canard_sauce_miel.png',
+      omelette: 'omelette.png',
+      risotto_aux_champignons: 'risotto_champignons.png',
+      supreme_de_poulet_sauce_forestiere: 'supreme_poulet_sauce_forestiere.png',
+      supreme_de_volaille: 'supreme_volaille.png',
+    };
+
+    return images[nom]
+      ? '/images/' + images[nom]
+      : '/images/logo-vite-gourmand.png';
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
 

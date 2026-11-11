@@ -67,6 +67,12 @@
           class="composition-element"
           *ngFor="let plat of menu.plats"
         >
+          <img
+            class="composition-image-plat"
+            [src]="imageDuPlat(plat)"
+            [alt]="'Photo de ' + plat.nom"
+            loading="lazy"
+          />
           <h3>
             {{
               plat.categorie === 'entree'
