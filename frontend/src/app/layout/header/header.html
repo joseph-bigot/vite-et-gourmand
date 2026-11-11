@@ -16,6 +16,7 @@
   @if (session.utilisateur(); as utilisateur) {
     <div class="user-actions">
       <span>Bonjour, {{ utilisateur.prenom }}</span>
+      <a class="space-link" routerLink="/mon-profil">Mon profil</a>
       <a class="space-link" [routerLink]="destinationEspace">
         {{ libelleEspace }}
       </a>

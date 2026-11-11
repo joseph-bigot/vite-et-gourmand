@@ -47,6 +47,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/auth/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe').then(m => m.ReinitialiserMotDePasse),
       },
       {
+        path: 'mon-profil',
+        loadComponent: () => import('./features/mon-profil/mon-profil').then(m => m.MonProfil),
+        canActivate: [authGuard],
+      },
+      {
         path: 'espace-client',
         loadComponent: () => import('./features/espace-client/espace-client').then(m => m.EspaceClient),
         canActivate: [authGuard],

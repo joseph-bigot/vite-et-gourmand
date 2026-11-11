@@ -15,6 +15,8 @@ import { InscriptionDto } from './dto/inscription.dto.js';
 import { ConnexionDto } from './dto/connexion.dto.js';
 import { Utilisateur } from './entities/utilisateur.entity.js';
 import { CreationEmployeDto } from './dto/creation-employe.dto.js';
+import { ModifierProfilDto } from './dto/modifier-profil.dto.js';
+import { ChangerMotDePasseDto } from './dto/changer-mot-de-passe.dto.js';
 
 @Injectable()
 export class UtilisateursService {
@@ -281,6 +283,109 @@ L'équipe Vite & Gourmand`,
       id_utilisateur: id,
       message: 'Le compte employé a été supprimé.',
     };
+  }
+
+  async trouverMonProfil(id: string) {
+    const utilisateur = await this.utilisateursRepository.findOne({
+      where: { id_utilisateur: id, actif: true },
+    });
+
+    if (!utilisateur) {
+      throw new NotFoundException('Utilisateur introuvable.');
+    }
+
+    const {
+      mot_de_passe_hash: _mot_de_passe_hash,
+      reset_password_token_hash: _reset_password_token_hash,
+      reset_password_expires_at: _reset_password_expires_at,
+      ...utilisateurPublic
+    } = utilisateur;
+
+    return utilisateurPublic;
+  }
+
+  async modifierMonProfil(id: string, donnees: ModifierProfilDto) {
+    const utilisateur = await this.utilisateursRepository.findOne({
+      where: { id_utilisateur: id, actif: true },
+    });
+
+    if (!utilisateur) {
+      throw new NotFoundException('Utilisateur introuvable.');
+    }
+
+    if (donnees.email !== undefined) {
+      const email = donnees.email.trim().toLowerCase();
+      const compteExistant = await this.utilisateursRepository.findOne({
+        where: { email },
+      });
+
+      if (
+        compteExistant &&
+        compteExistant.id_utilisateur !== utilisateur.id_utilisateur
+      ) {
+        throw new ConflictException(
+          'Un compte existe déjà avec cette adresse e-mail.',
+        );
+      }
+
+      utilisateur.email = email;
+    }
+
+    if (donnees.nom !== undefined) utilisateur.nom = donnees.nom.trim();
+    if (donnees.prenom !== undefined) utilisateur.prenom = donnees.prenom.trim();
+
+    if (donnees.telephone !== undefined) {
+      utilisateur.telephone = donnees.telephone?.trim() || null;
+    }
+
+    if (donnees.adresse !== undefined) {
+      utilisateur.adresse = donnees.adresse?.trim() || null;
+    }
+
+    const utilisateurEnregistre =
+      await this.utilisateursRepository.save(utilisateur);
+
+    const {
+      mot_de_passe_hash: _mot_de_passe_hash,
+      reset_password_token_hash: _reset_password_token_hash,
+      reset_password_expires_at: _reset_password_expires_at,
+      ...utilisateurPublic
+    } = utilisateurEnregistre;
+
+    return utilisateurPublic;
+  }
+
+  async changerMonMotDePasse(
+    id: string,
+    donnees: ChangerMotDePasseDto,
+  ) {
+    const utilisateur = await this.utilisateursRepository.findOne({
+      where: { id_utilisateur: id, actif: true },
+    });
+
+    if (!utilisateur) {
+      throw new NotFoundException('Utilisateur introuvable.');
+    }
+
+    const ancienMotDePasseValide = await bcrypt.compare(
+      donnees.ancienMotDePasse,
+      utilisateur.mot_de_passe_hash,
+    );
+
+    if (!ancienMotDePasseValide) {
+      throw new UnauthorizedException('L’ancien mot de passe est incorrect.');
+    }
+
+    utilisateur.mot_de_passe_hash = await bcrypt.hash(
+      donnees.nouveauMotDePasse,
+      12,
+    );
+    utilisateur.reset_password_token_hash = null;
+    utilisateur.reset_password_expires_at = null;
+
+    await this.utilisateursRepository.save(utilisateur);
+
+    return { message: 'Votre mot de passe a été modifié.' };
   }
 
   async connecter(donnees: ConnexionDto) {

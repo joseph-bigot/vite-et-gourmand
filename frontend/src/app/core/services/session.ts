@@ -6,6 +6,7 @@ export interface UtilisateurConnecte {
   prenom: string;
   email: string;
   telephone: string | null;
+  adresse?: string | null;
   role: string;
 }
 

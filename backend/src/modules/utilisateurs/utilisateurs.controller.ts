@@ -10,6 +10,7 @@ import {
   Delete,
   Param,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UtilisateursService } from './utilisateurs.service.js';
 import { InscriptionDto } from './dto/inscription.dto.js';
@@ -21,6 +22,8 @@ import { Roles } from '../auth/roles.decorator.js';
 import { CreationEmployeDto } from './dto/creation-employe.dto.js';
 import { DemandeReinitialisationDto } from './dto/demande-reinitialisation.dto.js';
 import { ReinitialisationMotDePasseDto } from './dto/reinitialisation-mot-de-passe.dto.js';
+import { ModifierProfilDto } from './dto/modifier-profil.dto.js';
+import { ChangerMotDePasseDto } from './dto/changer-mot-de-passe.dto.js';
 
 @Controller('utilisateurs')
 export class UtilisateursController {
@@ -28,6 +31,47 @@ export class UtilisateursController {
     private readonly utilisateursService: UtilisateursService,
     private readonly authService: AuthService,
   ) {}
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  obtenirMonProfil(
+    @Req() requete: { user: { id_utilisateur: string } },
+  ) {
+    return this.utilisateursService.trouverMonProfil(
+      requete.user.id_utilisateur,
+    );
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  async modifierMonProfil(
+    @Req() requete: { user: { id_utilisateur: string } },
+    @Body() donnees: ModifierProfilDto,
+  ) {
+    const utilisateur = await this.utilisateursService.modifierMonProfil(
+      requete.user.id_utilisateur,
+      donnees,
+    );
+
+    const accessToken = this.authService.genererJeton(utilisateur);
+
+    return {
+      utilisateur,
+      access_token: accessToken,
+    };
+  }
+
+  @Patch('me/mot-de-passe')
+  @UseGuards(JwtAuthGuard)
+  changerMonMotDePasse(
+    @Req() requete: { user: { id_utilisateur: string } },
+    @Body() donnees: ChangerMotDePasseDto,
+  ) {
+    return this.utilisateursService.changerMonMotDePasse(
+      requete.user.id_utilisateur,
+      donnees,
+    );
+  }
 
   @Post('inscription')
   @HttpCode(HttpStatus.CREATED)
