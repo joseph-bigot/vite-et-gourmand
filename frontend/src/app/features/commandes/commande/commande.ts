@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Session } from '../../../core/services/session';
+import { API_URL } from '../../../core/services/api.config';
 
 interface Menu {
   id_menu: string;
@@ -80,7 +81,7 @@ export class Commande implements OnInit {
       return;
     }
 
-    this.http.get<Menu>(`http://localhost:3000/menus/${id}`).subscribe({
+    this.http.get<Menu>(`${API_URL}/menus/${id}`).subscribe({
       next: (menu) => {
         this.menu = menu;
         this.nombre = menu.nombre_minimum_personnes;
@@ -189,7 +190,7 @@ export class Commande implements OnInit {
 
     this.http
       .post<{ message: string; commande: { id_commande: string } }>(
-        'http://localhost:3000/commandes',
+        `${API_URL}/commandes`,
         donnees,
       )
       .subscribe({

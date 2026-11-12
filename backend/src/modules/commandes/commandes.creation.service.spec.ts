@@ -41,6 +41,7 @@ describe('CommandesService - création et frais de livraison', () => {
       commandesRepository as any,
       dataSource as any,
       { envoyerEmail } as any,
+      { synchroniserCommande: vi.fn().mockResolvedValue(undefined) } as any,
     );
   });
 

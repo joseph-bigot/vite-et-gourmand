@@ -3,6 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { API_URL } from '../../core/services/api.config';
 
 interface Plat {
   id_plat: string;
@@ -94,7 +95,7 @@ export class DetailMenu implements OnInit {
       return;
     }
 
-    this.http.get<Menu>(`http://localhost:3000/menus/${id}`).subscribe({
+    this.http.get<Menu>(`${API_URL}/menus/${id}`).subscribe({
       next: (menu) => {
         this.menu = menu;
         this.chargement = false;

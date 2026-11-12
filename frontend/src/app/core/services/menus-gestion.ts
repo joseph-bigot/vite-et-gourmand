@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_URL } from './api.config';
 
 export interface PlatGestion {
   id_plat: number;
@@ -57,7 +58,7 @@ export interface ReferencesMenus {
 @Injectable({ providedIn: 'root' })
 export class MenusGestion {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/menus';
+  private readonly apiUrl = `${API_URL}/menus`;
 
   listerTous(): Observable<MenuGestion[]> {
     return this.http.get<MenuGestion[]>(`${this.apiUrl}/gestion/tous`);

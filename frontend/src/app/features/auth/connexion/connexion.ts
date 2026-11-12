@@ -6,6 +6,7 @@ import { RouterLink, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { finalize, timeout } from 'rxjs';
 import { Session, UtilisateurConnecte } from '../../../core/services/session';
+import { API_URL } from '../../../core/services/api.config';
 
 interface ReponseConnexion {
   utilisateur: UtilisateurConnecte;
@@ -42,7 +43,7 @@ export class Connexion {
 
     this.http
       .post<ReponseConnexion>(
-        'http://localhost:3000/utilisateurs/connexion',
+        `${API_URL}/utilisateurs/connexion`,
         {
           email: this.email,
           motDePasse: this.motDePasse,

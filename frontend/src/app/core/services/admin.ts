@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const API_URL = 'http://localhost:3000';
+import { API_URL } from './api.config';
 
 export interface StatistiquesParMenu {
   menuId: string;

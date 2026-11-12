@@ -4,6 +4,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { Session } from '../../core/services/session';
+import { API_URL } from '../../core/services/api.config';
 
 @Component({
   selector: 'app-contact',
@@ -42,7 +43,7 @@ export class Contact {
     this.envoiEnCours = true;
 
     this.http
-      .post<{ message: string }>('http://localhost:3000/contact', {
+      .post<{ message: string }>(`${API_URL}/contact`, {
         nom: this.nom.trim(),
         prenom: this.prenom.trim(),
         civilite: this.civilite,

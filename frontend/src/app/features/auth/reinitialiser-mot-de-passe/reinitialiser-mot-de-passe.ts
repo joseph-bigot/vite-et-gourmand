@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { finalize, timeout } from 'rxjs';
+import { API_URL } from '../../../core/services/api.config';
 
 @Component({
   selector: 'app-reinitialiser-mot-de-passe',
@@ -45,7 +46,7 @@ export class ReinitialiserMotDePasse {
 
     this.chargement = true;
     this.http.post<{ message: string }>(
-      'http://localhost:3000/utilisateurs/mot-de-passe/reinitialiser',
+      `${API_URL}/utilisateurs/mot-de-passe/reinitialiser`,
       { token: this.token, motDePasse: this.motDePasse },
     ).pipe(timeout(10000), finalize(() => {
       this.chargement = false;

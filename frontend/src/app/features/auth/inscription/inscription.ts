@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { finalize, timeout } from 'rxjs';
+import { API_URL } from '../../../core/services/api.config';
 
 @Component({
   selector: 'app-inscription',
@@ -46,7 +47,7 @@ export class Inscription {
     this.chargement = true;
 
     this.http
-      .post('http://localhost:3000/utilisateurs/inscription', {
+      .post(`${API_URL}/utilisateurs/inscription`, {
         nom: this.nom,
         prenom: this.prenom,
         email: this.email,

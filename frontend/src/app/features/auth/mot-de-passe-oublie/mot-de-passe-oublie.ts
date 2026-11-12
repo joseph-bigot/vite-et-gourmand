@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { finalize, timeout } from 'rxjs';
+import { API_URL } from '../../../core/services/api.config';
 
 @Component({
   selector: 'app-mot-de-passe-oublie',
@@ -25,7 +26,7 @@ export class MotDePasseOublie {
     this.erreur = '';
     this.chargement = true;
     this.http.post<{ message: string }>(
-      'http://localhost:3000/utilisateurs/mot-de-passe/oublie',
+      `${API_URL}/utilisateurs/mot-de-passe/oublie`,
       { email: this.email },
     ).pipe(timeout(10000), finalize(() => {
       this.chargement = false;

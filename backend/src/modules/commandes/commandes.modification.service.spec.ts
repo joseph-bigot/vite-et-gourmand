@@ -25,6 +25,7 @@ describe('CommandesService - modification et frais de livraison', () => {
       {} as any,
       dataSource as any,
       {} as any,
+      { synchroniserCommande: vi.fn().mockResolvedValue(undefined) } as any,
     );
   });
 

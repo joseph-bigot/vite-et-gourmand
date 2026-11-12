@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { API_URL } from './api.config';
 
 export interface Horaire {
   jour_semaine: number;
@@ -14,7 +15,7 @@ export interface Horaire {
 })
 export class HorairesService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/horaires';
+  private readonly apiUrl = `${API_URL}/horaires`;
 
   private readonly horairesSubject = new BehaviorSubject<Horaire[] | null>(null);
   readonly horaires$ = this.horairesSubject.asObservable();

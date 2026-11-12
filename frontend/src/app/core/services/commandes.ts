@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_URL } from './api.config';
 
 
 export interface HistoriqueStatutCommande {
@@ -52,7 +53,7 @@ export interface CommandeClient {
 })
 export class Commandes {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/commandes';
+  private readonly apiUrl = `${API_URL}/commandes`;
 
   trouverToutesLesCommandes(): Observable<CommandeEmploye[]> {
     return this.http.get<CommandeEmploye[]>(`${this.apiUrl}/toutes`);

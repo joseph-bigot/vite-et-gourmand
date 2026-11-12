@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { finalize, timeout } from 'rxjs';
 import { Session, UtilisateurConnecte } from '../../core/services/session';
+import { API_URL } from '../../core/services/api.config';
 
 interface ReponseProfil {
   utilisateur: UtilisateurConnecte;
@@ -18,7 +19,7 @@ interface ReponseProfil {
   styleUrl: './mon-profil.scss',
 })
 export class MonProfil implements OnInit {
-  private readonly apiUrl = 'http://localhost:3000/utilisateurs';
+  private readonly apiUrl = `${API_URL}/utilisateurs`;
 
   nom = '';
   prenom = '';

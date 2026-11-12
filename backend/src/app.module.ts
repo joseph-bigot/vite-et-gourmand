@@ -31,6 +31,7 @@ import { StatistiquesModule } from './modules/statistiques/statistiques.module.j
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
+        ssl: configService.get('database.ssl'),
         autoLoadEntities: true,
         synchronize: false,
       }),

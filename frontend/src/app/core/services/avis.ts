@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_URL } from './api.config';
 
 export interface AvisPublic {
   id_avis: string;
@@ -23,7 +24,7 @@ export interface AvisAModerer {
 @Injectable({ providedIn: 'root' })
 export class AvisService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/avis';
+  private readonly apiUrl = `${API_URL}/avis`;
 
   trouverAvisPublics(): Observable<AvisPublic[]> {
     return this.http.get<AvisPublic[]>(`${this.apiUrl}/public`);

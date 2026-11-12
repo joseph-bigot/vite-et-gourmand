@@ -18,6 +18,7 @@ describe('CommandesService - changements de statut et stock', () => {
       {} as any,
       dataSource as any,
       {} as any,
+      { synchroniserCommande: vi.fn().mockResolvedValue(undefined) } as any,
     );
   });
 
@@ -118,6 +119,7 @@ describe('CommandesService - annulation par un employé et restitution du stock'
       {} as any,
       dataSource as any,
       {} as any,
+      { synchroniserCommande: vi.fn().mockResolvedValue(undefined) } as any,
     );
   });
 
@@ -216,6 +218,7 @@ describe('CommandesService - prêt et restitution du matériel', () => {
       {} as any,
       dataSource as any,
       emailService as any,
+      { synchroniserCommande: vi.fn().mockResolvedValue(undefined) } as any,
     );
   });
 
@@ -290,7 +293,11 @@ describe('CommandesService - prêt et restitution du matériel', () => {
       ),
     ).toBe(true);
 
-    expect(envoyerEmail).not.toHaveBeenCalled();
+    expect(envoyerEmail).toHaveBeenCalledWith(
+      'client@example.com',
+      'Votre commande est terminée - Donnez votre avis',
+      expect.any(String),
+    );
   });
 
   it('enregistre la date de retour lors de la clôture après un prêt', async () => {
@@ -324,6 +331,10 @@ describe('CommandesService - prêt et restitution du matériel', () => {
       ['12', 'terminee'],
     );
 
-    expect(envoyerEmail).not.toHaveBeenCalled();
+    expect(envoyerEmail).toHaveBeenCalledWith(
+      'client@example.com',
+      'Votre commande est terminée - Donnez votre avis',
+      expect.any(String),
+    );
   });
 });

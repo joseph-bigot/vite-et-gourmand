@@ -3,6 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { API_URL } from '../../core/services/api.config';
 
 interface Menu {
   id_menu: string;
@@ -77,7 +78,7 @@ export class Menus implements OnInit {
       }
     }
 
-    this.http.get<Menu[]>('http://localhost:3000/menus', { params }).subscribe({
+    this.http.get<Menu[]>(`${API_URL}/menus`, { params }).subscribe({
       next: (menus) => {
         this.menus = menus;
         this.chargement = false;
