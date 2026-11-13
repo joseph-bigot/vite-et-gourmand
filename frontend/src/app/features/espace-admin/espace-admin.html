@@ -1,0 +1,178 @@
+<section class="espace-admin">
+  <h1>Espace administrateur</h1>
+
+  <nav class="onglets-admin" aria-label="Navigation administrateur">
+    <button type="button" [class.actif]="ongletActif === 'statistiques'" (click)="ouvrirOnglet('statistiques')">Statistiques</button>
+    <button type="button" [class.actif]="ongletActif === 'employes'" (click)="ouvrirOnglet('employes')">Gestion des employés</button>
+    <a routerLink="/espace-employe" class="lien-espace-operationnel">Gestion opérationnelle</a>
+  </nav>
+
+  <section *ngIf="ongletActif === 'statistiques'">
+    <h2>Statistiques générales</h2>
+
+    <p *ngIf="chargement">Chargement des statistiques…</p>
+    <p *ngIf="erreur" class="erreur">{{ erreur }}</p>
+
+    <div *ngIf="statistiques as stats" class="statistiques">
+      <article class="carte-statistique">
+        <h3>Commandes</h3>
+        <p>{{ stats.nombre_commandes }}</p>
+      </article>
+      <article class="carte-statistique">
+        <h3>Chiffre d’affaires</h3>
+        <p>{{ stats.chiffre_affaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</p>
+      </article>
+    </div>
+
+    <section class="filtres-statistiques" aria-labelledby="titre-filtres">
+      <h3 id="titre-filtres">Filtrer les statistiques</h3>
+      <form (ngSubmit)="appliquerFiltresStatistiques()">
+        <label for="filtre-menu">Menu</label>
+        <select id="filtre-menu" name="filtreMenuId" [(ngModel)]="filtreMenuId">
+          <option value="">Tous les menus</option>
+          <option *ngFor="let menu of menusDisponibles" [value]="menu.id_menu">
+            {{ menu.titre }}
+          </option>
+        </select>
+
+        <label for="filtre-date-debut">Date de début</label>
+        <input id="filtre-date-debut" name="filtreDateDebut" type="date" [(ngModel)]="filtreDateDebut">
+
+        <label for="filtre-date-fin">Date de fin</label>
+        <input id="filtre-date-fin" name="filtreDateFin" type="date" [(ngModel)]="filtreDateFin">
+
+        <div class="actions-filtres">
+          <button type="submit" [disabled]="chargement">Appliquer les filtres</button>
+          <button type="button" class="bouton-secondaire"
+            (click)="reinitialiserFiltresStatistiques()" [disabled]="chargement">
+            Réinitialiser
+          </button>
+        </div>
+        <p *ngIf="erreurFiltres" class="erreur">{{ erreurFiltres }}</p>
+      </form>
+    </section>
+
+    <section class="graphique-menus" *ngIf="statistiques as stats">
+      <h3>Comparaison des menus</h3>
+
+      <p *ngIf="stats.statistiques_par_menu.length === 0">
+        Aucune donnée pour les filtres sélectionnés.
+      </p>
+
+      <div class="graphiques-comparaison"
+        *ngIf="stats.statistiques_par_menu.length > 0">
+
+        <article class="carte-graphique">
+          <h4>Nombre de commandes</h4>
+          <p class="description-graphique">Volume de commandes par menu</p>
+
+          <div class="ligne-graphique"
+            *ngFor="let menu of stats.statistiques_par_menu">
+            <div class="entete-graphique">
+              <span>{{ menu.titreMenu }}</span>
+              <strong>{{ menu.nombreCommandes }}
+                {{ menu.nombreCommandes > 1 ? 'commandes' : 'commande' }}</strong>
+            </div>
+            <div class="fond-barre" role="img"
+              [attr.aria-label]="menu.titreMenu + ' : ' + menu.nombreCommandes + ' commandes'">
+              <div class="barre barre-commandes"
+                [style.width.%]="menu.nombreCommandes / maximumCommandes() * 100"></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="carte-graphique">
+          <h4>Chiffre d’affaires</h4>
+          <p class="description-graphique">Revenus par menu</p>
+
+          <div class="ligne-graphique"
+            *ngFor="let menu of stats.statistiques_par_menu">
+            <div class="entete-graphique">
+              <span>{{ menu.titreMenu }}</span>
+              <strong>{{ menu.chiffreAffaires | currency:'EUR':'symbol':'1.2-2':'fr-FR' }}</strong>
+            </div>
+            <div class="fond-barre" role="img"
+              [attr.aria-label]="menu.titreMenu + ' : ' + menu.chiffreAffaires + ' euros'">
+              <div class="barre barre-revenu"
+                [style.width.%]="menu.chiffreAffaires / maximumChiffreAffaires() * 100"></div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </section>
+
+
+
+
+
+  <section *ngIf="ongletActif === 'employes'">
+    <h2>Gestion des employés</h2>
+    <p *ngIf="erreurListeEmployes" class="erreur">{{ erreurListeEmployes }}</p>
+    <p *ngIf="!erreurListeEmployes && employes.length === 0">
+      Aucun compte employé à afficher.
+    </p>
+
+    <div class="formulaire-catalogue liste-employes">
+      <div *ngFor="let employe of employes" class="carte-statistique">
+        <h3>{{ employe.prenom }} {{ employe.nom }}</h3>
+        <p>{{ employe.email }}</p>
+        <p>Statut : {{ employe.actif ? 'Actif' : 'Désactivé' }}</p>
+        <button *ngIf="employe.actif" type="button"
+          (click)="desactiverEmploye(employe.id_utilisateur)">
+          Désactiver le compte
+        </button>
+        <button *ngIf="!employe.actif" type="button"
+          (click)="activerEmploye(employe.id_utilisateur)">
+          Réactiver le compte
+        </button>
+        <button type="button" class="bouton-supprimer"
+          (click)="supprimerEmploye(employe.id_utilisateur)">
+          Supprimer définitivement
+        </button>
+      </div>
+    </div>
+
+    <h2>Créer un compte employé</h2>
+    <p *ngIf="message" class="succes">{{ message }}</p>
+    <p *ngIf="erreurEmploye" class="erreur">{{ erreurEmploye }}</p>
+
+    <form (ngSubmit)="creerEmploye()">
+      <label for="nom">Nom</label>
+      <input id="nom" name="nom" [(ngModel)]="nom" required maxlength="100">
+
+      <label for="prenom">Prénom</label>
+      <input id="prenom" name="prenom" [(ngModel)]="prenom" required maxlength="100">
+
+      <label for="email">Adresse e-mail</label>
+      <input id="email" name="email" type="email" [(ngModel)]="email" required maxlength="255">
+
+      <label for="motDePasse">Mot de passe temporaire (10 caractères minimum, avec majuscule, minuscule, chiffre et caractère spécial)</label>
+      <div class="champ-mot-de-passe">
+<input id="motDePasse" name="motDePasse" [type]="motDePasseVisible ? 'text' : 'password'"
+        [(ngModel)]="motDePasse" required minlength="10" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}">
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="motDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="motDePasseVisible"
+    (click)="motDePasseVisible = !motDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!motDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+
+      <button type="submit" [disabled]="chargementEmploye">
+        {{ chargementEmploye ? 'Création…' : 'Créer le compte employé' }}
+      </button>
+    </form>
+  </section>
+</section>

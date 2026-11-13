@@ -1,0 +1,276 @@
+
+<section class="auth-page">
+  <h1>Mon espace client</h1>
+
+  <p *ngIf="session.utilisateur() as utilisateur">
+    Bienvenue {{ utilisateur.prenom }} {{ utilisateur.nom }}.
+  </p>
+
+  <h2>Mes commandes</h2>
+
+  <p *ngIf="chargement">Chargement de vos commandes...</p>
+
+  <p *ngIf="erreur">{{ erreur }}</p>
+
+  <p *ngIf="!chargement && !erreur && commandes.length === 0">
+    Vous n'avez pas encore de commande.
+  </p>
+
+  <article
+    *ngFor="let commande of commandes"
+    class="commande-card"
+  >
+    <h3>Commande n° {{ commande.id_commande }}</h3>
+
+    <button
+      type="button"
+      class="bouton-details"
+      (click)="afficherDetails(commande.id_commande)"
+    >
+      {{ commandeDetailsOuverte === commande.id_commande
+        ? 'Masquer les détails'
+        : 'Voir les détails' }}
+    </button>
+
+    <div
+      *ngIf="commandeDetailsOuverte === commande.id_commande"
+      class="commande-details"
+    >
+      <h4>Détails de la commande</h4>
+
+      <p><strong>Référence :</strong> {{ commande.id_commande }}</p>
+      <p><strong>Menu choisi :</strong> {{ commande.titre_menu }}</p>
+      <p><strong>Nombre de personnes :</strong> {{ commande.nombre_personnes }}</p>
+      <p><strong>Prix total :</strong> {{ commande.prix_total }} €</p>
+      <p>
+        <strong>Date de prestation :</strong>
+        {{ commande.date_prestation | date: 'dd/MM/yyyy' }}
+        à {{ commande.heure_prestation }}
+      </p>
+      <p><strong>Adresse de livraison :</strong> {{ commande.adresse_livraison }}</p>
+<p><strong>Lieu de prestation :</strong> {{ commande.lieu_prestation }}</p>
+
+      <section *ngIf="commande.pret_materiel" class="commande-details">
+        <h4>Retour du matériel</h4>
+        <p>
+          <strong>Date limite de restitution :</strong>
+          {{ commande.date_limite_retour_materiel | date: 'dd/MM/yyyy' }}
+        </p>
+        <p *ngIf="commande.date_retour_materiel">
+          <strong>Date de restitution effective :</strong>
+          {{ commande.date_retour_materiel | date: 'dd/MM/yyyy' }}
+        </p>
+        <p *ngIf="!commande.date_retour_materiel">
+          Le matériel doit être restitué avant la date limite indiquée.
+          Conformément aux conditions générales de vente, une pénalité de 600 €
+          est due en cas de non-restitution dans le délai de 10 jours ouvrés.
+        </p>
+      </section>
+
+      <h4>Historique des statuts</h4>
+
+      <p *ngIf="chargementHistorique === commande.id_commande">
+        Chargement de l’historique...
+      </p>
+
+      <p *ngIf="erreurHistorique === commande.id_commande">
+        Impossible de charger l’historique des statuts.
+      </p>
+
+      <p *ngIf="historiques[commande.id_commande]?.length === 0">
+        Aucun historique disponible.
+      </p>
+
+      <ul *ngIf="historiques[commande.id_commande]?.length">
+        <li *ngFor="let evenement of historiques[commande.id_commande]">
+          <strong>{{
+            ({
+              en_attente: 'En attente de confirmation',
+              acceptee: 'Commande acceptée',
+              refusee: 'Commande refusée',
+              en_preparation: 'En préparation',
+              en_livraison: 'En livraison',
+              livree: 'Livrée',
+              attente_retour_materiel: 'En attente du retour du matériel',
+              terminee: 'Terminée',
+              annulee: 'Annulée'
+            }[evenement.statut] || evenement.statut)
+          }}</strong> —
+          {{ evenement.date_changement | date: 'dd/MM/yyyy à HH:mm:ss' }}
+        </li>
+      </ul>
+    </div>
+
+    <button
+      *ngIf="commande.statut === 'en_attente'"
+      type="button"
+      class="bouton-annulation"
+      (click)="annulerCommande(commande.id_commande)"
+    >
+      Annuler la commande
+    </button>
+
+    <button
+      *ngIf="commande.statut === 'en_attente' && commanderEnModification !== commande.id_commande"
+      type="button"
+      class="bouton-details"
+      (click)="commencerModification(commande)"
+    >
+      Modifier la commande
+    </button>
+
+    <form
+      *ngIf="commanderEnModification === commande.id_commande"
+      class="commande-details"
+      (ngSubmit)="enregistrerModification(commande.id_commande)"
+    >
+      <h4>Modifier la commande</h4>
+
+      <label>
+        Date de prestation
+        <input
+          type="date"
+          name="date_prestation"
+          [(ngModel)]="modification.date_prestation"
+          required
+        />
+      </label>
+
+      <label>
+        Heure de prestation
+        <input
+          type="time"
+          name="heure_prestation"
+          [(ngModel)]="modification.heure_prestation"
+          required
+        />
+      </label>
+
+      <label>
+        Adresse de livraison
+        <input
+          type="text"
+          name="adresse_livraison"
+          [(ngModel)]="modification.adresse_livraison"
+          required
+        />
+      </label>
+
+      <label>
+        Lieu de prestation
+        <input
+          type="text"
+          name="lieu_prestation"
+          [(ngModel)]="modification.lieu_prestation"
+          required
+        />
+      </label>
+
+      <label>
+        Nombre de personnes
+        <input
+          type="number"
+          name="nombre_personnes"
+          [(ngModel)]="modification.nombre_personnes"
+          [min]="1"
+          step="1"
+          required
+        />
+      </label>
+
+      <button type="submit">Enregistrer les modifications</button>
+      <button type="button" (click)="annulerModification()">Annuler</button>
+    </form>
+
+    <div *ngIf="commandeDetailsOuverte !== commande.id_commande">
+      <p><strong>Menu :</strong> {{ commande.titre_menu }}</p>
+
+      <p>
+        <strong>Date de commande :</strong>
+        {{ commande.date_commande | date: 'dd/MM/yyyy' }}
+      </p>
+
+      <p>
+        <strong>Date de prestation :</strong>
+        {{ commande.date_prestation | date: 'dd/MM/yyyy' }}
+        à {{ commande.heure_prestation }}
+      </p>
+
+      <p>
+        <strong>Nombre de personnes :</strong>
+        {{ commande.nombre_personnes }}
+      </p>
+
+      <p>
+        <strong>Prix total :</strong>
+        {{ commande.prix_total }} €
+      </p>
+
+      <p class="statut-commande">
+        <strong>Statut :</strong>
+        <span
+          class="statut-badge"
+          [ngClass]="'statut-' + commande.statut"
+        >
+          {{
+            commande.statut === 'en_attente' ? 'En attente de confirmation' :
+            commande.statut === 'acceptee' ? 'Commande acceptée' :
+            commande.statut === 'refusee' ? 'Commande refusée' :
+            commande.statut === 'en_preparation' ? 'En préparation' :
+            commande.statut === 'en_livraison' ? 'En livraison' :
+            commande.statut === 'livree' ? 'Livrée' :
+            commande.statut === 'attente_retour_materiel' ? 'En attente du retour du matériel' :
+            commande.statut === 'terminee' ? 'Terminée' :
+            commande.statut === 'annulee' ? 'Annulée' :
+            'Statut indisponible'
+          }}
+        </span>
+      </p>
+    </div>
+    <section *ngIf="commande.statut === 'terminee'"
+      class="commande-details avis-client">
+      <h4>Déposer un avis</h4>
+
+      <p *ngIf="avisEnvoyes[commande.id_commande]" role="status">
+        {{ messagesAvis[commande.id_commande] }}
+      </p>
+
+      <form *ngIf="!avisEnvoyes[commande.id_commande]"
+        (ngSubmit)="envoyerAvis(commande.id_commande)">
+        <label>
+          Note
+          <select [name]="'note-' + commande.id_commande"
+            [(ngModel)]="formulaireAvis(commande.id_commande).note" required>
+            <option [ngValue]="5">5 — Excellent</option>
+            <option [ngValue]="4">4 — Très bien</option>
+            <option [ngValue]="3">3 — Bien</option>
+            <option [ngValue]="2">2 — Moyen</option>
+            <option [ngValue]="1">1 — Insatisfaisant</option>
+          </select>
+        </label>
+
+        <label>
+          Commentaire
+          <textarea [name]="'commentaire-' + commande.id_commande"
+            [(ngModel)]="formulaireAvis(commande.id_commande).commentaire"
+            minlength="3" maxlength="2000" rows="4" required></textarea>
+        </label>
+
+        <p *ngIf="erreursAvis[commande.id_commande]" role="alert">
+          {{ erreursAvis[commande.id_commande] }}
+        </p>
+
+        <button type="submit"
+          [disabled]="avisEnCours === commande.id_commande">
+          {{ avisEnCours === commande.id_commande
+            ? 'Envoi en cours…' : 'Envoyer mon avis' }}
+        </button>
+      </form>
+    </section>
+
+  </article>
+
+  <button type="button" (click)="deconnecter()">
+    Déconnexion
+  </button>
+</section>

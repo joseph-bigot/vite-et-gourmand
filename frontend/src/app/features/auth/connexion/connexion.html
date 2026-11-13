@@ -1,0 +1,56 @@
+<section class="auth-page">
+  <h1>Connexion</h1>
+  <p>Connectez-vous pour accéder à votre espace client et commander un menu.</p>
+
+  <form #formConnexion="ngForm" (ngSubmit)="connecter()">
+    <label for="email">Adresse e-mail</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      placeholder="exemple@email.fr"
+      [(ngModel)]="email"
+      required
+    />
+
+    <label for="motDePasse">Mot de passe</label>
+    <div class="champ-mot-de-passe">
+<input
+      id="motDePasse"
+      name="motDePasse"
+      [type]="motDePasseVisible ? 'text' : 'password'"
+      [(ngModel)]="motDePasse"
+      required
+    >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="motDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="motDePasseVisible"
+    (click)="motDePasseVisible = !motDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!motDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+
+    <p *ngIf="message" class="message-succes" role="status">{{ message }}</p>
+    <p *ngIf="erreur" class="message-erreur" role="alert">{{ erreur }}</p>
+
+    <button type="submit" [disabled]="formConnexion.invalid || chargement">
+      {{ chargement ? 'Connexion en cours...' : 'Se connecter' }}
+    </button>
+  </form>
+
+  <p><a routerLink="/mot-de-passe-oublie">Mot de passe oublié ?</a></p>
+  <p>
+    Pas encore de compte ?
+    <a routerLink="/inscription">Créer un compte</a>
+  </p>
+</section>

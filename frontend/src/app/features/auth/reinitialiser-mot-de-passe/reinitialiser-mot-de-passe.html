@@ -1,0 +1,61 @@
+<section class="auth-page">
+  <h1>Nouveau mot de passe</h1>
+  <p>Choisissez un mot de passe de 10 à 72 caractères comprenant une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
+
+  <form #form="ngForm" (ngSubmit)="reinitialiser()">
+    <label for="motDePasse">Nouveau mot de passe</label>
+    <div class="champ-mot-de-passe">
+<input id="motDePasse" name="motDePasse" [type]="motDePasseVisible ? 'text' : 'password'"
+      [(ngModel)]="motDePasse" minlength="10" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
+      autocomplete="new-password" required >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="motDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="motDePasseVisible"
+    (click)="motDePasseVisible = !motDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!motDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+
+    <label for="confirmation">Confirmer le mot de passe</label>
+    <div class="champ-mot-de-passe">
+<input id="confirmation" name="confirmation" [type]="confirmationVisible ? 'text' : 'password'"
+      [(ngModel)]="confirmation" minlength="10" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
+      autocomplete="new-password" required >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="confirmationVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="confirmationVisible"
+    (click)="confirmationVisible = !confirmationVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!confirmationVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+
+    <p *ngIf="message" class="message-succes" role="status">{{ message }}</p>
+    <p *ngIf="erreur" class="message-erreur" role="alert">{{ erreur }}</p>
+
+    <button type="submit" [disabled]="form.invalid || chargement || !token">
+      {{ chargement ? 'Modification en cours...' : 'Modifier le mot de passe' }}
+    </button>
+  </form>
+  <p><a routerLink="/mot-de-passe-oublie">Demander un nouveau lien</a></p>
+  <p><a routerLink="/connexion">Retour à la connexion</a></p>
+</section>

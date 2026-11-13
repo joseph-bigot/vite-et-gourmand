@@ -1,0 +1,12 @@
+{
+  "name": "vite-et-gourmand",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "26.x"
+  },
+  "scripts": {
+    "heroku-postbuild": "npm --prefix backend ci && npm --prefix frontend ci && npm --prefix backend run build && npm --prefix frontend run build",
+    "start": "npm --prefix backend run start:prod"
+  }
+}

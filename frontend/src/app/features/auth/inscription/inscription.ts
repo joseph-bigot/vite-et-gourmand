@@ -1,0 +1,99 @@
+import { Component, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { finalize, timeout } from 'rxjs';
+import { API_URL } from '../../../core/services/api.config';
+
+@Component({
+  selector: 'app-inscription',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './inscription.html',
+  styleUrl: './inscription.scss',
+})
+export class Inscription {
+  nom = '';
+  prenom = '';
+  email = '';
+  telephone = '';
+  motDePasse = '';
+  motDePasseVisible = false;
+  confirmationMotDePasse = '';
+
+  confirmationMotDePasseVisible = false;
+  message = '';
+  erreur = '';
+  chargement = false;
+
+  get motsDePasseIdentiques(): boolean {
+    return this.motDePasse === this.confirmationMotDePasse;
+  }
+
+  constructor(
+    private readonly http: HttpClient,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
+
+  inscrire(): void {
+    if (!this.motsDePasseIdentiques) {
+      this.erreur = 'Les deux mots de passe ne correspondent pas.';
+      return;
+    }
+
+    this.message = '';
+    this.erreur = '';
+    this.chargement = true;
+
+    this.http
+      .post(`${API_URL}/utilisateurs/inscription`, {
+        nom: this.nom,
+        prenom: this.prenom,
+        email: this.email,
+        telephone: this.telephone,
+        motDePasse: this.motDePasse,
+      })
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.chargement = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (reponse) => {
+
+          this.message =
+            'Votre compte a été créé. Vous pouvez vous connecter.';
+
+          this.nom = '';
+          this.prenom = '';
+          this.email = '';
+          this.telephone = '';
+          this.motDePasse = '';
+          this.confirmationMotDePasse = '';
+
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+
+
+          if (error.status === 0) {
+            this.erreur = 'Impossible de contacter le serveur.';
+          } else if (error.name === 'TimeoutError') {
+            this.erreur = 'Le serveur ne répond pas dans le délai prévu.';
+          } else {
+            const messageErreur = error.error?.message;
+
+            this.erreur = Array.isArray(messageErreur)
+              ? messageErreur.join(' ')
+              : messageErreur ??
+                'Impossible de créer le compte. Vérifiez les informations saisies.';
+          }
+
+          this.cdr.detectChanges();
+        },
+      });
+  }
+}

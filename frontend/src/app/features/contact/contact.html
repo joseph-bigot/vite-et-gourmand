@@ -1,0 +1,72 @@
+<section class="page-information">
+  <h1>Contact</h1>
+  <p>Une question concernant nos menus ou nos prestations ? Contactez Vite &amp; Gourmand.</p>
+
+  <form (ngSubmit)="envoyer()" #formulaire="ngForm">
+    <label for="civilite">Civilité</label>
+    <select id="civilite" name="civilite" [(ngModel)]="civilite" required>
+      <option value="">Sélectionnez une civilité</option>
+      <option value="Madame">Madame</option>
+      <option value="Monsieur">Monsieur</option>
+      <option value="Autre">Autre</option>
+    </select>
+
+    <label for="nom">Nom</label>
+    <input
+      id="nom"
+      name="nom"
+      type="text"
+      [(ngModel)]="nom"
+      required
+      minlength="2"
+      maxlength="100"
+      autocomplete="family-name"
+    />
+
+    <label for="prenom">Prénom</label>
+    <input
+      id="prenom"
+      name="prenom"
+      type="text"
+      [(ngModel)]="prenom"
+      required
+      minlength="2"
+      maxlength="100"
+      autocomplete="given-name"
+    />
+
+    <label for="email">Adresse e-mail</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      [(ngModel)]="email"
+      required
+      email
+      maxlength="255"
+      autocomplete="email"
+    />
+
+    <label for="description">Votre message</label>
+    <textarea
+      id="description"
+      name="description"
+      [(ngModel)]="description"
+      required
+      minlength="10"
+      maxlength="5000"
+      rows="6"
+    ></textarea>
+
+    <button type="submit" [disabled]="formulaire.invalid || envoiEnCours">
+      {{ envoiEnCours ? 'Envoi en cours...' : 'Envoyer le message' }}
+    </button>
+
+    <p *ngIf="messageSucces" class="succes" role="status" aria-live="polite">
+      {{ messageSucces }}
+    </p>
+    <p *ngIf="erreur" class="erreur" role="alert">
+      {{ erreur }}
+    </p>
+  </form>
+</section>

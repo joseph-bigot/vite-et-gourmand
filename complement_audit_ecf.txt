@@ -1,0 +1,1857 @@
+COMPLEMENT AUDIT ECF
+
+================================================================================
+database/postgres/01-create-tables.sql
+================================================================================
+
+-- Vite & Gourmand
+-- PostgreSQL 17
+-- Création du schéma relationnel
+
+BEGIN;
+
+CREATE TABLE utilisateur (
+    id_utilisateur BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    telephone VARCHAR(20),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    adresse TEXT,
+    mot_de_passe_hash TEXT NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'client'
+        CHECK (role IN ('client', 'employe', 'admin')),
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    date_creation TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE theme (
+    id_theme BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE regime_alimentaire (
+    id_regime BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE allergene (
+    id_allergene BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE menu (
+    id_menu BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_theme BIGINT NOT NULL REFERENCES theme(id_theme),
+    id_regime BIGINT NOT NULL REFERENCES regime_alimentaire(id_regime),
+    titre VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+    prix_par_personne NUMERIC(10,2) NOT NULL
+        CHECK (prix_par_personne >= 0),
+    nombre_minimum_personnes INTEGER NOT NULL
+        CHECK (nombre_minimum_personnes > 0),
+    stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    conditions_commande TEXT NOT NULL,
+    conditions_conservation TEXT NOT NULL,
+    disponible BOOLEAN NOT NULL DEFAULT TRUE,
+    date_creation TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE plat (
+    id_plat BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom VARCHAR(150) NOT NULL,
+    description TEXT,
+    categorie VARCHAR(20) NOT NULL
+        CHECK (categorie IN ('entree', 'plat', 'dessert'))
+);
+
+CREATE TABLE composer_menu (
+    id_menu BIGINT NOT NULL REFERENCES menu(id_menu) ON DELETE CASCADE,
+    id_plat BIGINT NOT NULL REFERENCES plat(id_plat),
+    quantite INTEGER NOT NULL DEFAULT 1 CHECK (quantite > 0),
+    ordre_affichage INTEGER NOT NULL DEFAULT 1 CHECK (ordre_affichage > 0),
+    PRIMARY KEY (id_menu, id_plat)
+);
+
+CREATE TABLE plat_allergene (
+    id_plat BIGINT NOT NULL REFERENCES plat(id_plat) ON DELETE CASCADE,
+    id_allergene BIGINT NOT NULL REFERENCES allergene(id_allergene),
+    PRIMARY KEY (id_plat, id_allergene)
+);
+
+CREATE TABLE image_menu (
+    id_image BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_menu BIGINT NOT NULL REFERENCES menu(id_menu) ON DELETE CASCADE,
+    chemin_image TEXT NOT NULL,
+    texte_alternatif VARCHAR(255) NOT NULL,
+    ordre_affichage INTEGER NOT NULL DEFAULT 1
+        CHECK (ordre_affichage > 0)
+);
+
+CREATE TABLE commande (
+    id_commande BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_utilisateur BIGINT NOT NULL REFERENCES utilisateur(id_utilisateur),
+    id_menu BIGINT NOT NULL REFERENCES menu(id_menu),
+    date_commande TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_prestation DATE NOT NULL,
+    heure_prestation TIME NOT NULL,
+    adresse_livraison TEXT NOT NULL,
+    lieu_prestation VARCHAR(255) NOT NULL,
+    nombre_personnes INTEGER NOT NULL CHECK (nombre_personnes > 0),
+    prix_menu NUMERIC(10,2) NOT NULL CHECK (prix_menu >= 0),
+    montant_reduction NUMERIC(10,2) NOT NULL DEFAULT 0
+        CHECK (montant_reduction >= 0),
+    frais_livraison NUMERIC(10,2) NOT NULL DEFAULT 0
+        CHECK (frais_livraison >= 0),
+    prix_total NUMERIC(10,2) NOT NULL CHECK (prix_total >= 0),
+    motif_annulation TEXT,
+    moyen_contact_annulation VARCHAR(50),
+    date_limite_retour_materiel DATE,
+    date_retour_materiel DATE,
+    CHECK (
+        date_retour_materiel IS NULL
+        OR date_limite_retour_materiel IS NULL
+        OR date_retour_materiel >= date_prestation
+    )
+);
+
+CREATE TABLE historique_statut (
+    id_historique BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_commande BIGINT NOT NULL REFERENCES commande(id_commande)
+        ON DELETE CASCADE,
+    statut VARCHAR(40) NOT NULL CHECK (
+        statut IN (
+            'en_attente',
+            'acceptee',
+            'refusee',
+            'en_preparation',
+            'en_livraison',
+            'livree',
+            'attente_retour_materiel',
+            'terminee',
+            'annulee'
+        )
+    ),
+    date_changement TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE avis (
+    id_avis BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_commande BIGINT NOT NULL UNIQUE REFERENCES commande(id_commande),
+    note SMALLINT NOT NULL CHECK (note BETWEEN 1 AND 5),
+    commentaire TEXT NOT NULL,
+    statut_validation VARCHAR(20) NOT NULL DEFAULT 'en_attente'
+        CHECK (statut_validation IN ('en_attente', 'approuve', 'rejete')),
+    date_creation TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE horaire (
+    id_horaire BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    jour_semaine SMALLINT NOT NULL UNIQUE
+        CHECK (jour_semaine BETWEEN 1 AND 7),
+    heure_ouverture TIME,
+    heure_fermeture TIME,
+    ferme BOOLEAN NOT NULL DEFAULT FALSE,
+    CHECK (
+        ferme = TRUE
+        OR (
+            heure_ouverture IS NOT NULL
+            AND heure_fermeture IS NOT NULL
+            AND heure_fermeture > heure_ouverture
+        )
+    )
+);
+
+CREATE TABLE contact (
+    id_contact BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    sujet VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    date_envoi TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_commande_utilisateur
+    ON commande(id_utilisateur);
+
+CREATE INDEX idx_commande_menu
+    ON commande(id_menu);
+
+CREATE INDEX idx_commande_date_prestation
+    ON commande(date_prestation);
+
+CREATE INDEX idx_historique_commande_date
+    ON historique_statut(id_commande, date_changement DESC);
+
+CREATE INDEX idx_menu_filtres
+    ON menu(id_theme, id_regime, prix_par_personne, disponible);
+
+COMMIT;
+
+================================================================================
+database/postgres/02-seed-data.sql
+================================================================================
+
+-- Vite & Gourmand
+-- Données de démonstration
+
+BEGIN;
+
+INSERT INTO theme (nom) VALUES
+    ('Classique'),
+    ('Festif'),
+    ('Végétarien');
+
+INSERT INTO regime_alimentaire (nom) VALUES
+    ('Classique'),
+    ('Végétarien'),
+    ('Végétalien'),
+    ('Sans gluten');
+
+INSERT INTO allergene (nom) VALUES
+    ('Gluten'),
+    ('Lait'),
+    ('Œufs'),
+    ('Fruits à coque'),
+    ('Soja');
+
+INSERT INTO plat (nom, description, categorie) VALUES
+    ('Velouté de saison', 'Velouté préparé avec des légumes de saison.', 'entree'),
+    ('Feuilleté aux légumes', 'Feuilleté garni de légumes de saison.', 'entree'),
+    ('Suprême de volaille', 'Volaille accompagnée de légumes rôtis.', 'plat'),
+    ('Risotto aux champignons', 'Risotto crémeux aux champignons.', 'plat'),
+    ('Fondant au chocolat', 'Dessert au chocolat.', 'dessert'),
+    ('Tarte aux fruits', 'Tarte garnie de fruits de saison.', 'dessert');
+
+INSERT INTO menu (
+    id_theme,
+    id_regime,
+    titre,
+    description,
+    prix_par_personne,
+    nombre_minimum_personnes,
+    stock,
+    conditions_commande,
+    conditions_conservation,
+    disponible
+)
+SELECT
+    t.id_theme,
+    r.id_regime,
+    'Menu Classique',
+    'Un menu traditionnel composé de produits de saison.',
+    35.00,
+    10,
+    5,
+    'Commande à confirmer selon les disponibilités.',
+    'Conserver les préparations selon les consignes communiquées.',
+    TRUE
+FROM theme t
+JOIN regime_alimentaire r ON r.nom = 'Classique'
+WHERE t.nom = 'Classique';
+
+INSERT INTO menu (
+    id_theme,
+    id_regime,
+    titre,
+    description,
+    prix_par_personne,
+    nombre_minimum_personnes,
+    stock,
+    conditions_commande,
+    conditions_conservation,
+    disponible
+)
+SELECT
+    t.id_theme,
+    r.id_regime,
+    'Menu Festif',
+    'Un menu conçu pour les repas de fête et les grandes occasions.',
+    45.00,
+    10,
+    5,
+    'Commande à confirmer selon les disponibilités.',
+    'Conserver les préparations selon les consignes communiquées.',
+    TRUE
+FROM theme t
+JOIN regime_alimentaire r ON r.nom = 'Classique'
+WHERE t.nom = 'Festif';
+
+INSERT INTO menu (
+    id_theme,
+    id_regime,
+    titre,
+    description,
+    prix_par_personne,
+    nombre_minimum_personnes,
+    stock,
+    conditions_commande,
+    conditions_conservation,
+    disponible
+)
+SELECT
+    t.id_theme,
+    r.id_regime,
+    'Menu Végétarien',
+    'Un menu végétarien autour des légumes et des produits de saison.',
+    32.00,
+    10,
+    5,
+    'Commande à confirmer selon les disponibilités.',
+    'Conserver les préparations selon les consignes communiquées.',
+    TRUE
+FROM theme t
+JOIN regime_alimentaire r ON r.nom = 'Végétarien'
+WHERE t.nom = 'Végétarien';
+
+INSERT INTO composer_menu (id_menu, id_plat, quantite, ordre_affichage)
+SELECT m.id_menu, p.id_plat, 1,
+       CASE p.categorie
+           WHEN 'entree' THEN 1
+           WHEN 'plat' THEN 2
+           WHEN 'dessert' THEN 3
+       END
+FROM menu m
+JOIN plat p ON
+    (m.titre = 'Menu Classique' AND p.nom IN (
+        'Velouté de saison', 'Suprême de volaille', 'Tarte aux fruits'
+    ))
+    OR
+    (m.titre = 'Menu Festif' AND p.nom IN (
+        'Feuilleté aux légumes', 'Suprême de volaille', 'Fondant au chocolat'
+    ))
+    OR
+    (m.titre = 'Menu Végétarien' AND p.nom IN (
+        'Velouté de saison', 'Risotto aux champignons', 'Tarte aux fruits'
+    ));
+
+INSERT INTO plat_allergene (id_plat, id_allergene)
+SELECT p.id_plat, a.id_allergene
+FROM plat p
+JOIN allergene a ON
+    (p.nom = 'Feuilleté aux légumes' AND a.nom = 'Gluten')
+    OR
+    (p.nom = 'Suprême de volaille' AND a.nom = 'Lait')
+    OR
+    (p.nom = 'Fondant au chocolat' AND a.nom IN ('Lait', 'Œufs'))
+    OR
+    (p.nom = 'Tarte aux fruits' AND a.nom = 'Gluten');
+
+COMMIT;
+
+-- Horaires d'ouverture de démonstration
+INSERT INTO horaire (
+    jour_semaine,
+    heure_ouverture,
+    heure_fermeture,
+    ferme
+)
+VALUES
+    (1, '09:00', '18:00', FALSE),
+    (2, '09:00', '18:00', FALSE),
+    (3, '09:00', '18:00', FALSE),
+    (4, '09:00', '18:00', FALSE),
+    (5, '09:00', '18:00', FALSE),
+    (6, '09:00', '18:00', FALSE),
+    (7, '09:00', '12:00', FALSE)
+ON CONFLICT (jour_semaine)
+DO UPDATE SET
+    heure_ouverture = EXCLUDED.heure_ouverture,
+    heure_fermeture = EXCLUDED.heure_fermeture,
+    ferme = EXCLUDED.ferme;
+
+================================================================================
+database/postgres/03-reinitialisation-mot-de-passe.sql
+================================================================================
+-- Vite & Gourmand : jetons de réinitialisation de mot de passe
+-- À exécuter une seule fois sur la base PostgreSQL utilisée par l'application.
+
+BEGIN;
+
+ALTER TABLE utilisateur
+  ADD COLUMN IF NOT EXISTS reset_password_token_hash VARCHAR(64),
+  ADD COLUMN IF NOT EXISTS reset_password_expires_at TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS idx_utilisateur_reset_password_token_hash
+  ON utilisateur (reset_password_token_hash)
+  WHERE reset_password_token_hash IS NOT NULL;
+
+COMMIT;
+
+================================================================================
+frontend/angular.json
+================================================================================
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "frontend": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "frontend:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}
+
+================================================================================
+frontend/src/app/app.routes.ts
+================================================================================
+import { Routes } from '@angular/router';
+import { MainLayout } from './layout/main-layout/main-layout';
+import { Accueil } from './features/accueil/accueil';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { adminGuard } from './core/guards/admin.guard';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+        { path: 'contact', loadComponent: () => import('./features/contact/contact').then(m => m.Contact) },
+        { path: 'mentions-legales', loadComponent: () => import('./features/mentions-legales/mentions-legales').then(m => m.MentionsLegales) },
+        { path: 'cgv', loadComponent: () => import('./features/cgv/cgv').then(m => m.Cgv) },
+      {
+        path: '',
+        component: Accueil,
+      },
+      {
+        path: 'menus',
+        loadComponent: () => import('./features/menus/menus').then(m => m.Menus),
+      },
+      {
+        path: 'menus/:id',
+        loadComponent: () => import('./features/detail-menu/detail-menu').then(m => m.DetailMenu),
+      },
+      {
+        path: 'commande/:id',
+        loadComponent: () => import('./features/commandes/commande/commande').then(m => m.Commande),
+      },
+      {
+        path: 'connexion',
+        loadComponent: () => import('./features/auth/connexion/connexion').then(m => m.Connexion),
+      },
+      {
+        path: 'inscription',
+        loadComponent: () => import('./features/auth/inscription/inscription').then(m => m.Inscription),
+      },
+      {
+        path: 'mot-de-passe-oublie',
+        loadComponent: () => import('./features/auth/mot-de-passe-oublie/mot-de-passe-oublie').then(m => m.MotDePasseOublie),
+      },
+      {
+        path: 'reinitialiser-mot-de-passe',
+        loadComponent: () => import('./features/auth/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe').then(m => m.ReinitialiserMotDePasse),
+      },
+      {
+        path: 'espace-client',
+        loadComponent: () => import('./features/espace-client/espace-client').then(m => m.EspaceClient),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'espace-employe',
+        loadComponent: () => import('./features/espace-employe/espace-employe').then(m => m.EspaceEmploye),
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'espace-admin',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./features/espace-admin/espace-admin').then(m => m.EspaceAdmin),
+      },
+    ],
+  },
+];
+================================================================================
+sauvegarde-commande-schema.sql
+================================================================================
+--
+-- PostgreSQL database dump
+--
+
+\restrict furDpi8cyyhxqybklySnzgZFMnEtmgUzf3YtHlvPaci9iS6dClPYxtVf36YyAtk
+
+-- Dumped from database version 17.11 (Debian 17.11-1.pgdg13+2)
+-- Dumped by pg_dump version 17.11 (Debian 17.11-1.pgdg13+2)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: commande; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.commande (
+    id_commande bigint NOT NULL,
+    id_utilisateur bigint NOT NULL,
+    id_menu bigint NOT NULL,
+    date_commande timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_prestation date NOT NULL,
+    heure_prestation time without time zone NOT NULL,
+    adresse_livraison text NOT NULL,
+    lieu_prestation character varying(255) NOT NULL,
+    nombre_personnes integer NOT NULL,
+    prix_menu numeric(10,2) NOT NULL,
+    montant_reduction numeric(10,2) DEFAULT 0 NOT NULL,
+    frais_livraison numeric(10,2) DEFAULT 0 NOT NULL,
+    prix_total numeric(10,2) NOT NULL,
+    motif_annulation text,
+    moyen_contact_annulation character varying(50),
+    date_limite_retour_materiel date,
+    date_retour_materiel date,
+    CONSTRAINT commande_check CHECK (((date_retour_materiel IS NULL) OR (date_limite_retour_materiel IS NULL) OR (date_retour_materiel >= date_prestation))),
+    CONSTRAINT commande_frais_livraison_check CHECK ((frais_livraison >= (0)::numeric)),
+    CONSTRAINT commande_montant_reduction_check CHECK ((montant_reduction >= (0)::numeric)),
+    CONSTRAINT commande_nombre_personnes_check CHECK ((nombre_personnes > 0)),
+    CONSTRAINT commande_prix_menu_check CHECK ((prix_menu >= (0)::numeric)),
+    CONSTRAINT commande_prix_total_check CHECK ((prix_total >= (0)::numeric))
+);
+
+
+ALTER TABLE public.commande OWNER TO vite_admin;
+
+--
+-- Name: commande_id_commande_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.commande ALTER COLUMN id_commande ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.commande_id_commande_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: commande commande_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_pkey PRIMARY KEY (id_commande);
+
+
+--
+-- Name: idx_commande_date_prestation; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_date_prestation ON public.commande USING btree (date_prestation);
+
+
+--
+-- Name: idx_commande_menu; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_menu ON public.commande USING btree (id_menu);
+
+
+--
+-- Name: idx_commande_utilisateur; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_utilisateur ON public.commande USING btree (id_utilisateur);
+
+
+--
+-- Name: commande commande_id_menu_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_id_menu_fkey FOREIGN KEY (id_menu) REFERENCES public.menu(id_menu);
+
+
+--
+-- Name: commande commande_id_utilisateur_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_id_utilisateur_fkey FOREIGN KEY (id_utilisateur) REFERENCES public.utilisateur(id_utilisateur);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict furDpi8cyyhxqybklySnzgZFMnEtmgUzf3YtHlvPaci9iS6dClPYxtVf36YyAtk
+
+
+================================================================================
+sauvegarde-complete-vite-gourmand.sql
+================================================================================
+--
+-- PostgreSQL database dump
+--
+
+\restrict 7V1Q1SW8MeN1ltwvnltpiJmanUrdUaIofJoXxV1kHZcWt1M3SZZAUqakenl0jt8
+
+-- Dumped from database version 17.11 (Debian 17.11-1.pgdg13+2)
+-- Dumped by pg_dump version 17.11 (Debian 17.11-1.pgdg13+2)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: allergene; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.allergene (
+    id_allergene bigint NOT NULL,
+    nom character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.allergene OWNER TO vite_admin;
+
+--
+-- Name: allergene_id_allergene_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.allergene ALTER COLUMN id_allergene ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.allergene_id_allergene_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: avis; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.avis (
+    id_avis bigint NOT NULL,
+    id_commande bigint NOT NULL,
+    note smallint NOT NULL,
+    commentaire text NOT NULL,
+    statut_validation character varying(20) DEFAULT 'en_attente'::character varying NOT NULL,
+    date_creation timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT avis_note_check CHECK (((note >= 1) AND (note <= 5))),
+    CONSTRAINT avis_statut_validation_check CHECK (((statut_validation)::text = ANY ((ARRAY['en_attente'::character varying, 'approuve'::character varying, 'rejete'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.avis OWNER TO vite_admin;
+
+--
+-- Name: avis_id_avis_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.avis ALTER COLUMN id_avis ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.avis_id_avis_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: commande; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.commande (
+    id_commande bigint NOT NULL,
+    id_utilisateur bigint NOT NULL,
+    id_menu bigint NOT NULL,
+    date_commande timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_prestation date NOT NULL,
+    heure_prestation time without time zone NOT NULL,
+    adresse_livraison text NOT NULL,
+    lieu_prestation character varying(255) NOT NULL,
+    nombre_personnes integer NOT NULL,
+    prix_menu numeric(10,2) NOT NULL,
+    montant_reduction numeric(10,2) DEFAULT 0 NOT NULL,
+    frais_livraison numeric(10,2) DEFAULT 0 NOT NULL,
+    prix_total numeric(10,2) NOT NULL,
+    motif_annulation text,
+    moyen_contact_annulation character varying(50),
+    date_limite_retour_materiel date,
+    date_retour_materiel date,
+    distance_km numeric(10,2) DEFAULT 0 NOT NULL,
+    livraison_hors_bordeaux boolean DEFAULT false NOT NULL,
+    CONSTRAINT commande_check CHECK (((date_retour_materiel IS NULL) OR (date_limite_retour_materiel IS NULL) OR (date_retour_materiel >= date_prestation))),
+    CONSTRAINT commande_frais_livraison_check CHECK ((frais_livraison >= (0)::numeric)),
+    CONSTRAINT commande_montant_reduction_check CHECK ((montant_reduction >= (0)::numeric)),
+    CONSTRAINT commande_nombre_personnes_check CHECK ((nombre_personnes > 0)),
+    CONSTRAINT commande_prix_menu_check CHECK ((prix_menu >= (0)::numeric)),
+    CONSTRAINT commande_prix_total_check CHECK ((prix_total >= (0)::numeric))
+);
+
+
+ALTER TABLE public.commande OWNER TO vite_admin;
+
+--
+-- Name: commande_id_commande_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.commande ALTER COLUMN id_commande ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.commande_id_commande_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: composer_menu; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.composer_menu (
+    id_menu bigint NOT NULL,
+    id_plat bigint NOT NULL,
+    quantite integer DEFAULT 1 NOT NULL,
+    ordre_affichage integer DEFAULT 1 NOT NULL,
+    CONSTRAINT composer_menu_ordre_affichage_check CHECK ((ordre_affichage > 0)),
+    CONSTRAINT composer_menu_quantite_check CHECK ((quantite > 0))
+);
+
+
+ALTER TABLE public.composer_menu OWNER TO vite_admin;
+
+--
+-- Name: contact; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.contact (
+    id_contact bigint NOT NULL,
+    nom character varying(100) NOT NULL,
+    email character varying(255) NOT NULL,
+    sujet character varying(200) NOT NULL,
+    message text NOT NULL,
+    date_envoi timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.contact OWNER TO vite_admin;
+
+--
+-- Name: contact_id_contact_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.contact ALTER COLUMN id_contact ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.contact_id_contact_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: historique_statut; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.historique_statut (
+    id_historique bigint NOT NULL,
+    id_commande bigint NOT NULL,
+    statut character varying(40) NOT NULL,
+    date_changement timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT historique_statut_statut_check CHECK (((statut)::text = ANY ((ARRAY['en_attente'::character varying, 'acceptee'::character varying, 'refusee'::character varying, 'en_preparation'::character varying, 'en_livraison'::character varying, 'livree'::character varying, 'attente_retour_materiel'::character varying, 'terminee'::character varying, 'annulee'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.historique_statut OWNER TO vite_admin;
+
+--
+-- Name: historique_statut_id_historique_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.historique_statut ALTER COLUMN id_historique ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.historique_statut_id_historique_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: horaire; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.horaire (
+    id_horaire bigint NOT NULL,
+    jour_semaine smallint NOT NULL,
+    heure_ouverture time without time zone,
+    heure_fermeture time without time zone,
+    ferme boolean DEFAULT false NOT NULL,
+    CONSTRAINT horaire_check CHECK (((ferme = true) OR ((heure_ouverture IS NOT NULL) AND (heure_fermeture IS NOT NULL) AND (heure_fermeture > heure_ouverture)))),
+    CONSTRAINT horaire_jour_semaine_check CHECK (((jour_semaine >= 1) AND (jour_semaine <= 7)))
+);
+
+
+ALTER TABLE public.horaire OWNER TO vite_admin;
+
+--
+-- Name: horaire_id_horaire_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.horaire ALTER COLUMN id_horaire ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.horaire_id_horaire_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: image_menu; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.image_menu (
+    id_image bigint NOT NULL,
+    id_menu bigint NOT NULL,
+    chemin_image text NOT NULL,
+    texte_alternatif character varying(255) NOT NULL,
+    ordre_affichage integer DEFAULT 1 NOT NULL,
+    CONSTRAINT image_menu_ordre_affichage_check CHECK ((ordre_affichage > 0))
+);
+
+
+ALTER TABLE public.image_menu OWNER TO vite_admin;
+
+--
+-- Name: image_menu_id_image_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.image_menu ALTER COLUMN id_image ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.image_menu_id_image_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: menu; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.menu (
+    id_menu bigint NOT NULL,
+    id_theme bigint NOT NULL,
+    id_regime bigint NOT NULL,
+    titre character varying(150) NOT NULL,
+    description text NOT NULL,
+    prix_par_personne numeric(10,2) NOT NULL,
+    nombre_minimum_personnes integer NOT NULL,
+    stock integer DEFAULT 0 NOT NULL,
+    conditions_commande text NOT NULL,
+    conditions_conservation text NOT NULL,
+    disponible boolean DEFAULT true NOT NULL,
+    date_creation timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT menu_nombre_minimum_personnes_check CHECK ((nombre_minimum_personnes > 0)),
+    CONSTRAINT menu_prix_par_personne_check CHECK ((prix_par_personne >= (0)::numeric)),
+    CONSTRAINT menu_stock_check CHECK ((stock >= 0))
+);
+
+
+ALTER TABLE public.menu OWNER TO vite_admin;
+
+--
+-- Name: menu_id_menu_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.menu ALTER COLUMN id_menu ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.menu_id_menu_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: plat; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.plat (
+    id_plat bigint NOT NULL,
+    nom character varying(150) NOT NULL,
+    description text,
+    categorie character varying(20) NOT NULL,
+    CONSTRAINT plat_categorie_check CHECK (((categorie)::text = ANY ((ARRAY['entree'::character varying, 'plat'::character varying, 'dessert'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.plat OWNER TO vite_admin;
+
+--
+-- Name: plat_allergene; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.plat_allergene (
+    id_plat bigint NOT NULL,
+    id_allergene bigint NOT NULL
+);
+
+
+ALTER TABLE public.plat_allergene OWNER TO vite_admin;
+
+--
+-- Name: plat_id_plat_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.plat ALTER COLUMN id_plat ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.plat_id_plat_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: regime_alimentaire; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.regime_alimentaire (
+    id_regime bigint NOT NULL,
+    nom character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.regime_alimentaire OWNER TO vite_admin;
+
+--
+-- Name: regime_alimentaire_id_regime_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.regime_alimentaire ALTER COLUMN id_regime ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.regime_alimentaire_id_regime_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: theme; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.theme (
+    id_theme bigint NOT NULL,
+    nom character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.theme OWNER TO vite_admin;
+
+--
+-- Name: theme_id_theme_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.theme ALTER COLUMN id_theme ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.theme_id_theme_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: utilisateur; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.utilisateur (
+    id_utilisateur bigint NOT NULL,
+    nom character varying(100) NOT NULL,
+    prenom character varying(100) NOT NULL,
+    telephone character varying(20),
+    email character varying(255) NOT NULL,
+    adresse text,
+    mot_de_passe_hash text NOT NULL,
+    role character varying(20) DEFAULT 'client'::character varying NOT NULL,
+    actif boolean DEFAULT true NOT NULL,
+    date_creation timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT utilisateur_role_check CHECK (((role)::text = ANY ((ARRAY['client'::character varying, 'employe'::character varying, 'admin'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.utilisateur OWNER TO vite_admin;
+
+--
+-- Name: utilisateur_id_utilisateur_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.utilisateur ALTER COLUMN id_utilisateur ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.utilisateur_id_utilisateur_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Data for Name: allergene; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.allergene (id_allergene, nom) FROM stdin;
+1	Gluten
+2	Lait
+3	Œufs
+4	Fruits à coque
+5	Soja
+\.
+
+
+--
+-- Data for Name: avis; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.avis (id_avis, id_commande, note, commentaire, statut_validation, date_creation) FROM stdin;
+\.
+
+
+--
+-- Data for Name: commande; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.commande (id_commande, id_utilisateur, id_menu, date_commande, date_prestation, heure_prestation, adresse_livraison, lieu_prestation, nombre_personnes, prix_menu, montant_reduction, frais_livraison, prix_total, motif_annulation, moyen_contact_annulation, date_limite_retour_materiel, date_retour_materiel, distance_km, livraison_hors_bordeaux) FROM stdin;
+2	1	1	2026-10-23 07:22:47.15329+00	2026-11-15	12:00:00	Adresse fictive de test	Domicile	10	350.00	0.00	0.00	350.00	\N	\N	\N	\N	0.00	f
+4	10	2	2026-10-23 09:02:46.466014+00	2026-10-30	12:30:00	201 avenue de la resistance, 83000 toulon	TOULON	10	450.00	0.00	5.00	455.00	delai	0786762264	\N	\N	10.00	t
+3	10	1	2026-10-23 07:26:12.771507+00	2026-11-28	12:00:00	Adresse fictive de test	Domicile	10	350.00	0.00	0.00	350.00	\N	\N	\N	\N	0.00	f
+5	10	1	2026-10-26 07:53:19.704279+00	2026-11-19	12:45:00	1 rue artas, 83100 toulon	Ollioules	10	350.00	0.00	5.00	355.00	\N	\N	\N	\N	0.00	f
+\.
+
+
+--
+-- Data for Name: composer_menu; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.composer_menu (id_menu, id_plat, quantite, ordre_affichage) FROM stdin;
+1	1	1	1
+3	1	1	1
+2	2	1	1
+1	3	1	2
+2	3	1	2
+3	4	1	2
+2	5	1	3
+1	6	1	3
+3	6	1	3
+\.
+
+
+--
+-- Data for Name: contact; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.contact (id_contact, nom, email, sujet, message, date_envoi) FROM stdin;
+\.
+
+
+--
+-- Data for Name: historique_statut; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.historique_statut (id_historique, id_commande, statut, date_changement) FROM stdin;
+1	2	en_attente	2026-10-23 07:22:47.15329+00
+2	3	en_attente	2026-10-23 07:26:12.771507+00
+3	4	en_attente	2026-10-23 09:02:46.466014+00
+4	4	annulee	2026-10-23 09:59:49.651792+00
+5	5	en_attente	2026-10-26 07:53:19.704279+00
+\.
+
+
+--
+-- Data for Name: horaire; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.horaire (id_horaire, jour_semaine, heure_ouverture, heure_fermeture, ferme) FROM stdin;
+\.
+
+
+--
+-- Data for Name: image_menu; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.image_menu (id_image, id_menu, chemin_image, texte_alternatif, ordre_affichage) FROM stdin;
+\.
+
+
+--
+-- Data for Name: menu; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.menu (id_menu, id_theme, id_regime, titre, description, prix_par_personne, nombre_minimum_personnes, stock, conditions_commande, conditions_conservation, disponible, date_creation) FROM stdin;
+1	1	1	Menu Classique	Un menu traditionnel composé de produits de saison.	35.00	10	5	Commande à confirmer selon les disponibilités.	Conserver les préparations selon les consignes communiquées.	t	2026-10-20 09:05:23.949405+00
+2	2	1	Menu Festif	Un menu conçu pour les repas de fête et les grandes occasions.	45.00	10	5	Commande à confirmer selon les disponibilités.	Conserver les préparations selon les consignes communiquées.	t	2026-10-20 09:05:23.949405+00
+3	3	2	Menu Végétarien	Un menu végétarien autour des légumes et des produits de saison.	32.00	10	5	Commande à confirmer selon les disponibilités.	Conserver les préparations selon les consignes communiquées.	t	2026-10-20 09:05:23.949405+00
+\.
+
+
+--
+-- Data for Name: plat; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.plat (id_plat, nom, description, categorie) FROM stdin;
+1	Velouté de saison	Velouté préparé avec des légumes de saison.	entree
+2	Feuilleté aux légumes	Feuilleté garni de légumes de saison.	entree
+3	Suprême de volaille	Volaille accompagnée de légumes rôtis.	plat
+4	Risotto aux champignons	Risotto crémeux aux champignons.	plat
+5	Fondant au chocolat	Dessert au chocolat.	dessert
+6	Tarte aux fruits	Tarte garnie de fruits de saison.	dessert
+\.
+
+
+--
+-- Data for Name: plat_allergene; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.plat_allergene (id_plat, id_allergene) FROM stdin;
+2	1
+6	1
+3	2
+5	2
+5	3
+\.
+
+
+--
+-- Data for Name: regime_alimentaire; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.regime_alimentaire (id_regime, nom) FROM stdin;
+1	Classique
+2	Végétarien
+3	Végétalien
+4	Sans gluten
+\.
+
+
+--
+-- Data for Name: theme; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.theme (id_theme, nom) FROM stdin;
+1	Classique
+2	Festif
+3	Végétarien
+\.
+
+
+--
+-- Data for Name: utilisateur; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.utilisateur (id_utilisateur, nom, prenom, telephone, email, adresse, mot_de_passe_hash, role, actif, date_creation) FROM stdin;
+1	Bigot	Joseph	0786762264	jos2215@gmail.com	\N	$2b$12$MGIXjZNc7P8fTMVxQR5I/.v0cJP4JaFIweZQGdVteRwtjY4uaaK7i	client	t	2026-10-22 08:27:17.698058+00
+2	Bigot	Joseph	0899887766	jos2200015@gmail.com	\N	$2b$12$UXEQdVUdjSyeSbzJNiADYO/.jC7oNZVfpzDl.pGNZ13PYwDdzxCzS	client	t	2026-10-22 08:35:00.668949+00
+3	Bigot	Joseph	2322332222	jos221235@gmail.com	\N	$2b$12$kyr5tF6A1EUGX4qbjjTnouIsbPDEFO6G.24rACKNa2HXAAfC8ywLS	client	t	2026-10-22 08:37:35.245975+00
+4	fghgf	fghf	0788776655	fgjfhjnv@gmail.com	\N	$2b$12$PsVFdL5vPZp1gTJOYFIIPOo9twJLzogfhoVNJjOec2dIQVneZWm.W	client	t	2026-10-22 08:45:00.929922+00
+5	fdgf	sdfsfgf	0677889966	sqfdsc@gmail.com	\N	$2b$12$hQqqCiy8l2CmujfEOevB8Onx.DW3eIhGdvYrT1yEOztaJk1hPSvAu	client	t	2026-10-22 08:52:12.1098+00
+6	dfgf	hgfdfgh	0787887766	sdgggggfs@gmail.com	\N	$2b$12$wyQhUH5XUd/FFbxvrkKuw.LF5wcKwVDzr2/tU1bZdCHsLu484Vtsu	client	t	2026-10-22 08:57:59.536293+00
+7	fdgbgb	nhng,j	0766443311	klkojlkj@gmail.com	\N	$2b$12$xHoffPv3Z94HK/tLkrSVfOAg30VsjAbrhPhLGiYo.XRHmYn0HBYYO	client	t	2026-10-22 08:59:31.537608+00
+8	fghfgh	fgjfjmmmmmm	0688009988	nbgjoi@gmail.com	\N	$2b$12$TFQTE3pw8j2QPfre3AczWOnk7yFl2yc95t05MtH3qMuK26OobgxiK	client	t	2026-10-22 09:03:06.25623+00
+9	waou	frite	0644336629	fritewaou@gmail.com	\N	$2b$12$LkbmhCOPui5KyHIxVN30/uzQ1Lnq9PY2C5lhAmIinege65B9F05VW	client	t	2026-10-22 09:05:59.065854+00
+10	BIGOT	JOSEPH	0786762264	jos02215@gmail.com	\N	$2b$12$8jInFOJ2imNUetrlUQTnEuY56Dyyfb63.Q.YXmecPXWVtKsKqGQVm	client	t	2026-10-22 11:53:44.093896+00
+\.
+
+
+--
+-- Name: allergene_id_allergene_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.allergene_id_allergene_seq', 5, true);
+
+
+--
+-- Name: avis_id_avis_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.avis_id_avis_seq', 1, false);
+
+
+--
+-- Name: commande_id_commande_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.commande_id_commande_seq', 5, true);
+
+
+--
+-- Name: contact_id_contact_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.contact_id_contact_seq', 1, false);
+
+
+--
+-- Name: historique_statut_id_historique_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.historique_statut_id_historique_seq', 5, true);
+
+
+--
+-- Name: horaire_id_horaire_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.horaire_id_horaire_seq', 1, false);
+
+
+--
+-- Name: image_menu_id_image_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.image_menu_id_image_seq', 1, false);
+
+
+--
+-- Name: menu_id_menu_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.menu_id_menu_seq', 3, true);
+
+
+--
+-- Name: plat_id_plat_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.plat_id_plat_seq', 6, true);
+
+
+--
+-- Name: regime_alimentaire_id_regime_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.regime_alimentaire_id_regime_seq', 4, true);
+
+
+--
+-- Name: theme_id_theme_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.theme_id_theme_seq', 3, true);
+
+
+--
+-- Name: utilisateur_id_utilisateur_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.utilisateur_id_utilisateur_seq', 10, true);
+
+
+--
+-- Name: allergene allergene_nom_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.allergene
+    ADD CONSTRAINT allergene_nom_key UNIQUE (nom);
+
+
+--
+-- Name: allergene allergene_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.allergene
+    ADD CONSTRAINT allergene_pkey PRIMARY KEY (id_allergene);
+
+
+--
+-- Name: avis avis_id_commande_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.avis
+    ADD CONSTRAINT avis_id_commande_key UNIQUE (id_commande);
+
+
+--
+-- Name: avis avis_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.avis
+    ADD CONSTRAINT avis_pkey PRIMARY KEY (id_avis);
+
+
+--
+-- Name: commande commande_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_pkey PRIMARY KEY (id_commande);
+
+
+--
+-- Name: composer_menu composer_menu_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.composer_menu
+    ADD CONSTRAINT composer_menu_pkey PRIMARY KEY (id_menu, id_plat);
+
+
+--
+-- Name: contact contact_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.contact
+    ADD CONSTRAINT contact_pkey PRIMARY KEY (id_contact);
+
+
+--
+-- Name: historique_statut historique_statut_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.historique_statut
+    ADD CONSTRAINT historique_statut_pkey PRIMARY KEY (id_historique);
+
+
+--
+-- Name: horaire horaire_jour_semaine_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.horaire
+    ADD CONSTRAINT horaire_jour_semaine_key UNIQUE (jour_semaine);
+
+
+--
+-- Name: horaire horaire_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.horaire
+    ADD CONSTRAINT horaire_pkey PRIMARY KEY (id_horaire);
+
+
+--
+-- Name: image_menu image_menu_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.image_menu
+    ADD CONSTRAINT image_menu_pkey PRIMARY KEY (id_image);
+
+
+--
+-- Name: menu menu_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.menu
+    ADD CONSTRAINT menu_pkey PRIMARY KEY (id_menu);
+
+
+--
+-- Name: plat_allergene plat_allergene_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.plat_allergene
+    ADD CONSTRAINT plat_allergene_pkey PRIMARY KEY (id_plat, id_allergene);
+
+
+--
+-- Name: plat plat_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.plat
+    ADD CONSTRAINT plat_pkey PRIMARY KEY (id_plat);
+
+
+--
+-- Name: regime_alimentaire regime_alimentaire_nom_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.regime_alimentaire
+    ADD CONSTRAINT regime_alimentaire_nom_key UNIQUE (nom);
+
+
+--
+-- Name: regime_alimentaire regime_alimentaire_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.regime_alimentaire
+    ADD CONSTRAINT regime_alimentaire_pkey PRIMARY KEY (id_regime);
+
+
+--
+-- Name: theme theme_nom_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.theme
+    ADD CONSTRAINT theme_nom_key UNIQUE (nom);
+
+
+--
+-- Name: theme theme_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.theme
+    ADD CONSTRAINT theme_pkey PRIMARY KEY (id_theme);
+
+
+--
+-- Name: utilisateur utilisateur_email_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.utilisateur
+    ADD CONSTRAINT utilisateur_email_key UNIQUE (email);
+
+
+--
+-- Name: utilisateur utilisateur_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.utilisateur
+    ADD CONSTRAINT utilisateur_pkey PRIMARY KEY (id_utilisateur);
+
+
+--
+-- Name: idx_commande_date_prestation; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_date_prestation ON public.commande USING btree (date_prestation);
+
+
+--
+-- Name: idx_commande_menu; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_menu ON public.commande USING btree (id_menu);
+
+
+--
+-- Name: idx_commande_utilisateur; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_utilisateur ON public.commande USING btree (id_utilisateur);
+
+
+--
+-- Name: idx_historique_commande_date; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_historique_commande_date ON public.historique_statut USING btree (id_commande, date_changement DESC);
+
+
+--
+-- Name: idx_menu_filtres; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_menu_filtres ON public.menu USING btree (id_theme, id_regime, prix_par_personne, disponible);
+
+
+--
+-- Name: avis avis_id_commande_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.avis
+    ADD CONSTRAINT avis_id_commande_fkey FOREIGN KEY (id_commande) REFERENCES public.commande(id_commande);
+
+
+--
+-- Name: commande commande_id_menu_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_id_menu_fkey FOREIGN KEY (id_menu) REFERENCES public.menu(id_menu);
+
+
+--
+-- Name: commande commande_id_utilisateur_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_id_utilisateur_fkey FOREIGN KEY (id_utilisateur) REFERENCES public.utilisateur(id_utilisateur);
+
+
+--
+-- Name: composer_menu composer_menu_id_menu_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.composer_menu
+    ADD CONSTRAINT composer_menu_id_menu_fkey FOREIGN KEY (id_menu) REFERENCES public.menu(id_menu) ON DELETE CASCADE;
+
+
+--
+-- Name: composer_menu composer_menu_id_plat_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.composer_menu
+    ADD CONSTRAINT composer_menu_id_plat_fkey FOREIGN KEY (id_plat) REFERENCES public.plat(id_plat);
+
+
+--
+-- Name: historique_statut historique_statut_id_commande_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.historique_statut
+    ADD CONSTRAINT historique_statut_id_commande_fkey FOREIGN KEY (id_commande) REFERENCES public.commande(id_commande) ON DELETE CASCADE;
+
+
+--
+-- Name: image_menu image_menu_id_menu_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.image_menu
+    ADD CONSTRAINT image_menu_id_menu_fkey FOREIGN KEY (id_menu) REFERENCES public.menu(id_menu) ON DELETE CASCADE;
+
+
+--
+-- Name: menu menu_id_regime_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.menu
+    ADD CONSTRAINT menu_id_regime_fkey FOREIGN KEY (id_regime) REFERENCES public.regime_alimentaire(id_regime);
+
+
+--
+-- Name: menu menu_id_theme_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.menu
+    ADD CONSTRAINT menu_id_theme_fkey FOREIGN KEY (id_theme) REFERENCES public.theme(id_theme);
+
+
+--
+-- Name: plat_allergene plat_allergene_id_allergene_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.plat_allergene
+    ADD CONSTRAINT plat_allergene_id_allergene_fkey FOREIGN KEY (id_allergene) REFERENCES public.allergene(id_allergene);
+
+
+--
+-- Name: plat_allergene plat_allergene_id_plat_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.plat_allergene
+    ADD CONSTRAINT plat_allergene_id_plat_fkey FOREIGN KEY (id_plat) REFERENCES public.plat(id_plat) ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict 7V1Q1SW8MeN1ltwvnltpiJmanUrdUaIofJoXxV1kHZcWt1M3SZZAUqakenl0jt8
+
+
+================================================================================
+sauvegarde-utilisateurs-commandes.sql
+================================================================================
+--
+-- PostgreSQL database dump
+--
+
+\restrict PEeKEKEs6NPLXWd5sVuXjioYaiesPy5IjKiiryfGg6jzXSDY09XIStMtvICu3w9
+
+-- Dumped from database version 17.11 (Debian 17.11-1.pgdg13+2)
+-- Dumped by pg_dump version 17.11 (Debian 17.11-1.pgdg13+2)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: commande; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.commande (
+    id_commande bigint NOT NULL,
+    id_utilisateur bigint NOT NULL,
+    id_menu bigint NOT NULL,
+    date_commande timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_prestation date NOT NULL,
+    heure_prestation time without time zone NOT NULL,
+    adresse_livraison text NOT NULL,
+    lieu_prestation character varying(255) NOT NULL,
+    nombre_personnes integer NOT NULL,
+    prix_menu numeric(10,2) NOT NULL,
+    montant_reduction numeric(10,2) DEFAULT 0 NOT NULL,
+    frais_livraison numeric(10,2) DEFAULT 0 NOT NULL,
+    prix_total numeric(10,2) NOT NULL,
+    motif_annulation text,
+    moyen_contact_annulation character varying(50),
+    date_limite_retour_materiel date,
+    date_retour_materiel date,
+    distance_km numeric(10,2) DEFAULT 0 NOT NULL,
+    livraison_hors_bordeaux boolean DEFAULT false NOT NULL,
+    CONSTRAINT commande_check CHECK (((date_retour_materiel IS NULL) OR (date_limite_retour_materiel IS NULL) OR (date_retour_materiel >= date_prestation))),
+    CONSTRAINT commande_frais_livraison_check CHECK ((frais_livraison >= (0)::numeric)),
+    CONSTRAINT commande_montant_reduction_check CHECK ((montant_reduction >= (0)::numeric)),
+    CONSTRAINT commande_nombre_personnes_check CHECK ((nombre_personnes > 0)),
+    CONSTRAINT commande_prix_menu_check CHECK ((prix_menu >= (0)::numeric)),
+    CONSTRAINT commande_prix_total_check CHECK ((prix_total >= (0)::numeric))
+);
+
+
+ALTER TABLE public.commande OWNER TO vite_admin;
+
+--
+-- Name: commande_id_commande_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.commande ALTER COLUMN id_commande ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.commande_id_commande_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: utilisateur; Type: TABLE; Schema: public; Owner: vite_admin
+--
+
+CREATE TABLE public.utilisateur (
+    id_utilisateur bigint NOT NULL,
+    nom character varying(100) NOT NULL,
+    prenom character varying(100) NOT NULL,
+    telephone character varying(20),
+    email character varying(255) NOT NULL,
+    adresse text,
+    mot_de_passe_hash text NOT NULL,
+    role character varying(20) DEFAULT 'client'::character varying NOT NULL,
+    actif boolean DEFAULT true NOT NULL,
+    date_creation timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT utilisateur_role_check CHECK (((role)::text = ANY ((ARRAY['client'::character varying, 'employe'::character varying, 'admin'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.utilisateur OWNER TO vite_admin;
+
+--
+-- Name: utilisateur_id_utilisateur_seq; Type: SEQUENCE; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE public.utilisateur ALTER COLUMN id_utilisateur ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.utilisateur_id_utilisateur_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Data for Name: commande; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.commande (id_commande, id_utilisateur, id_menu, date_commande, date_prestation, heure_prestation, adresse_livraison, lieu_prestation, nombre_personnes, prix_menu, montant_reduction, frais_livraison, prix_total, motif_annulation, moyen_contact_annulation, date_limite_retour_materiel, date_retour_materiel, distance_km, livraison_hors_bordeaux) FROM stdin;
+2	1	1	2026-10-23 07:22:47.15329+00	2026-11-15	12:00:00	Adresse fictive de test	Domicile	10	350.00	0.00	0.00	350.00	\N	\N	\N	\N	0.00	f
+4	10	2	2026-10-23 09:02:46.466014+00	2026-10-30	12:30:00	201 avenue de la resistance, 83000 toulon	TOULON	10	450.00	0.00	5.00	455.00	delai	0786762264	\N	\N	10.00	t
+3	10	1	2026-10-23 07:26:12.771507+00	2026-11-28	12:00:00	Adresse fictive de test	Domicile	10	350.00	0.00	0.00	350.00	\N	\N	\N	\N	0.00	f
+5	10	1	2026-10-26 07:53:19.704279+00	2026-11-19	12:45:00	1 rue artas, 83100 toulon	Ollioules	10	350.00	0.00	5.00	355.00	\N	\N	\N	\N	0.00	f
+\.
+
+
+--
+-- Data for Name: utilisateur; Type: TABLE DATA; Schema: public; Owner: vite_admin
+--
+
+COPY public.utilisateur (id_utilisateur, nom, prenom, telephone, email, adresse, mot_de_passe_hash, role, actif, date_creation) FROM stdin;
+1	Bigot	Joseph	0786762264	jos2215@gmail.com	\N	$2b$12$MGIXjZNc7P8fTMVxQR5I/.v0cJP4JaFIweZQGdVteRwtjY4uaaK7i	client	t	2026-10-22 08:27:17.698058+00
+2	Bigot	Joseph	0899887766	jos2200015@gmail.com	\N	$2b$12$UXEQdVUdjSyeSbzJNiADYO/.jC7oNZVfpzDl.pGNZ13PYwDdzxCzS	client	t	2026-10-22 08:35:00.668949+00
+3	Bigot	Joseph	2322332222	jos221235@gmail.com	\N	$2b$12$kyr5tF6A1EUGX4qbjjTnouIsbPDEFO6G.24rACKNa2HXAAfC8ywLS	client	t	2026-10-22 08:37:35.245975+00
+4	fghgf	fghf	0788776655	fgjfhjnv@gmail.com	\N	$2b$12$PsVFdL5vPZp1gTJOYFIIPOo9twJLzogfhoVNJjOec2dIQVneZWm.W	client	t	2026-10-22 08:45:00.929922+00
+5	fdgf	sdfsfgf	0677889966	sqfdsc@gmail.com	\N	$2b$12$hQqqCiy8l2CmujfEOevB8Onx.DW3eIhGdvYrT1yEOztaJk1hPSvAu	client	t	2026-10-22 08:52:12.1098+00
+6	dfgf	hgfdfgh	0787887766	sdgggggfs@gmail.com	\N	$2b$12$wyQhUH5XUd/FFbxvrkKuw.LF5wcKwVDzr2/tU1bZdCHsLu484Vtsu	client	t	2026-10-22 08:57:59.536293+00
+7	fdgbgb	nhng,j	0766443311	klkojlkj@gmail.com	\N	$2b$12$xHoffPv3Z94HK/tLkrSVfOAg30VsjAbrhPhLGiYo.XRHmYn0HBYYO	client	t	2026-10-22 08:59:31.537608+00
+8	fghfgh	fgjfjmmmmmm	0688009988	nbgjoi@gmail.com	\N	$2b$12$TFQTE3pw8j2QPfre3AczWOnk7yFl2yc95t05MtH3qMuK26OobgxiK	client	t	2026-10-22 09:03:06.25623+00
+9	waou	frite	0644336629	fritewaou@gmail.com	\N	$2b$12$LkbmhCOPui5KyHIxVN30/uzQ1Lnq9PY2C5lhAmIinege65B9F05VW	client	t	2026-10-22 09:05:59.065854+00
+10	BIGOT	JOSEPH	0786762264	jos02215@gmail.com	\N	$2b$12$8jInFOJ2imNUetrlUQTnEuY56Dyyfb63.Q.YXmecPXWVtKsKqGQVm	client	t	2026-10-22 11:53:44.093896+00
+\.
+
+
+--
+-- Name: commande_id_commande_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.commande_id_commande_seq', 5, true);
+
+
+--
+-- Name: utilisateur_id_utilisateur_seq; Type: SEQUENCE SET; Schema: public; Owner: vite_admin
+--
+
+SELECT pg_catalog.setval('public.utilisateur_id_utilisateur_seq', 10, true);
+
+
+--
+-- Name: commande commande_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_pkey PRIMARY KEY (id_commande);
+
+
+--
+-- Name: utilisateur utilisateur_email_key; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.utilisateur
+    ADD CONSTRAINT utilisateur_email_key UNIQUE (email);
+
+
+--
+-- Name: utilisateur utilisateur_pkey; Type: CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.utilisateur
+    ADD CONSTRAINT utilisateur_pkey PRIMARY KEY (id_utilisateur);
+
+
+--
+-- Name: idx_commande_date_prestation; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_date_prestation ON public.commande USING btree (date_prestation);
+
+
+--
+-- Name: idx_commande_menu; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_menu ON public.commande USING btree (id_menu);
+
+
+--
+-- Name: idx_commande_utilisateur; Type: INDEX; Schema: public; Owner: vite_admin
+--
+
+CREATE INDEX idx_commande_utilisateur ON public.commande USING btree (id_utilisateur);
+
+
+--
+-- Name: commande commande_id_menu_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_id_menu_fkey FOREIGN KEY (id_menu) REFERENCES public.menu(id_menu);
+
+
+--
+-- Name: commande commande_id_utilisateur_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vite_admin
+--
+
+ALTER TABLE ONLY public.commande
+    ADD CONSTRAINT commande_id_utilisateur_fkey FOREIGN KEY (id_utilisateur) REFERENCES public.utilisateur(id_utilisateur);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict PEeKEKEs6NPLXWd5sVuXjioYaiesPy5IjKiiryfGg6jzXSDY09XIStMtvICu3w9
+

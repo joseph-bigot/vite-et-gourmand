@@ -1,0 +1,139 @@
+.profil-page {
+  max-width: 760px;
+  margin: 48px auto;
+  padding: 32px;
+  color: #302522;
+  background: #fffdf9;
+  border: 1px solid #e7dfd5;
+  border-radius: 10px;
+}
+
+h1 {
+  margin-top: 0;
+  color: #572d32;
+  text-align: center;
+}
+
+.introduction {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+form {
+  padding: 24px 0;
+  border-top: 1px solid #e7dfd5;
+}
+
+h2 {
+  margin-top: 0;
+  color: #572d32;
+  font-size: 20px;
+}
+
+.champs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+.champ-large {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: block;
+  margin: 18px 0 8px;
+  font-weight: 600;
+}
+
+input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cfc2b7;
+  border-radius: 5px;
+  font: inherit;
+}
+
+button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+  border: none;
+  border-radius: 5px;
+  background: #572d32;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.message-succes {
+  color: #267343;
+}
+
+.message-erreur {
+  color: #b42318;
+}
+
+.aide {
+  font-size: 13px;
+  color: #665b55;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .profil-page {
+    margin: 24px 16px;
+    padding: 24px;
+  }
+
+  .champs {
+    grid-template-columns: 1fr;
+  }
+
+  .champ-large {
+    grid-column: auto;
+  }
+}
+
+.champ-mot-de-passe {
+  position: relative;
+  width: 100%;
+}
+
+.champ-mot-de-passe input {
+  padding-right: 3.2rem;
+}
+
+.profil-page .bouton-visibilite {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 7px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #572d32;
+  cursor: pointer;
+}
+
+.profil-page .bouton-visibilite:hover {
+  background: #f1e9e5;
+}
+
+.bouton-visibilite svg {
+  width: 21px;
+  height: 21px;
+}

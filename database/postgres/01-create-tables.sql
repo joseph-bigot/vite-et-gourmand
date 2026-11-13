@@ -97,6 +97,10 @@ CREATE TABLE commande (
         CHECK (montant_reduction >= 0),
     frais_livraison NUMERIC(10,2) NOT NULL DEFAULT 0
         CHECK (frais_livraison >= 0),
+    distance_km NUMERIC(10,2) NOT NULL DEFAULT 0
+        CHECK (distance_km >= 0),
+    livraison_hors_bordeaux BOOLEAN NOT NULL DEFAULT FALSE,
+    pret_materiel BOOLEAN NOT NULL DEFAULT FALSE,
     prix_total NUMERIC(10,2) NOT NULL CHECK (prix_total >= 0),
     motif_annulation TEXT,
     moyen_contact_annulation VARCHAR(50),

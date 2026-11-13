@@ -1,0 +1,129 @@
+<section class="profil-page">
+  <h1>Mon profil</h1>
+  <p class="introduction">Consultez et modifiez vos informations personnelles.</p>
+
+  <p *ngIf="chargement">Chargement de votre profil...</p>
+  <p *ngIf="erreur" class="message-erreur" role="alert">{{ erreur }}</p>
+
+  <form #formProfil="ngForm" (ngSubmit)="modifierProfil()">
+    <h2>Informations personnelles</h2>
+
+    <div class="champs">
+      <div class="champ">
+        <label for="prenom">Prénom</label>
+        <input id="prenom" name="prenom" [(ngModel)]="prenom"
+          required minlength="2" maxlength="100">
+      </div>
+
+      <div class="champ">
+        <label for="nom">Nom</label>
+        <input id="nom" name="nom" [(ngModel)]="nom"
+          required minlength="2" maxlength="100">
+      </div>
+
+      <div class="champ">
+        <label for="email">Adresse e-mail</label>
+        <input id="email" name="email" type="email" [(ngModel)]="email"
+          required maxlength="255">
+      </div>
+
+      <div class="champ">
+        <label for="telephone">Téléphone</label>
+        <input id="telephone" name="telephone" type="tel"
+          [(ngModel)]="telephone" maxlength="20">
+      </div>
+
+      <div class="champ champ-large">
+        <label for="adresse">Adresse</label>
+        <input id="adresse" name="adresse" [(ngModel)]="adresse"
+          maxlength="500">
+      </div>
+    </div>
+
+    <p *ngIf="message" class="message-succes" role="status">{{ message }}</p>
+    <button type="submit" [disabled]="formProfil.invalid || chargement">
+      {{ chargement ? 'Enregistrement...' : 'Enregistrer mes informations' }}
+    </button>
+  </form>
+
+  <form #formMotDePasse="ngForm" (ngSubmit)="changerMotDePasse()">
+    <h2>Changer mon mot de passe</h2>
+
+    <label for="ancienMotDePasse">Mot de passe actuel</label>
+    <div class="champ-mot-de-passe">
+      <input id="ancienMotDePasse" name="ancienMotDePasse"
+        [type]="ancienMotDePasseVisible ? 'text' : 'password'"
+        [(ngModel)]="ancienMotDePasse" required maxlength="72">
+      <button type="button" class="bouton-visibilite"
+        [attr.aria-label]="ancienMotDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+        [attr.aria-pressed]="ancienMotDePasseVisible"
+        (click)="ancienMotDePasseVisible = !ancienMotDePasseVisible">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+            fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="12" cy="12" r="3" fill="none"
+            stroke="currentColor" stroke-width="1.8"/>
+          <path *ngIf="!ancienMotDePasseVisible" d="M3 3l18 18"
+            stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </div>
+
+    <label for="nouveauMotDePasse">Nouveau mot de passe</label>
+    <div class="champ-mot-de-passe">
+      <input id="nouveauMotDePasse" name="nouveauMotDePasse"
+        [type]="nouveauMotDePasseVisible ? 'text' : 'password'"
+        [(ngModel)]="nouveauMotDePasse" required minlength="10" maxlength="72"
+        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}">
+      <button type="button" class="bouton-visibilite"
+        [attr.aria-label]="nouveauMotDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+        [attr.aria-pressed]="nouveauMotDePasseVisible"
+        (click)="nouveauMotDePasseVisible = !nouveauMotDePasseVisible">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+            fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="12" cy="12" r="3" fill="none"
+            stroke="currentColor" stroke-width="1.8"/>
+          <path *ngIf="!nouveauMotDePasseVisible" d="M3 3l18 18"
+            stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </div>
+
+    <label for="confirmationMotDePasse">Confirmer le nouveau mot de passe</label>
+    <div class="champ-mot-de-passe">
+      <input id="confirmationMotDePasse" name="confirmationMotDePasse"
+        [type]="confirmationMotDePasseVisible ? 'text' : 'password'"
+        [(ngModel)]="confirmationMotDePasse"
+        required minlength="10" maxlength="72">
+      <button type="button" class="bouton-visibilite"
+        [attr.aria-label]="confirmationMotDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+        [attr.aria-pressed]="confirmationMotDePasseVisible"
+        (click)="confirmationMotDePasseVisible = !confirmationMotDePasseVisible">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+            fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="12" cy="12" r="3" fill="none"
+            stroke="currentColor" stroke-width="1.8"/>
+          <path *ngIf="!confirmationMotDePasseVisible" d="M3 3l18 18"
+            stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </div>
+
+    <p class="aide">10 caractères minimum, avec une majuscule, une minuscule,
+      un chiffre et un caractère spécial.</p>
+
+    <p *ngIf="messageMotDePasse" class="message-succes" role="status">
+      {{ messageMotDePasse }}
+    </p>
+    <p *ngIf="erreurMotDePasse" class="message-erreur" role="alert">
+      {{ erreurMotDePasse }}
+    </p>
+
+    <button type="submit"
+      [disabled]="formMotDePasse.invalid || chargementMotDePasse">
+      {{ chargementMotDePasse ? 'Modification...' : 'Modifier mon mot de passe' }}
+    </button>
+  </form>
+</section>

@@ -6,13 +6,13 @@ BEGIN;
 
 INSERT INTO theme (nom) VALUES
     ('Classique'),
-    ('Festif'),
-    ('Végétarien');
+    ('Noël'),
+    ('Pâques'),
+    ('Événement');
 
 INSERT INTO regime_alimentaire (nom) VALUES
     ('Classique'),
     ('Végétarien'),
-    ('Végétalien'),
     ('Sans gluten');
 
 INSERT INTO allergene (nom) VALUES
@@ -82,7 +82,7 @@ SELECT
     TRUE
 FROM theme t
 JOIN regime_alimentaire r ON r.nom = 'Classique'
-WHERE t.nom = 'Festif';
+WHERE t.nom = 'Événement';
 
 INSERT INTO menu (
     id_theme,
@@ -109,7 +109,7 @@ SELECT
     TRUE
 FROM theme t
 JOIN regime_alimentaire r ON r.nom = 'Végétarien'
-WHERE t.nom = 'Végétarien';
+WHERE t.nom = 'Classique';
 
 INSERT INTO composer_menu (id_menu, id_plat, quantite, ordre_affichage)
 SELECT m.id_menu, p.id_plat, 1,
@@ -145,3 +145,24 @@ JOIN allergene a ON
     (p.nom = 'Tarte aux fruits' AND a.nom = 'Gluten');
 
 COMMIT;
+
+-- Horaires d'ouverture de démonstration
+INSERT INTO horaire (
+    jour_semaine,
+    heure_ouverture,
+    heure_fermeture,
+    ferme
+)
+VALUES
+    (1, '09:00', '18:00', FALSE),
+    (2, '09:00', '18:00', FALSE),
+    (3, '09:00', '18:00', FALSE),
+    (4, '09:00', '18:00', FALSE),
+    (5, '09:00', '18:00', FALSE),
+    (6, '09:00', '18:00', FALSE),
+    (7, '09:00', '12:00', FALSE)
+ON CONFLICT (jour_semaine)
+DO UPDATE SET
+    heure_ouverture = EXCLUDED.heure_ouverture,
+    heure_fermeture = EXCLUDED.heure_fermeture,
+    ferme = EXCLUDED.ferme;

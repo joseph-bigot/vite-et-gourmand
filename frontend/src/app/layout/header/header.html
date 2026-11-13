@@ -1,0 +1,26 @@
+<header class="site-header">
+  <a class="logo" routerLink="/" aria-label="Vite & Gourmand - Accueil">
+    <img src="/images/logo-vite-gourmand.png" alt="Vite & Gourmand" />
+  </a>
+
+  <nav aria-label="Navigation principale">
+    <a routerLink="/">Accueil</a>
+    <a routerLink="/menus">Nos menus</a>
+    <a routerLink="/contact">Contact</a>
+
+    @if (!session.utilisateur()) {
+      <a routerLink="/connexion">Connexion</a>
+    }
+  </nav>
+
+  @if (session.utilisateur(); as utilisateur) {
+    <div class="user-actions">
+      <span>Bonjour, {{ utilisateur.prenom }}</span>
+      <a class="space-link" routerLink="/mon-profil">Mon profil</a>
+      <a class="space-link" [routerLink]="destinationEspace">
+        {{ libelleEspace }}
+      </a>
+      <button type="button" (click)="deconnexion()">Déconnexion</button>
+    </div>
+  }
+</header>

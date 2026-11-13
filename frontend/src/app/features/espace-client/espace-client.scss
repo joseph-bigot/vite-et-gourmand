@@ -1,0 +1,157 @@
+
+.auth-page {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 32px;
+}
+
+.auth-page h1 {
+  margin-bottom: 12px;
+  color: #542b2e;
+}
+
+.auth-page h2 {
+  margin: 32px 0 20px;
+  color: #542b2e;
+}
+
+.commande-card {
+  margin: 20px 0;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e5d9d4;
+  border-left: 5px solid #542b2e;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.commande-card h3 {
+  margin: 0 0 20px;
+  color: #542b2e;
+  font-size: 1.3rem;
+}
+
+.commande-card p {
+  margin: 12px 0;
+  line-height: 1.6;
+  color: #383333;
+}
+
+.commande-card p strong {
+  display: inline-block;
+  min-width: 180px;
+}
+
+.commande-card p:last-child {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee5e1;
+  font-weight: 600;
+}
+
+.auth-page button {
+  margin-top: 20px;
+  padding: 12px 22px;
+  color: #ffffff;
+  background: #542b2e;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.auth-page button:hover {
+  background: #713b3f;
+}
+
+@media (max-width: 600px) {
+  .auth-page {
+    margin: 20px auto;
+    padding: 20px 16px;
+  }
+
+  .commande-card {
+    padding: 18px;
+  }
+
+  .commande-card p strong {
+    display: block;
+    min-width: auto;
+    margin-bottom: 4px;
+  }
+}
+
+.statut-commande {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.statut-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #f4ead7;
+  color: #76531c;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.statut-acceptee,
+.statut-livree,
+.statut-terminee {
+  background: #e1f3e6;
+  color: #23683a;
+}
+
+.statut-refusee,
+.statut-annulee {
+  background: #f8e3e3;
+  color: #922d2d;
+}
+
+.statut-en_preparation,
+.statut-en_livraison {
+  background: #e1ebf9;
+  color: #24538a;
+}
+
+
+.bouton-details {
+  margin: 0 0 16px;
+  padding: 9px 16px;
+  color: #542b2e;
+  background: #ffffff;
+  border: 1px solid #542b2e;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.bouton-details:hover {
+  color: #ffffff;
+  background: #542b2e;
+}
+
+.commande-details {
+  margin: 12px 0 20px;
+  padding: 20px;
+  background: #faf6f3;
+  border: 1px solid #e5d9d4;
+  border-radius: 8px;
+}
+
+.commande-details h4 {
+  margin: 0 0 16px;
+  color: #542b2e;
+}
+
+.commande-details p {
+  margin: 10px 0;
+}
+
+/* Espacement entre les actions de chaque commande */
+.commande-card > button {
+  margin-right: 12px;
+}

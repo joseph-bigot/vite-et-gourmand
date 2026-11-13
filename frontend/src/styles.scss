@@ -1,1 +1,463 @@
-/* You can add global styles to this file, and also import other style files */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bordeaux: #542D32;
+  --color-creme: #F6F1E7;
+  --color-vert-foret: #34483A;
+  --color-ocre: #C69B65;
+  --color-brun-encre: #292725;
+
+  /* Identité commune des espaces administrateur et employé */
+  --admin-vert: #285943;
+  --admin-vert-fonce: #173d2d;
+  --admin-vert-clair: #8db6a0;
+  --admin-fond-formulaire: #f8f9f8;
+  --admin-bordure: #ddd;
+  --admin-bordure-champ: #bbb;
+  --admin-arrondi: 8px;
+  --admin-arrondi-champ: 5px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--color-creme);
+  color: var(--color-brun-encre);
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Lora', serif;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+
+/* Interrupteurs communs aux espaces de gestion */
+.espace-employe .toggle-fermeture {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 0 0 0.5rem;
+  cursor: pointer;
+}
+
+.espace-employe .toggle-input {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 22px;
+  min-width: 38px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #c8c8c8;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.espace-employe .toggle-input::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.espace-employe .toggle-input:checked {
+  background: var(--admin-vert);
+}
+
+.espace-employe .toggle-input:checked::before {
+  transform: translateX(16px);
+}
+
+.espace-employe .toggle-input:focus-visible {
+  outline: 2px solid var(--admin-vert);
+  outline-offset: 3px;
+}
+
+
+/* Boutons communs des espaces de gestion */
+.onglets-admin button,
+.onglets-employe button,
+.gestion-catalogue button {
+  border: 0;
+  border-radius: 5px;
+  padding: 0.7rem 1rem;
+  background: var(--admin-vert);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+
+/* Champs communs aux espaces administrateur et employé */
+.espace-admin input,
+.filtres-statistiques select,
+.filtres-statistiques input,
+.espace-employe .gestion select,
+.espace-employe .gestion textarea,
+.espace-employe .outils-commandes input,
+.espace-employe .outils-commandes select,
+.espace-employe .formulaire-catalogue input:not([type="checkbox"]),
+.espace-employe .formulaire-catalogue select,
+.espace-employe .formulaire-catalogue textarea {
+  box-sizing: border-box;
+  padding: 0.7rem;
+  border: 1px solid var(--admin-bordure-champ);
+  border-radius: 5px;
+  font: inherit;
+}
+
+
+/* Cartes horaires employé : mêmes bases que les cartes administrateur */
+.espace-employe .gestion-catalogue .carte-statistique {
+  border: 1px solid var(--admin-bordure);
+  border-radius: 8px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+
+
+/* Formulaire de menu employé — styles isolés */
+.espace-employe {
+/* Formulaire de menu : grille régulière et champs alignés */
+.formulaire-menu {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 1.1rem;
+  align-items: start;
+}
+
+.formulaire-menu .formulaire-menu-titre,
+.formulaire-menu .composition-menu,
+.formulaire-menu .information-menu,
+.formulaire-menu .actions-formulaire-menu {
+  grid-column: 1 / -1;
+}
+
+.formulaire-menu .formulaire-menu-titre {
+  margin: 0 0 0.3rem;
+}
+
+.champ-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.champ-menu label {
+  font-weight: 600;
+  font-size: 0.94rem;
+}
+
+.formulaire-menu .champ-menu input:not([type="checkbox"]),
+.formulaire-menu .champ-menu select {
+  min-height: 46px;
+}
+
+.formulaire-menu .champ-menu textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.composition-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--admin-bordure);
+}
+
+
+
+.ajout-plat-existant {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.ajout-plat-existant .champ-menu {
+  flex: 1 1 280px;
+}
+
+.bouton-secondaire {
+  width: fit-content;
+}
+
+.creation-plat-integree {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.creation-plat-integree h4,
+.creation-plat-integree .allergenes-menu,
+.creation-plat-integree button {
+  grid-column: 1 / -1;
+}
+
+.allergenes-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.2rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.liste-composition-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.liste-composition-menu li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-bordure);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.liste-composition-menu li > span {
+  flex: 1 1 180px;
+  font-weight: 600;
+}
+
+.liste-composition-menu li label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.liste-composition-menu li input {
+  width: 75px;
+}
+
+.actions-formulaire-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 700px) {
+  .formulaire-menu,
+  .creation-plat-integree {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .formulaire-menu > *,
+  .creation-plat-integree > * {
+    grid-column: 1;
+  }
+
+  .ajout-plat-existant {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions-formulaire-menu {
+    flex-direction: column;
+  }
+
+  .actions-formulaire-menu button {
+    width: 100%;
+  }
+}
+
+}
+
+/* Formulaire compact de modification d'un plat */
+.carte-plat .formulaire-edition-plat {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 0.45rem;
+}
+
+.carte-plat .formulaire-edition-plat h5 {
+  margin-bottom: 0.5rem;
+  color: var(--admin-vert-fonce);
+}
+
+.carte-plat .formulaire-edition-plat label {
+  margin-top: 0.25rem;
+  color: #514b45;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.carte-plat .formulaire-edition-plat input[type="text"],
+.carte-plat .formulaire-edition-plat textarea,
+.carte-plat .formulaire-edition-plat select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--admin-bordure);
+  border-radius: 7px;
+  background: #fff;
+  color: #302a25;
+  font: inherit;
+}
+
+.carte-plat .formulaire-edition-plat textarea {
+  min-height: 85px;
+  resize: vertical;
+}
+
+.carte-plat .formulaire-edition-plat fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0.5rem 0;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-bordure);
+  border-radius: 7px;
+}
+
+.carte-plat .formulaire-edition-plat legend {
+  padding: 0 0.3rem;
+  color: #514b45;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.carte-plat .formulaire-edition-plat fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.carte-plat .formulaire-edition-plat input[type="checkbox"] {
+  flex: 0 0 auto;
+  accent-color: var(--admin-vert-fonce);
+}
+
+.carte-plat .formulaire-edition-plat button {
+  width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.carte-plat .formulaire-edition-plat .bouton-enregistrer-edition {
+  margin-top: 0.35rem;
+  background: var(--admin-vert-fonce);
+  color: #fff;
+}
+
+.carte-plat .formulaire-edition-plat .bouton-annuler-edition {
+  background: #f1eee8;
+  color: #514b45;
+  border: 1px solid var(--admin-bordure);
+}
+
+.carte-plat .formulaire-edition-plat button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Espacement entre les actions des cartes de plats */
+.carte-plat > button + button {
+  margin-top: 0.5rem;
+}
+
+
+/* Séparation des boutons d'action des cartes de plats */
+.carte-plat .bouton-modifier-plat {
+  margin-bottom: 0.6rem !important;
+}
+
+
+/* Transitions entre les pages */
+::view-transition-old(root) {
+  animation: page-fade-out 150ms ease both;
+}
+
+::view-transition-new(root) {
+  animation: page-fade-in 300ms ease both;
+}
+
+@keyframes page-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms !important;
+  }
+}
+
+/* Accessibilité : réduction des animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

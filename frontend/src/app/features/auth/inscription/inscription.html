@@ -1,0 +1,135 @@
+
+<section class="auth-page">
+  <h1>Créer un compte</h1>
+  <p>Créez votre compte client pour pouvoir commander vos menus.</p>
+
+  <form #formInscription="ngForm" (ngSubmit)="inscrire()">
+    <label for="nom">Nom</label>
+    <input
+      id="nom"
+      name="nom"
+      type="text"
+      [(ngModel)]="nom"
+      maxlength="100"
+      required
+    />
+
+    <label for="prenom">Prénom</label>
+    <input
+      id="prenom"
+      name="prenom"
+      type="text"
+      [(ngModel)]="prenom"
+      maxlength="100"
+      required
+    />
+
+    <label for="email">Adresse e-mail</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      [(ngModel)]="email"
+      maxlength="255"
+      required
+    />
+
+    <label for="telephone">Téléphone mobile</label>
+    <input
+      id="telephone"
+      name="telephone"
+      type="tel"
+      [(ngModel)]="telephone"
+      minlength="6"
+      maxlength="20"
+      required
+    />
+
+    <label for="motDePasse">Mot de passe</label>
+    <div class="champ-mot-de-passe">
+<input
+      id="motDePasse"
+      name="motDePasse"
+      [type]="motDePasseVisible ? 'text' : 'password'"
+      [(ngModel)]="motDePasse"
+      minlength="10"
+      maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
+      required
+    >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="motDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="motDePasseVisible"
+    (click)="motDePasseVisible = !motDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!motDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+    <p class="indication">10 caractères minimum : une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
+
+    <label for="confirmationMotDePasse">Confirmer le mot de passe</label>
+    <div class="champ-mot-de-passe">
+<input
+      id="confirmationMotDePasse"
+      name="confirmationMotDePasse"
+      [type]="confirmationMotDePasseVisible ? 'text' : 'password'"
+      [(ngModel)]="confirmationMotDePasse"
+      minlength="10"
+      maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{10,72}"
+      required
+    >
+  <button
+    type="button"
+    class="bouton-visibilite"
+    [attr.aria-label]="confirmationMotDePasseVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    [attr.aria-pressed]="confirmationMotDePasseVisible"
+    (click)="confirmationMotDePasseVisible = !confirmationMotDePasseVisible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="3" fill="none"
+        stroke="currentColor" stroke-width="1.8"/>
+      <path *ngIf="!confirmationMotDePasseVisible" d="M3 3l18 18"
+        stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+
+    <p
+      *ngIf="confirmationMotDePasse && !motsDePasseIdentiques"
+      class="message-erreur"
+      role="alert"
+    >
+      Les deux mots de passe ne correspondent pas.
+    </p>
+
+    <p *ngIf="message" class="message-succes" role="status">
+      {{ message }}
+    </p>
+
+    <p *ngIf="erreur" class="message-erreur" role="alert">
+      {{ erreur }}
+    </p>
+
+    <button
+      type="submit"
+      [disabled]="formInscription.invalid || !motsDePasseIdentiques || chargement"
+    >
+      {{ chargement ? 'Création en cours...' : 'Créer mon compte' }}
+    </button>
+  </form>
+
+  <p>
+    Vous avez déjà un compte ?
+    <a routerLink="/connexion">Se connecter</a>
+  </p>
+</section>

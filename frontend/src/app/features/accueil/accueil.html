@@ -1,0 +1,51 @@
+
+<section class="hero">
+  <h1>Le goût des belles tables bordelaises</h1>
+  <p>
+    Depuis 25 ans, Julie et José imaginent des menus généreux pour vos repas de famille et vos événements à Bordeaux.
+  </p>
+  <a class="hero-button" routerLink="/menus">Découvrir nos menus</a>
+
+  <div class="hero-image-frame">
+    <span class="frame-ornament top-left" aria-hidden="true">❧</span>
+    <span class="frame-ornament top-right" aria-hidden="true">❧</span>
+    <span class="frame-ornament bottom-left" aria-hidden="true">❧</span>
+    <span class="frame-ornament bottom-right" aria-hidden="true">❧</span>
+    <img
+      class="hero-image"
+      src="/images/hero-vite-gourmand.png"
+      alt="Julie et José dans leur cuisine professionnelle"
+    />
+  </div>
+</section>
+
+
+
+<section class="story" id="histoire">
+  <h2>Notre histoire</h2>
+  <p>
+    Depuis 25 ans, Julie et José partagent leur passion pour la cuisine et l’art de recevoir.
+    Installés à Bordeaux, ils imaginent des menus généreux et soignés pour accompagner
+    vos repas de famille et vos événements.
+  </p>
+</section>
+
+
+
+<section class="reviews">
+  <h2>Ils nous font confiance</h2>
+  <p *ngIf="avis.length === 0">Aucun avis publié pour le moment.</p>
+  <div class="review-cards" *ngIf="avis.length > 0">
+    <article class="review-card" *ngFor="let avisClient of avis">
+      <span class="frame-ornament top-left">❧</span>
+      <span class="frame-ornament top-right">❧</span>
+      <span class="frame-ornament bottom-left">❧</span>
+      <span class="frame-ornament bottom-right">❧</span>
+      <blockquote>{{ avisClient.commentaire }}</blockquote>
+      <p>
+        <span [attr.aria-label]="avisClient.note + ' sur 5'">{{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }}</span>
+        — {{ avisClient.auteur }}
+      </p>
+    </article>
+  </div>
+</section>

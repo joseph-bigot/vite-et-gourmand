@@ -1,8 +1,12 @@
+
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import databaseConfig from './config/database.config.js';
 
+import { AuthModule } from './modules/auth/auth.module.js';
 import { UtilisateursModule } from './modules/utilisateurs/utilisateurs.module.js';
 import { MenusModule } from './modules/menus/menus.module.js';
 import { CommandesModule } from './modules/commandes/commandes.module.js';
@@ -27,10 +31,12 @@ import { StatistiquesModule } from './modules/statistiques/statistiques.module.j
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
+        ssl: configService.get('database.ssl'),
         autoLoadEntities: true,
         synchronize: false,
       }),
     }),
+    AuthModule,
     UtilisateursModule,
     MenusModule,
     CommandesModule,
@@ -39,5 +45,7 @@ import { StatistiquesModule } from './modules/statistiques/statistiques.module.j
     ContactModule,
     StatistiquesModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
