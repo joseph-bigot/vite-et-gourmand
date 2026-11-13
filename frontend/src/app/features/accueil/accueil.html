@@ -34,18 +34,56 @@
 
 <section class="reviews">
   <h2>Ils nous font confiance</h2>
+
   <p *ngIf="avis.length === 0">Aucun avis publié pour le moment.</p>
-  <div class="review-cards" *ngIf="avis.length > 0">
-    <article class="review-card" *ngFor="let avisClient of avis">
-      <span class="frame-ornament top-left">❧</span>
-      <span class="frame-ornament top-right">❧</span>
-      <span class="frame-ornament bottom-left">❧</span>
-      <span class="frame-ornament bottom-right">❧</span>
-      <blockquote>{{ avisClient.commentaire }}</blockquote>
-      <p>
-        <span [attr.aria-label]="avisClient.note + ' sur 5'">{{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }}</span>
-        — {{ avisClient.auteur }}
-      </p>
-    </article>
+
+  <div class="review-carousel" *ngIf="avis.length > 0">
+    <button
+      type="button"
+      class="review-arrow"
+      aria-label="Avis précédent"
+      (click)="avisPrecedent()">
+      &#10094;
+    </button>
+
+    <div class="review-viewport">
+      <div
+        class="review-cards"
+        [style.transform]="'translateX(-' + indiceAvis * 100 + '%)'">
+
+        <article class="review-card" *ngFor="let avisClient of avis">
+          <span class="frame-ornament top-left" aria-hidden="true">❧</span>
+          <span class="frame-ornament top-right" aria-hidden="true">❧</span>
+          <span class="frame-ornament bottom-left" aria-hidden="true">❧</span>
+          <span class="frame-ornament bottom-right" aria-hidden="true">❧</span>
+
+          <blockquote>{{ avisClient.commentaire }}</blockquote>
+
+          <p>
+            <span [attr.aria-label]="avisClient.note + ' sur 5'">{{ '★'.repeat(avisClient.note) }}{{ '☆'.repeat(5 - avisClient.note) }}</span>
+            — {{ avisClient.auteur }}
+          </p>
+        </article>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="review-arrow"
+      aria-label="Avis suivant"
+      (click)="avisSuivant()">
+      &#10095;
+    </button>
+  </div>
+
+  <div class="review-indicators" *ngIf="avis.length > 1">
+    <button
+      *ngFor="let avisClient of avis; let i = index"
+      type="button"
+      [class.active]="indiceAvis === i"
+      [attr.aria-label]="'Afficher l’avis ' + (i + 1)"
+      [attr.aria-current]="indiceAvis === i ? 'true' : null"
+      (click)="allerAVis(i)">
+    </button>
   </div>
 </section>
