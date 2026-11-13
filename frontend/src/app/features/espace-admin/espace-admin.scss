@@ -397,3 +397,40 @@
 
 .espace-admin .bouton-visibilite:hover { background: #eef2ee; }
 .bouton-visibilite svg { width: 21px; height: 21px; }
+
+/* Correction des filtres statistiques sur mobile */
+@media (max-width: 600px) {
+  .filtres-statistiques form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filtres-statistiques label[for="filtre-menu"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .filtres-statistiques #filtre-menu {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .filtres-statistiques label[for="filtre-date-debut"] {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .filtres-statistiques #filtre-date-debut {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  .filtres-statistiques label[for="filtre-date-fin"] {
+    grid-column: 1;
+    grid-row: 5;
+  }
+
+  .filtres-statistiques #filtre-date-fin {
+    grid-column: 1;
+    grid-row: 6;
+  }
+}
