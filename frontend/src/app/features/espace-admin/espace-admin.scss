@@ -235,15 +235,62 @@
     padding: 1rem;
   }
 
-  .filtres-statistiques form {
-    grid-template-columns: 1fr;
+  /* Comparaison des menus : une carte par ligne sur mobile */
+  .graphiques-comparaison {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
   }
 
-  .filtres-statistiques form label,
-  .filtres-statistiques form select,
-  .filtres-statistiques form input {
-    grid-column: auto;
-    grid-row: auto;
+  .carte-graphique {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .filtres-statistiques form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem 0.75rem;
+  }
+
+  .filtres-statistiques label[for="filtre-menu"] {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .filtres-statistiques #filtre-menu {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .filtres-statistiques label[for="filtre-date-debut"] {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .filtres-statistiques #filtre-date-debut {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  .filtres-statistiques label[for="filtre-date-fin"] {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .filtres-statistiques #filtre-date-fin {
+    grid-column: 2;
+    grid-row: 4;
+  }
+
+  .filtres-statistiques select,
+  .filtres-statistiques input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .actions-filtres {
+    grid-column: 1 / -1;
   }
 
   .actions-filtres button {
