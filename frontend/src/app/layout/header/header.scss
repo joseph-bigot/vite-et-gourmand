@@ -144,3 +144,47 @@ nav a:hover,
     justify-self: center;
   }
 }
+
+
+@media (min-width: 1101px) {
+  .site-header {
+    min-height: 120px;
+    padding: 28px 4%;
+  }
+
+  .logo {
+    flex-basis: 250px;
+    width: 250px;
+  }
+
+  .logo img {
+    max-height: 90px;
+  }
+
+  nav {
+    gap: 30px;
+  }
+
+  nav a {
+    font-size: 16px;
+  }
+
+  .user-actions {
+    column-gap: 20px;
+    row-gap: 11px;
+    font-size: 15px;
+  }
+
+  .user-actions span {
+    font-size: 14px;
+  }
+
+  .space-link {
+    font-size: 14px;
+  }
+
+  .user-actions button {
+    padding: 11px 20px;
+    font-size: 14px;
+  }
+}
