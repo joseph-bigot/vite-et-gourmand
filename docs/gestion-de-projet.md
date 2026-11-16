@@ -139,8 +139,8 @@ Le code source est hébergé sur GitHub afin de conserver un historique des évo
 
 Deux branches principales structurent le dépôt :
 
-- **main :** branche contenant la version principale du projet.
-- **develop :** branche utilisée pour les développements et les évolutions.
+- main : branche contenant la version principale du projet.
+- develop : branche utilisée pour les développements et les évolutions.
 
 Les modifications sont enregistrées sous forme de commits avec des messages décrivant leur objectif : ajout de fonctionnalité, correction, amélioration graphique ou documentation.
 
